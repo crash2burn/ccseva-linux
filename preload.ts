@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+const { contextBridge, ipcRenderer } = require('electron');
 
 const electronAPI = {
   getUsageStats: () => ipcRenderer.invoke('get-usage-stats'),
@@ -8,9 +8,3 @@ const electronAPI = {
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
-
-declare global {
-  interface Window {
-    electronAPI: typeof electronAPI;
-  }
-}

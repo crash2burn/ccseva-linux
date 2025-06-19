@@ -1,19 +1,4 @@
-import { spawn } from 'child_process';
 import { UsageStats, DailyUsage, MenuBarData } from '../types/usage';
-
-// Types matching ccusage CLI output format
-interface CcusageResponse {
-  totals?: {
-    totalTokens: number;
-    costUSD: number;
-  };
-  daily?: Array<{
-    date: string;
-    totalTokens: number;
-    costUSD: number;
-    model: string;
-  }>;
-}
 
 export class CCUsageService {
   private static instance: CCUsageService;
@@ -37,13 +22,11 @@ export class CCUsageService {
     }
 
     try {
-      // Get daily usage data for last 30 days with JSON output
-      const dailyData = await this.executeCommand(['daily', '--json', '--days', '30']);
+      // Get daily usage data using the ccusage data-loader API
+      const { loadDailyUsageData } = await import('ccusage/data-loader');
+      const dailyData = await loadDailyUsageData();
       
-      // Get today's usage specifically
-      const todayData = await this.executeCommand(['daily', '--json', '--days', '1']);
-      
-      const stats = this.parseUsageData(dailyData, todayData);
+      const stats = this.parseUsageData(dailyData);
       
       this.cachedStats = stats;
       this.lastUpdate = now;
@@ -69,81 +52,32 @@ export class CCUsageService {
     };
   }
 
-  private async executeCommand(args: string[]): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const ccusage = spawn('npx', ['ccusage', ...args], {
-        stdio: ['pipe', 'pipe', 'pipe']
-      });
-      let stdout = '';
-      let stderr = '';
 
-      ccusage.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      ccusage.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      ccusage.on('close', (code) => {
-        if (code === 0) {
-          resolve(stdout.trim());
-        } else {
-          reject(new Error(`ccusage failed with code ${code}: ${stderr}`));
-        }
-      });
-
-      ccusage.on('error', (error) => {
-        reject(error);
-      });
-    });
-  }
-
-  private parseUsageData(dailyData: string, todayData: string): UsageStats {
+  private parseUsageData(dailyData: any): UsageStats {
     try {
-      let dailyArray: any[] = [];
-      let todayArray: any[] = [];
+      // The API returns structured data, no need to parse JSON
+      const dailyArray = Array.isArray(dailyData) ? dailyData : [];
       
-      // Parse daily data
-      if (dailyData.trim()) {
-        try {
-          dailyArray = JSON.parse(dailyData);
-          if (!Array.isArray(dailyArray)) {
-            dailyArray = [];
-          }
-        } catch (e) {
-          console.error('Error parsing daily data:', e);
-        }
-      }
-      
-      // Parse today data
-      if (todayData.trim()) {
-        try {
-          todayArray = JSON.parse(todayData);
-          if (!Array.isArray(todayArray)) {
-            todayArray = [];
-          }
-        } catch (e) {
-          console.error('Error parsing today data:', e);
-        }
-      }
+      // Get today's data from the daily array
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayArray = dailyArray.filter((item: any) => item.date === todayStr);
       
       // Calculate totals
       const totalTokens = dailyArray.reduce((sum: number, item: any) => {
-        return sum + (item.totalTokens || item.total_tokens || 0);
+        return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
       }, 0);
       
       const totalCost = dailyArray.reduce((sum: number, item: any) => {
-        return sum + (item.costUSD || item.cost_usd || item.cost || 0);
+        return sum + (item.totalCost || item.cost || 0);
       }, 0);
       
       // Today's usage
       const todayTokens = todayArray.reduce((sum: number, item: any) => {
-        return sum + (item.totalTokens || item.total_tokens || 0);
+        return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
       }, 0);
       
       const todayCost = todayArray.reduce((sum: number, item: any) => {
-        return sum + (item.costUSD || item.cost_usd || item.cost || 0);
+        return sum + (item.totalCost || item.cost || 0);
       }, 0);
 
       // Determine plan and limits based on current month usage
@@ -153,11 +87,11 @@ export class CCUsageService {
       // Calculate burn rate
       const burnRate = this.calculateBurnRate(dailyArray);
       
-      const today = new Date().toISOString().split('T')[0];
+      const todayDate = new Date().toISOString().split('T')[0];
       
       return {
         today: {
-          date: today,
+          date: todayDate,
           totalTokens: todayTokens,
           totalCost: todayCost,
           models: this.groupByModel(todayArray)
@@ -203,7 +137,7 @@ export class CCUsageService {
     });
 
     const totalTokens = last24Hours.reduce((sum, item) => {
-      return sum + (item.totalTokens || item.total_tokens || 0);
+      return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
     }, 0);
     return Math.round(totalTokens / 24); // tokens per hour
   }
@@ -224,12 +158,16 @@ export class CCUsageService {
     const models: { [key: string]: { tokens: number; cost: number } } = {};
     
     data.forEach(item => {
-      const modelName = item.model || 'unknown';
-      if (!models[modelName]) {
-        models[modelName] = { tokens: 0, cost: 0 };
+      if (item.modelBreakdowns && Array.isArray(item.modelBreakdowns)) {
+        item.modelBreakdowns.forEach((breakdown: any) => {
+          const modelName = breakdown.modelName || 'unknown';
+          if (!models[modelName]) {
+            models[modelName] = { tokens: 0, cost: 0 };
+          }
+          models[modelName].tokens += (breakdown.inputTokens || 0) + (breakdown.outputTokens || 0) + (breakdown.cacheCreationTokens || 0);
+          models[modelName].cost += breakdown.cost || 0;
+        });
       }
-      models[modelName].tokens += item.totalTokens || item.total_tokens || 0;
-      models[modelName].cost += item.costUSD || item.cost_usd || item.cost || 0;
     });
     
     return models;
@@ -245,10 +183,10 @@ export class CCUsageService {
       
       const dayData = data.filter(item => item.date === dateStr);
       const totalTokens = dayData.reduce((sum, item) => {
-        return sum + (item.totalTokens || item.total_tokens || 0);
+        return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
       }, 0);
       const totalCost = dayData.reduce((sum, item) => {
-        return sum + (item.costUSD || item.cost_usd || item.cost || 0);
+        return sum + (item.totalCost || item.cost || 0);
       }, 0);
       
       result.push({

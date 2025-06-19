@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "webpack --mode development --watch",
-    "build": "webpack --mode production && tsc --project tsconfig.main.json",
+    "build": "webpack --mode production && tsc --project tsconfig.main.json && tsc --project tsconfig.preload.json",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on dist/bundle.js && electron .\"",
     "pack": "electron-builder",
     "dist": "npm run build && electron-builder"
