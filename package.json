@@ -11,7 +11,15 @@
     "pack": "electron-builder",
     "dist": "npm run build && electron-builder"
   },
-  "keywords": ["electron", "claude-code", "usage-monitor", "macos", "menu-bar", "ai", "tokens"],
+  "keywords": [
+    "electron",
+    "claude-code",
+    "usage-monitor",
+    "macos",
+    "menu-bar",
+    "ai",
+    "tokens"
+  ],
   "author": "Claude Code",
   "license": "MIT",
   "type": "module",
@@ -33,12 +41,20 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.21",
     "ccusage": "^13.0.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.518.0",
     "postcss": "^8.5.6",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "recharts": "^2.15.3",
+    "tailwind-merge": "^3.3.1"
   }
 }

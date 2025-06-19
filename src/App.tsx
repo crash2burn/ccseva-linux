@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { UsageStats } from './types/usage';
 import { Dashboard } from './components/Dashboard';
+import { Analytics } from './components/Analytics';
+import { NavigationTabs } from './components/NavigationTabs';
 import { SettingsPanel } from './components/SettingsPanel';
 import { NotificationSystem } from './components/NotificationSystem';
 import { Sidebar } from './components/Sidebar';
@@ -128,7 +130,7 @@ const App: React.FC = () => {
   const addNotification = (notification: Omit<AppState['notifications'][0], 'id' | 'timestamp'>) => {
     const newNotification = {
       ...notification,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
       timestamp: new Date(),
     };
 
@@ -340,6 +342,13 @@ const App: React.FC = () => {
                   </button>
                 </div>
               </div>
+
+              {/* Navigation Tabs */}
+              <NavigationTabs
+                currentView={state.currentView}
+                onNavigate={navigateTo}
+                className="mt-6"
+              />
             </header>
 
             {/* Content */}
@@ -354,6 +363,13 @@ const App: React.FC = () => {
                 />
               )}
 
+              {state.currentView === 'analytics' && (
+                <Analytics
+                  stats={currentStats}
+                  preferences={state.preferences}
+                />
+              )}
+
               {state.currentView === 'settings' && (
                 <SettingsPanel
                   preferences={state.preferences}
@@ -362,7 +378,7 @@ const App: React.FC = () => {
                 />
               )}
 
-              {(state.currentView === 'analytics' || state.currentView === 'models' || state.currentView === 'about') && (
+              {(state.currentView === 'models' || state.currentView === 'about') && (
                 <div className="glass-card p-12 text-center">
                   <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                     <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,7 +387,6 @@ const App: React.FC = () => {
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-4">Coming Soon</h2>
                   <p className="text-neutral-300 max-w-md mx-auto">
-                    {state.currentView === 'analytics' && 'Advanced analytics and insights are being developed.'}
                     {state.currentView === 'models' && 'Model-specific usage breakdown and comparison tools.'}
                     {state.currentView === 'about' && 'Learn more about Claude Credits Monitor and its features.'}
                   </p>

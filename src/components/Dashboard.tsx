@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { UsageStats } from '../types/usage';
-import { MetricCard } from './MetricCard';
 import { ProgressRing } from './ProgressRing';
 import { UsageChart } from './UsageChart';
 import { ModelBreakdown } from './ModelBreakdown';
 import { BurnRateIndicator } from './BurnRateIndicator';
-import { QuickStats } from './QuickStats';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Progress } from './ui/progress';
+import { formatNumber, formatCurrency, getStatusColor, getStatusIcon } from '../lib/utils';
+import { RefreshCw, DollarSign, Flame, Shield, TrendingUp, Eye, Download, Settings } from 'lucide-react';
 
 interface DashboardProps {
   stats: UsageStats;
@@ -43,197 +47,235 @@ export const Dashboard: React.FC<DashboardProps> = ({
     setSelectedMetric(selectedMetric === metricId ? null : metricId);
   };
 
-  const getStatusColor = (status: string) => {
+  const getProgressVariant = (status: string): "default" | "success" | "warning" | "destructive" => {
     switch (status) {
-      case 'critical': return 'from-red-500 to-red-600';
-      case 'warning': return 'from-yellow-500 to-yellow-600';
-      default: return 'from-green-500 to-green-600';
+      case 'critical': return 'destructive';
+      case 'warning': return 'warning';
+      default: return 'success';
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getBadgeVariant = (status: string): "default" | "success" | "warning" | "destructive" => {
     switch (status) {
-      case 'critical': return '🚨';
-      case 'warning': return '⚠️';
-      default: return '✅';
+      case 'critical': return 'destructive';
+      case 'warning': return 'warning';
+      default: return 'success';
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3
-    }).format(amount);
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
   };
 
   return (
     <div className={`space-y-8 ${preferences.animationsEnabled ? 'stagger-children' : ''}`} key={animationKey}>
       
       {/* Hero Section - Main Usage Overview */}
-      <div className="glass-card p-8 hover-lift">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Usage Overview</h2>
-            <p className="text-neutral-400">Monitor your Claude API consumption in real-time</p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setViewMode(viewMode === 'overview' ? 'detailed' : 'overview')}
-              className="btn btn-ghost hover-scale"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              {viewMode === 'overview' ? 'Detailed View' : 'Overview'}
-            </button>
+      <Card variant="glass" className="p-8">
+        <CardHeader className="pb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-3xl font-bold text-gradient mb-2">Usage Overview</CardTitle>
+              <CardDescription className="text-lg">
+                Monitor your Claude API consumption in real-time
+              </CardDescription>
+            </div>
             
-            <button
-              onClick={onRefresh}
-              className="btn btn-primary hover-scale"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <Badge variant="glass" className="px-3 py-1">
+                <div className={`w-2 h-2 rounded-full mr-2 animate-pulse ${
+                  status === 'critical' ? 'bg-red-500' :
+                  status === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
+                }`} />
+                Live
+              </Badge>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setViewMode(viewMode === 'overview' ? 'detailed' : 'overview')}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                {viewMode === 'overview' ? 'Detailed' : 'Overview'}
+              </Button>
+              
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onRefresh}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
           </div>
-        </div>
+        </CardHeader>
 
         {/* Main Progress Display */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center relative">
             <ProgressRing
               percentage={stats.percentageUsed}
               status={status}
-              size={200}
-              strokeWidth={12}
+              size={240}
+              strokeWidth={16}
               showAnimation={preferences.animationsEnabled}
             />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-5xl font-bold text-white mb-1">
+                  {Math.round(stats.percentageUsed)}%
+                </div>
+                <div className="text-sm text-neutral-400 uppercase tracking-wider">
+                  Used
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="space-y-6">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-4xl">{getStatusIcon(status)}</span>
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${getStatusColor(status)} flex items-center justify-center text-3xl shadow-lg`}>
+                  {getStatusIcon(status)}
+                </div>
                 <div>
-                  <h3 className="text-4xl font-bold text-white">
-                    {Math.round(stats.percentageUsed)}%
+                  <h3 className="text-3xl font-bold text-white mb-1">
+                    {stats.currentPlan} Plan
                   </h3>
-                  <p className="text-xl text-neutral-300">of {stats.currentPlan} plan used</p>
+                  <p className="text-neutral-400">
+                    {formatNumber(stats.tokenLimit)} tokens available
+                  </p>
                 </div>
               </div>
             </div>
             
-            <div className={`glass p-6 rounded-2xl bg-gradient-to-r ${getStatusColor(status)} bg-opacity-10`}>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-white">{formatNumber(stats.tokensUsed)}</div>
-                  <div className="text-sm text-neutral-300">Tokens Used</div>
+            <div className={`glass p-6 rounded-2xl bg-gradient-to-r ${getStatusColor(status)} bg-opacity-10 border border-white/10`}>
+              <div className="grid grid-cols-2 gap-6 text-center mb-6">
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-white">{formatNumber(stats.tokensUsed)}</div>
+                  <div className="text-sm text-neutral-300 uppercase tracking-wide">Tokens Used</div>
+                  <Progress 
+                    value={stats.percentageUsed} 
+                    variant={getProgressVariant(status)} 
+                    className="h-2 mt-2"
+                  />
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">{formatNumber(stats.tokensRemaining)}</div>
-                  <div className="text-sm text-neutral-300">Remaining</div>
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-white">{formatNumber(stats.tokensRemaining)}</div>
+                  <div className="text-sm text-neutral-300 uppercase tracking-wide">Remaining</div>
+                  <Progress 
+                    value={100 - stats.percentageUsed} 
+                    variant="default" 
+                    className="h-2 mt-2"
+                  />
                 </div>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-white/20">
+              <div className="pt-4 border-t border-white/20">
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-white">{timeRemaining}</div>
-                  <div className="text-sm text-neutral-300">at current burn rate</div>
+                  <div className="text-xl font-bold text-white mb-1">{timeRemaining}</div>
+                  <div className="text-sm text-neutral-300">at current burn rate of {formatNumber(stats.burnRate)}/hr</div>
                 </div>
               </div>
             </div>
+
+            {/* Real-time Status Indicator */}
+            <Badge variant="glass" className="justify-center gap-3 p-4 w-full">
+              <div className={`w-3 h-3 rounded-full animate-pulse ${
+                status === 'critical' ? 'bg-red-500' :
+                status === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
+              }`} />
+              <span className="text-sm">
+                Live monitoring • Updated every 30s
+              </span>
+            </Badge>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Today's Cost */}
-        <div className="glass-card p-6 hover-lift glass-interactive" onClick={() => handleMetricClick('cost')}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
+        <Card variant="interactive" onClick={() => handleMetricClick('cost')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-white">{formatCurrency(stats.today.totalCost)}</div>
+                <div className="text-sm text-neutral-400">Today's Cost</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-white">{formatCurrency(stats.today.totalCost)}</div>
-              <div className="text-sm text-neutral-400">Today's Cost</div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-neutral-400">Current session</span>
+              <Badge variant="success" className="text-xs">
+                {stats.today.totalTokens.toLocaleString()} tokens
+              </Badge>
             </div>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-neutral-400">Current session</span>
-            <span className="text-green-400">{stats.today.totalTokens.toLocaleString()} tokens</span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Burn Rate */}
-        <div className="glass-card p-6 hover-lift glass-interactive" onClick={() => handleMetricClick('burnrate')}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-              </svg>
+        <Card variant="interactive" onClick={() => handleMetricClick('burnrate')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
+                <Flame className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-white">{formatNumber(stats.burnRate)}</div>
+                <div className="text-sm text-neutral-400">Tokens/Hour</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-white">{formatNumber(stats.burnRate)}</div>
-              <div className="text-sm text-neutral-400">Tokens/Hour</div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-neutral-400">Burn rate</span>
+              <Badge variant={stats.burnRate > 500 ? 'warning' : 'glass'} className="text-xs">
+                {stats.burnRate > 500 ? 'High' : 'Normal'}
+              </Badge>
             </div>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-neutral-400">Burn rate</span>
-            <span className={`${stats.burnRate > 500 ? 'text-orange-400' : 'text-blue-400'}`}>
-              {stats.burnRate > 500 ? 'High' : 'Normal'}
-            </span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Current Plan */}
-        <div className="glass-card p-6 hover-lift glass-interactive" onClick={() => handleMetricClick('plan')}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
+        <Card variant="interactive" onClick={() => handleMetricClick('plan')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-white">{stats.currentPlan}</div>
+                <div className="text-sm text-neutral-400">Current Plan</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-white">{stats.currentPlan}</div>
-              <div className="text-sm text-neutral-400">Current Plan</div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-neutral-400">Token limit</span>
+              <Badge variant="glass" className="text-xs">
+                {formatNumber(stats.tokenLimit)}
+              </Badge>
             </div>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-neutral-400">Token limit</span>
-            <span className="text-blue-400">{formatNumber(stats.tokenLimit)}</span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* This Week */}
-        <div className="glass-card p-6 hover-lift glass-interactive" onClick={() => handleMetricClick('week')}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+        <Card variant="interactive" onClick={() => handleMetricClick('week')}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-white">{formatCurrency(stats.thisWeek.reduce((sum, day) => sum + day.totalCost, 0))}</div>
+                <div className="text-sm text-neutral-400">This Week</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-white">{formatCurrency(stats.thisWeek.reduce((sum, day) => sum + day.totalCost, 0))}</div>
-              <div className="text-sm text-neutral-400">This Week</div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-neutral-400">7-day total</span>
+              <Badge variant="glass" className="text-xs">
+                {stats.thisWeek.reduce((sum, day) => sum + day.totalTokens, 0).toLocaleString()}
+              </Badge>
             </div>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-neutral-400">7-day total</span>
-            <span className="text-cyan-400">{stats.thisWeek.reduce((sum, day) => sum + day.totalTokens, 0).toLocaleString()}</span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Expanded Metric Details */}
@@ -293,54 +335,51 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* Quick Actions */}
-      <div className="glass-card p-6">
-        <h3 className="text-xl font-bold text-white mb-4">Quick Actions</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="btn btn-ghost p-4 text-left hover-lift">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+      <Card variant="glass">
+        <CardHeader>
+          <CardTitle className="text-xl">Quick Actions</CardTitle>
+          <CardDescription>Access key features and settings</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="ghost" className="p-6 h-auto text-left justify-start group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Eye className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-white">View Analytics</div>
+                  <div className="text-sm text-neutral-400">Detailed usage insights</div>
+                </div>
               </div>
-              <div>
-                <div className="font-medium text-white">View Analytics</div>
-                <div className="text-sm text-neutral-400">Detailed usage insights</div>
+            </Button>
+            
+            <Button variant="ghost" className="p-6 h-auto text-left justify-start group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Download className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-white">Export Data</div>
+                  <div className="text-sm text-neutral-400">Download usage reports</div>
+                </div>
               </div>
-            </div>
-          </button>
-          
-          <button className="btn btn-ghost p-4 text-left hover-lift">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 0v1m-2 0V6a2 2 0 00-2 0v1m2 0V6a2 2 0 00-2 0v1m2 0V6a2 2 0 112 0v1m-2 0V6a2 2 0 00-2 0v1" />
-                </svg>
+            </Button>
+            
+            <Button variant="ghost" className="p-6 h-auto text-left justify-start group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Settings className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="font-medium text-white">Settings</div>
+                  <div className="text-sm text-neutral-400">Customize preferences</div>
+                </div>
               </div>
-              <div>
-                <div className="font-medium text-white">Export Data</div>
-                <div className="text-sm text-neutral-400">Download usage reports</div>
-              </div>
-            </div>
-          </button>
-          
-          <button className="btn btn-ghost p-4 text-left hover-lift">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div>
-                <div className="font-medium text-white">Settings</div>
-                <div className="text-sm text-neutral-400">Customize preferences</div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

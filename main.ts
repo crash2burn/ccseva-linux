@@ -136,13 +136,13 @@ class CCMonitorApp {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     
     this.window = new BrowserWindow({
-      width: 400,
+      width: 600,
       height: 600,
       x: width - 420,
       y: 50,
       show: false,
       frame: false,
-      resizable: false,
+      resizable: true,
       skipTaskbar: true,
       alwaysOnTop: true,
       webPreferences: {
