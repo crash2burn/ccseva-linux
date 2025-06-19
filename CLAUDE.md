@@ -40,13 +40,13 @@ The app follows standard Electron patterns with clear separation:
 ### Key Architectural Components
 
 #### Service Layer (Singleton Pattern)
-- **CCUsageService**: Executes `npx ccusage` commands, parses JSON output, implements 30-second caching
+- **CCUsageService**: Executes `npx ccusage daily --json` commands following ccusage CLI best practices, implements 30-second caching
 - **NotificationService**: Manages macOS notifications with cooldown periods and threshold detection
 
 #### Data Flow
 1. Main process polls CCUsageService every 30 seconds
-2. Service executes `ccusage --json --days 30` via child_process.spawn
-3. Raw JSON parsed into typed interfaces (UsageStats, MenuBarData)
+2. Service executes `ccusage daily --json --days 30` and `ccusage daily --json --days 1` via child_process.spawn
+3. Raw JSON parsed into typed interfaces (UsageStats, MenuBarData) with fallback field names for compatibility
 4. Menu bar updates with percentage, renderer receives data via IPC
 5. React components render charts, cards, and progress indicators
 
@@ -117,9 +117,18 @@ Implements intelligent notification logic:
 
 ## Required External Dependencies
 
-- **ccusage CLI**: The app is useless without this. Install via `npm install -g ccusage` or ensure `npx ccusage` works
-- **Claude Code**: Must be configured with valid credentials in `~/.claude` directory
+- **ccusage CLI**: The app requires ccusage ^13.0.1. Install via `npm install -g ccusage` or ensure `npx ccusage` works
+- **Claude Code**: Must be configured with valid credentials in `~/.claude` directory containing JSONL usage files
 - **macOS**: Tray and notification APIs are platform-specific
+
+## ccusage Integration Best Practices
+
+Following patterns from successful projects like `claude-usage-tracker-for-mac`:
+
+1. **Use specific ccusage commands**: `ccusage daily --json --days N` instead of generic commands
+2. **Handle multiple field name formats**: Support both `totalTokens`/`costUSD` and `total_tokens`/`cost_usd`
+3. **Separate today vs historical data**: Make separate calls for current day and historical data
+4. **Robust error handling**: Gracefully handle empty responses, malformed JSON, and missing fields
 
 ## Testing the App
 

@@ -1,6 +1,7 @@
 {
-  "name": "ccmonitor",
+  "name": "claude-code-monitor",
   "version": "1.0.0",
+  "description": "A beautiful macOS menu bar app for real-time Claude Code usage monitoring",
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
@@ -10,10 +11,9 @@
     "pack": "electron-builder",
     "dist": "npm run build && electron-builder"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["electron", "claude-code", "usage-monitor", "macos", "menu-bar", "ai", "tokens"],
+  "author": "Claude Code",
+  "license": "MIT",
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.0.3",

@@ -1,5 +1,19 @@
 import { spawn } from 'child_process';
-import { UsageData, UsageStats, DailyUsage, MenuBarData } from '../types/usage';
+import { UsageStats, DailyUsage, MenuBarData } from '../types/usage';
+
+// Types matching ccusage CLI output format
+interface CcusageResponse {
+  totals?: {
+    totalTokens: number;
+    costUSD: number;
+  };
+  daily?: Array<{
+    date: string;
+    totalTokens: number;
+    costUSD: number;
+    model: string;
+  }>;
+}
 
 export class CCUsageService {
   private static instance: CCUsageService;
@@ -23,8 +37,13 @@ export class CCUsageService {
     }
 
     try {
-      const rawData = await this.executeCommand(['--json', '--days', '30']);
-      const stats = this.parseUsageData(rawData);
+      // Get daily usage data for last 30 days with JSON output
+      const dailyData = await this.executeCommand(['daily', '--json', '--days', '30']);
+      
+      // Get today's usage specifically
+      const todayData = await this.executeCommand(['daily', '--json', '--days', '1']);
+      
+      const stats = this.parseUsageData(dailyData, todayData);
       
       this.cachedStats = stats;
       this.lastUpdate = now;
@@ -52,7 +71,9 @@ export class CCUsageService {
 
   private async executeCommand(args: string[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      const ccusage = spawn('npx', ['ccusage', ...args]);
+      const ccusage = spawn('npx', ['ccusage', ...args], {
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
       let stdout = '';
       let stderr = '';
 
@@ -78,38 +99,71 @@ export class CCUsageService {
     });
   }
 
-  private parseUsageData(rawData: string): UsageStats {
+  private parseUsageData(dailyData: string, todayData: string): UsageStats {
     try {
-      const data = JSON.parse(rawData);
+      let dailyArray: any[] = [];
+      let todayArray: any[] = [];
       
-      // Ensure data is an array
-      const dataArray = Array.isArray(data) ? data : [];
+      // Parse daily data
+      if (dailyData.trim()) {
+        try {
+          dailyArray = JSON.parse(dailyData);
+          if (!Array.isArray(dailyArray)) {
+            dailyArray = [];
+          }
+        } catch (e) {
+          console.error('Error parsing daily data:', e);
+        }
+      }
       
-      // Calculate totals and process data
-      const totalTokens = dataArray.reduce((sum: number, item: any) => sum + (item.totalTokens || 0), 0);
+      // Parse today data
+      if (todayData.trim()) {
+        try {
+          todayArray = JSON.parse(todayData);
+          if (!Array.isArray(todayArray)) {
+            todayArray = [];
+          }
+        } catch (e) {
+          console.error('Error parsing today data:', e);
+        }
+      }
       
-      // Get today's usage
-      const today = new Date().toISOString().split('T')[0];
-      const todayData = dataArray.filter((item: any) => item.date === today);
-      const todayTokens = todayData.reduce((sum: number, item: any) => sum + (item.totalTokens || 0), 0);
-      const todayCost = todayData.reduce((sum: number, item: any) => sum + (item.estimatedCost || 0), 0);
+      // Calculate totals
+      const totalTokens = dailyArray.reduce((sum: number, item: any) => {
+        return sum + (item.totalTokens || item.total_tokens || 0);
+      }, 0);
+      
+      const totalCost = dailyArray.reduce((sum: number, item: any) => {
+        return sum + (item.costUSD || item.cost_usd || item.cost || 0);
+      }, 0);
+      
+      // Today's usage
+      const todayTokens = todayArray.reduce((sum: number, item: any) => {
+        return sum + (item.totalTokens || item.total_tokens || 0);
+      }, 0);
+      
+      const todayCost = todayArray.reduce((sum: number, item: any) => {
+        return sum + (item.costUSD || item.cost_usd || item.cost || 0);
+      }, 0);
 
-      // Determine plan and limits
+      // Determine plan and limits based on current month usage
       const currentPlan = this.detectPlan(totalTokens);
       const tokenLimit = this.getTokenLimit(currentPlan);
       
-      // Calculate burn rate (tokens per hour over last 24 hours)
-      const burnRate = this.calculateBurnRate(dataArray);
+      // Calculate burn rate
+      const burnRate = this.calculateBurnRate(dailyArray);
+      
+      const today = new Date().toISOString().split('T')[0];
       
       return {
         today: {
           date: today,
           totalTokens: todayTokens,
           totalCost: todayCost,
-          models: this.groupByModel(todayData)
+          models: this.groupByModel(todayArray)
         },
-        thisWeek: this.groupByDay(dataArray, 7),
-        thisMonth: this.groupByDay(dataArray, 30),
+        thisWeek: this.groupByDay(dailyArray, 7),
+        thisMonth: this.groupByDay(dailyArray, 30),
         burnRate,
         predictedDepleted: this.calculatePredictedDepletion(totalTokens, tokenLimit, burnRate),
         currentPlan,
@@ -148,7 +202,9 @@ export class CCUsageService {
       return hoursDiff <= 24;
     });
 
-    const totalTokens = last24Hours.reduce((sum, item) => sum + (item.totalTokens || 0), 0);
+    const totalTokens = last24Hours.reduce((sum, item) => {
+      return sum + (item.totalTokens || item.total_tokens || 0);
+    }, 0);
     return Math.round(totalTokens / 24); // tokens per hour
   }
 
@@ -168,11 +224,12 @@ export class CCUsageService {
     const models: { [key: string]: { tokens: number; cost: number } } = {};
     
     data.forEach(item => {
-      if (!models[item.model]) {
-        models[item.model] = { tokens: 0, cost: 0 };
+      const modelName = item.model || 'unknown';
+      if (!models[modelName]) {
+        models[modelName] = { tokens: 0, cost: 0 };
       }
-      models[item.model].tokens += item.totalTokens || 0;
-      models[item.model].cost += item.estimatedCost || 0;
+      models[modelName].tokens += item.totalTokens || item.total_tokens || 0;
+      models[modelName].cost += item.costUSD || item.cost_usd || item.cost || 0;
     });
     
     return models;
@@ -187,8 +244,12 @@ export class CCUsageService {
       const dateStr = date.toISOString().split('T')[0];
       
       const dayData = data.filter(item => item.date === dateStr);
-      const totalTokens = dayData.reduce((sum, item) => sum + (item.totalTokens || 0), 0);
-      const totalCost = dayData.reduce((sum, item) => sum + (item.estimatedCost || 0), 0);
+      const totalTokens = dayData.reduce((sum, item) => {
+        return sum + (item.totalTokens || item.total_tokens || 0);
+      }, 0);
+      const totalCost = dayData.reduce((sum, item) => {
+        return sum + (item.costUSD || item.cost_usd || item.cost || 0);
+      }, 0);
       
       result.push({
         date: dateStr,
