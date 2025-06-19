@@ -39,9 +39,9 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-screen w-full gradient-bg flex items-center justify-center">
-        <div className="glass-card p-8 text-center">
-          <div className="loading-spinner mb-4"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4 mx-auto"></div>
           <div className="text-white text-lg">Loading Claude Code Monitor...</div>
         </div>
       </div>
@@ -50,16 +50,16 @@ const App: React.FC = () => {
 
   if (error) {
     return (
-      <div className="h-screen w-full gradient-bg flex items-center justify-center p-6">
-        <div className="glass-card max-w-md w-full text-center">
-          <div className="text-6xl mb-6">⚠️</div>
-          <h2 className="text-white text-2xl font-bold mb-4">Connection Error</h2>
-          <p className="text-white/80 text-base mb-6">{error}</p>
-          <button
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-red-500/50">
+          <div className="text-red-400 text-4xl mb-4">❌</div>
+          <div className="text-white text-xl mb-4">Error</div>
+          <div className="text-red-300 mb-6">{error}</div>
+          <button 
             onClick={loadUsageStats}
-            className="btn btn-primary hover-lift"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
-            Try Again
+            Retry
           </button>
         </div>
       </div>
@@ -68,15 +68,10 @@ const App: React.FC = () => {
 
   if (!stats) {
     return (
-      <div className="h-screen w-full gradient-bg flex items-center justify-center">
-        <div className="glass-card text-center p-8">
-          <div className="text-white text-lg">No data available</div>
-          <button
-            onClick={loadUsageStats}
-            className="btn btn-primary mt-4 hover-lift"
-          >
-            Load Data
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/20">
+          <div className="text-white text-xl mb-4">📊</div>
+          <div className="text-white">No data available</div>
         </div>
       </div>
     );
@@ -86,57 +81,34 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen w-full gradient-bg relative overflow-hidden">
-        
-        {/* Header */}
-        <header className="glass-card m-4 p-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-white text-xl font-bold">Claude Code Monitor</h1>
-            <p className="text-white/70 text-sm">Real-time usage tracking</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2">Claude Code Monitor</h1>
+            <p className="text-purple-300">Track your API usage with style</p>
           </div>
-          <button
-            onClick={loadUsageStats}
-            className="btn hover-scale"
-            title="Refresh Data"
-          >
-            🔄
-          </button>
-        </header>
 
-        {/* Main Content */}
-        <main className="p-4">
-          
           {/* Main Stats Card */}
-          <div className="glass-card p-6 mb-6 hover-lift">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-white text-2xl font-bold">Usage Overview</h2>
-              <div className={`px-4 py-2 rounded-full ${
-                status === 'critical' ? 'bg-red-500/20 border border-red-400/50' :
-                status === 'warning' ? 'bg-yellow-500/20 border border-yellow-400/50' :
-                'bg-green-500/20 border border-green-400/50'
-              }`}>
-                <span className={`text-sm font-medium ${
-                  status === 'critical' ? 'text-red-400' :
-                  status === 'warning' ? 'text-yellow-400' :
-                  'text-green-400'
-                }`}>
-                  {Math.round(stats.percentageUsed)}% Used
-                </span>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-6">
+            <div className="text-center mb-6">
+              <div className="text-6xl font-bold text-white mb-2">
+                {Math.round(stats.percentageUsed)}%
               </div>
+              <div className="text-xl text-purple-300">of {stats.currentPlan} plan used</div>
             </div>
 
-            {/* Progress Bar */}
             <div className="mb-6">
               <div className="flex justify-between text-sm text-white/70 mb-2">
                 <span>Usage Progress</span>
                 <span>{stats.tokensUsed.toLocaleString()} / {stats.tokenLimit.toLocaleString()} tokens</span>
               </div>
-              <div className="progress-container h-4">
+              <div className="w-full bg-white/20 rounded-full h-4">
                 <div
-                  className={`progress-bar ${
-                    status === 'critical' ? 'progress-critical' :
-                    status === 'warning' ? 'progress-warning' :
-                    'progress-safe'
+                  className={`h-4 rounded-full transition-all duration-1000 ${
+                    status === 'critical' ? 'bg-gradient-to-r from-red-500 to-red-600' :
+                    status === 'warning' ? 'bg-gradient-to-r from-yellow-500 to-orange-600' :
+                    'bg-gradient-to-r from-blue-500 to-purple-600'
                   }`}
                   style={{ width: `${Math.min(stats.percentageUsed, 100)}%` }}
                 />
@@ -165,29 +137,31 @@ const App: React.FC = () => {
           </div>
 
           {/* Model Usage */}
-          {Object.keys(stats.today.models).length > 0 && (
-            <div className="glass-card p-6 hover-lift">
-              <h3 className="text-white text-xl font-bold mb-4">Today's Model Usage</h3>
-              <div className="space-y-3">
-                {Object.entries(stats.today.models).map(([model, data]) => (
-                  <div key={model} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                    <div>
-                      <div className="text-white font-medium">{model.replace('claude-', '').replace('-20250514', '')}</div>
-                      <div className="text-white/60 text-sm">{data.tokens.toLocaleString()} tokens</div>
-                    </div>
-                    <div className="text-white font-bold">${data.cost.toFixed(3)}</div>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-6">
+            <h3 className="text-white text-xl font-bold mb-4">Today's Model Usage</h3>
+            <div className="space-y-3">
+              {Object.entries(stats.today.models).map(([model, data]) => (
+                <div key={model} className="flex justify-between items-center">
+                  <span className="text-white/80">{model}</span>
+                  <div className="text-right">
+                    <div className="text-white font-semibold">{data.tokens.toLocaleString()} tokens</div>
+                    <div className="text-white/60 text-sm">${data.cost.toFixed(3)}</div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-        </main>
+          </div>
 
-        {/* Footer */}
-        <footer className="glass-card m-4 mt-2 p-3 flex items-center justify-between text-sm text-white/60">
-          <span>Last updated: {new Date().toLocaleTimeString()}</span>
-          <span>Press 'R' to refresh</span>
-        </footer>
+          {/* Actions */}
+          <div className="text-center">
+            <button 
+              onClick={loadUsageStats}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+            >
+              🔄 Refresh Data
+            </button>
+          </div>
+        </div>
       </div>
     </ErrorBoundary>
   );
