@@ -5,7 +5,6 @@ import { Analytics } from './components/Analytics';
 import { NavigationTabs } from './components/NavigationTabs';
 import { SettingsPanel } from './components/SettingsPanel';
 import { NotificationSystem } from './components/NotificationSystem';
-import { Sidebar } from './components/Sidebar';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -166,10 +165,6 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, currentView: view }));
   };
 
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setState(prev => ({ ...prev, sidebarExpanded: !prev.sidebarExpanded }));
-  };
 
   // Setup auto-refresh and event listeners
   useEffect(() => {
@@ -213,6 +208,10 @@ const App: React.FC = () => {
             event.preventDefault();
             refreshData();
             break;
+          case 'q':
+            event.preventDefault();
+            window.electronAPI?.quitApp();
+            break;
           case '1':
             event.preventDefault();
             navigateTo('dashboard');
@@ -228,10 +227,6 @@ const App: React.FC = () => {
           case ',':
             event.preventDefault();
             navigateTo('settings');
-            break;
-          case 'b':
-            event.preventDefault();
-            toggleSidebar();
             break;
         }
       }
@@ -299,45 +294,45 @@ const App: React.FC = () => {
       <div className="app-background" />
       
       <div className="relative flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar
-          currentView={state.currentView}
-          expanded={state.sidebarExpanded}
-          onNavigate={navigateTo}
-          onToggle={toggleSidebar}
-          stats={currentStats}
-          status={usageStatus}
-        />
-
-        {/* Main Content */}
+        {/* Main Content - Full Width for Compact Mode */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-6 max-w-7xl mx-auto min-h-full">
-            {/* Header */}
-            <header className="mb-8">
-              <div className="flex items-center justify-between">
+          <div className="p-3 max-w-full min-h-full">
+            {/* Compact Header */}
+            <header className="mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h1 className="text-3xl font-bold text-gradient mb-2">
-                    Claude Credits Monitor
+                  <h1 className="text-lg font-bold text-gradient mb-1">
+                    Claude Monitor
                   </h1>
-                  <p className="text-neutral-400">
-                    Track your API usage with style and precision
+                  <p className="text-xs text-neutral-400">
+                    Track API usage
                   </p>
                 </div>
                 
-                <div className="flex items-center gap-3">
-                  <div className="glass px-4 py-2 rounded-full">
-                    <span className="text-sm text-neutral-300">
-                      Last updated: {new Date().toLocaleTimeString()}
+                <div className="flex items-center gap-2">
+                  <div className="glass px-2 py-1 rounded-lg">
+                    <span className="text-xs text-neutral-300">
+                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   
                   <button
                     onClick={refreshData}
-                    className="btn btn-ghost hover-scale"
+                    className="btn btn-ghost hover-scale p-1"
                     title="Refresh Data (⌘R)"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                  
+                  <button
+                    onClick={() => window.electronAPI?.quitApp()}
+                    className="btn btn-ghost hover-scale p-1 text-red-400 hover:text-red-300"
+                    title="Quit Application (⌘Q)"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
@@ -347,12 +342,12 @@ const App: React.FC = () => {
               <NavigationTabs
                 currentView={state.currentView}
                 onNavigate={navigateTo}
-                className="mt-6"
+                className="mb-3"
               />
             </header>
 
             {/* Content */}
-            <div className="space-y-6 pb-12">
+            <div className="space-y-3 pb-3">
               {state.currentView === 'dashboard' && (
                 <Dashboard
                   stats={currentStats}

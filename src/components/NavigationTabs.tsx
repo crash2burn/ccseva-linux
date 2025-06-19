@@ -36,18 +36,18 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
       onValueChange={(value) => onNavigate(value as ViewType)}
       className={className}
     >
-      <TabsList className="grid w-fit grid-cols-2">
+      <TabsList className="grid w-full grid-cols-2 h-8">
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
           return (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="flex items-center gap-2 px-6 py-3"
+              className="flex items-center gap-1 px-3 py-1 text-xs"
               title={tab.description}
             >
-              <IconComponent className="h-4 w-4" />
-              <span className="hidden sm:block">{tab.name}</span>
+              <IconComponent className="h-3 w-3" />
+              <span>{tab.name}</span>
             </TabsTrigger>
           );
         })}

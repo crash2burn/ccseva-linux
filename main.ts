@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } from 'electron';
+import { app, BrowserWindow, Tray, nativeImage, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { CCUsageService } from './src/services/ccusageService.js';
@@ -66,52 +66,18 @@ class CCMonitorApp {
     this.tray = new Tray(icon);
     this.tray.setToolTip('Claude Code Monitor');
     
-    // Initial context menu
-    this.updateTrayMenu();
+    // Update tray title with usage percentage
+    this.updateTrayTitle();
 
     this.tray.on('click', () => {
       this.toggleWindow();
     });
   }
 
-  private async updateTrayMenu() {
+  private async updateTrayTitle() {
     try {
       const menuBarData = await this.usageService.getMenuBarData();
       const percentage = Math.round(menuBarData.percentageUsed);
-      const statusColor = menuBarData.status === 'critical' ? '🔴' : 
-                         menuBarData.status === 'warning' ? '🟡' : '🟢';
-
-      const contextMenu = Menu.buildFromTemplate([
-        {
-          label: `${statusColor} ${percentage}% used (${menuBarData.tokensUsed.toLocaleString()} tokens)`,
-          enabled: false
-        },
-        {
-          label: `💰 $${menuBarData.cost.toFixed(2)} today`,
-          enabled: false
-        },
-        { type: 'separator' },
-        {
-          label: 'Show Details',
-          click: () => this.showWindow()
-        },
-        {
-          label: 'Refresh Data',
-          click: () => this.refreshData()
-        },
-        { type: 'separator' },
-        {
-          label: 'Quit',
-          click: () => {
-            if (this.updateInterval) {
-              clearInterval(this.updateInterval);
-            }
-            app.quit();
-          }
-        }
-      ]);
-
-      this.tray?.setContextMenu(contextMenu);
       
       // Update tray title with percentage
       this.tray?.setTitle(`${percentage}%`);
@@ -120,15 +86,8 @@ class CCMonitorApp {
       this.notificationService.checkAndNotify(menuBarData);
       
     } catch (error) {
-      console.error('Error updating tray menu:', error);
-      
-      // Fallback menu
-      const contextMenu = Menu.buildFromTemplate([
-        { label: 'Loading...', enabled: false },
-        { type: 'separator' },
-        { label: 'Quit', click: () => app.quit() }
-      ]);
-      this.tray?.setContextMenu(contextMenu);
+      console.error('Error updating tray title:', error);
+      this.tray?.setTitle('--');
     }
   }
 
@@ -183,19 +142,26 @@ class CCMonitorApp {
       try {
         // Clear cache and fetch fresh data
         const stats = await this.usageService.getUsageStats();
-        await this.updateTrayMenu();
+        await this.updateTrayTitle();
         return stats;
       } catch (error) {
         console.error('Error refreshing data:', error);
         throw error;
       }
     });
+
+    ipcMain.handle('quit-app', () => {
+      if (this.updateInterval) {
+        clearInterval(this.updateInterval);
+      }
+      app.quit();
+    });
   }
 
   private startUsagePolling() {
     // Update every 30 seconds
     this.updateInterval = setInterval(async () => {
-      await this.updateTrayMenu();
+      await this.updateTrayTitle();
       
       // Notify renderer if window is open
       if (this.window && !this.window.isDestroyed()) {
@@ -204,7 +170,7 @@ class CCMonitorApp {
     }, 30000);
 
     // Initial update
-    setTimeout(() => this.updateTrayMenu(), 1000);
+    setTimeout(() => this.updateTrayTitle(), 1000);
   }
 
   private showWindow() {
@@ -231,7 +197,7 @@ class CCMonitorApp {
   }
 
   private async refreshData() {
-    await this.updateTrayMenu();
+    await this.updateTrayTitle();
     if (this.window && !this.window.isDestroyed()) {
       this.window.webContents.send('usage-updated');
     }

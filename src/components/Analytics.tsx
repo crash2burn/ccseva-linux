@@ -227,67 +227,70 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats, preferences }) => {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Analytics Header */}
+    <div className="space-y-3">
+      {/* Compact Analytics Header */}
       <Card variant="glass">
-        <CardHeader className="pb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <CardHeader className="pb-2 p-3">
+          <div className="flex flex-col gap-3">
             <div>
-              <CardTitle className="text-3xl font-bold text-gradient mb-2">Usage Analytics</CardTitle>
-              <CardDescription className="text-lg">
-                Deep insights into your Claude API consumption patterns
+              <CardTitle className="text-base font-bold text-gradient mb-1">Usage Analytics</CardTitle>
+              <CardDescription className="text-xs">
+                Deep insights into your API consumption
               </CardDescription>
             </div>
             
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-1">
               {/* Time Range Toggle */}
-              <div className="flex bg-white/5 backdrop-blur-lg border border-white/20 rounded-xl p-1">
+              <div className="flex bg-white/5 backdrop-blur-lg border border-white/20 rounded-lg p-0.5">
                 {(['7d', '30d'] as ChartTimeRange[]).map((range) => (
                   <Button
                     key={range}
                     variant={timeRange === range ? "primary" : "ghost"}
                     size="sm"
                     onClick={() => setTimeRange(range)}
+                    className="h-5 px-2 text-xs"
                   >
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {range === '7d' ? '7 Days' : '30 Days'}
+                    <Calendar className="w-2 h-2 mr-1" />
+                    {range === '7d' ? '7D' : '30D'}
                   </Button>
                 ))}
               </div>
 
               {/* Chart Type Toggle */}
-              <div className="flex bg-white/5 backdrop-blur-lg border border-white/20 rounded-xl p-1">
+              <div className="flex bg-white/5 backdrop-blur-lg border border-white/20 rounded-lg p-0.5">
                 {([
-                  { type: 'area', icon: Activity },
-                  { type: 'line', icon: LineChartIcon },
-                  { type: 'bar', icon: BarChart3 }
-                ] as { type: ChartType; icon: any }[]).map(({ type, icon: Icon }) => (
+                  { type: 'area', icon: Activity, label: 'Area' },
+                  { type: 'line', icon: LineChartIcon, label: 'Line' },
+                  { type: 'bar', icon: BarChart3, label: 'Bar' }
+                ] as { type: ChartType; icon: any; label: string }[]).map(({ type, icon: Icon, label }) => (
                   <Button
                     key={type}
                     variant={chartType === type ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setChartType(type)}
+                    className="h-5 px-2 text-xs"
                   >
-                    <Icon className="w-3 h-3 mr-1" />
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                    <Icon className="w-2 h-2 mr-1" />
+                    {label}
                   </Button>
                 ))}
               </div>
 
               {/* Metric Toggle */}
-              <div className="flex bg-white/5 backdrop-blur-lg border border-white/20 rounded-xl p-1">
+              <div className="flex bg-white/5 backdrop-blur-lg border border-white/20 rounded-lg p-0.5">
                 {([
-                  { metric: 'tokens', icon: TrendingUp },
-                  { metric: 'cost', icon: DollarSign }
-                ] as { metric: 'tokens' | 'cost'; icon: any }[]).map(({ metric, icon: Icon }) => (
+                  { metric: 'tokens', icon: TrendingUp, label: 'Tokens' },
+                  { metric: 'cost', icon: DollarSign, label: 'Cost' }
+                ] as { metric: 'tokens' | 'cost'; icon: any; label: string }[]).map(({ metric, icon: Icon, label }) => (
                   <Button
                     key={metric}
                     variant={selectedMetric === metric ? "success" : "ghost"}
                     size="sm"
                     onClick={() => setSelectedMetric(metric)}
+                    className="h-5 px-2 text-xs"
                   >
-                    <Icon className="w-3 h-3 mr-1" />
-                    {metric.charAt(0).toUpperCase() + metric.slice(1)}
+                    <Icon className="w-2 h-2 mr-1" />
+                    {label}
                   </Button>
                 ))}
               </div>
@@ -295,137 +298,139 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats, preferences }) => {
           </div>
         </CardHeader>
 
-        <CardContent>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass p-4 rounded-xl text-center">
-              <div className="text-2xl font-bold text-white">{totalWeekTokens.toLocaleString()}</div>
-              <div className="text-sm text-neutral-400">Total Tokens (7d)</div>
+        <CardContent className="p-3 pt-0">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="glass p-2 rounded-lg text-center">
+              <div className="text-sm font-bold text-white">{totalWeekTokens.toLocaleString()}</div>
+              <div className="text-xs text-neutral-400">Total Tokens (7d)</div>
             </div>
-            <div className="glass p-4 rounded-xl text-center">
-              <div className="text-2xl font-bold text-white">${totalWeekCost.toFixed(3)}</div>
-              <div className="text-sm text-neutral-400">Total Cost (7d)</div>
+            <div className="glass p-2 rounded-lg text-center">
+              <div className="text-sm font-bold text-white">${totalWeekCost.toFixed(3)}</div>
+              <div className="text-xs text-neutral-400">Total Cost (7d)</div>
             </div>
-            <div className="glass p-4 rounded-xl text-center">
-              <div className="text-2xl font-bold text-white">{Math.round(avgDailyTokens).toLocaleString()}</div>
-              <div className="text-sm text-neutral-400">Avg Daily Tokens</div>
+            <div className="glass p-2 rounded-lg text-center">
+              <div className="text-sm font-bold text-white">{Math.round(avgDailyTokens).toLocaleString()}</div>
+              <div className="text-xs text-neutral-400">Avg Daily Tokens</div>
             </div>
-            <div className="glass p-4 rounded-xl text-center">
-              <div className="text-2xl font-bold text-white">${avgDailyCost.toFixed(3)}</div>
-              <div className="text-sm text-neutral-400">Avg Daily Cost</div>
+            <div className="glass p-2 rounded-lg text-center">
+              <div className="text-sm font-bold text-white">${avgDailyCost.toFixed(3)}</div>
+              <div className="text-xs text-neutral-400">Avg Daily Cost</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Main Chart */}
+      {/* Compact Main Chart */}
       <Card variant="glass">
-        <CardHeader>
+        <CardHeader className="pb-2 p-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl flex items-center gap-2">
-                {selectedMetric === 'tokens' ? <TrendingUp className="w-5 h-5" /> : <DollarSign className="w-5 h-5" />}
+              <CardTitle className="text-sm flex items-center gap-1">
+                {selectedMetric === 'tokens' ? <TrendingUp className="w-3 h-3" /> : <DollarSign className="w-3 h-3" />}
                 {selectedMetric === 'tokens' ? 'Token Usage' : 'Cost'} Trends
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 {timeRange === '7d' ? 'Last 7 days' : 'Last 30 days'} • {chartType} chart
               </CardDescription>
             </div>
-            <Badge variant="glass" className="px-3 py-1">
-              <Activity className="w-3 h-3 mr-1" />
-              {preferences.animationsEnabled ? 'Animated' : 'Static'}
+            <Badge variant="glass" className="px-2 py-0.5 text-xs">
+              <Activity className="w-2 h-2 mr-1" />
+              {preferences.animationsEnabled ? 'Live' : 'Static'}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="h-96 chart-container">
+        <CardContent className="p-3 pt-0">
+          <div className="h-48 chart-container">
             {renderChart()}
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-3">
         {/* Model Breakdown */}
         <Card variant="glass">
-          <CardHeader>
+          <CardHeader className="pb-2 p-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <PieChartIcon className="w-5 h-5" />
+                <CardTitle className="text-sm flex items-center gap-1">
+                  <PieChartIcon className="w-3 h-3" />
                   Model Distribution
                 </CardTitle>
-                <CardDescription>Today's usage by model</CardDescription>
+                <CardDescription className="text-xs">Today's usage by model</CardDescription>
               </div>
-              <Badge variant="glass" className="px-3 py-1">
+              <Badge variant="glass" className="px-2 py-0.5 text-xs">
                 {modelBreakdownData.length} models
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
           
-          <div className="h-64 mb-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={modelBreakdownData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {modelBreakdownData.map((item, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={Object.values(modelColors)[index] || '#6B7280'} 
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-24 w-24">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={modelBreakdownData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={20}
+                    outerRadius={35}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {modelBreakdownData.map((item, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={Object.values(modelColors)[index] || '#6B7280'} 
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
 
-          <div className="space-y-3">
-            {modelBreakdownData.map((model, index) => (
-              <div key={model.name} className="flex items-center justify-between p-3 glass rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: Object.values(modelColors)[index] || '#6B7280' }}
-                  />
-                  <span className="text-white font-medium capitalize">{model.name}</span>
+            <div className="flex-1 space-y-1">
+              {modelBreakdownData.map((model, index) => (
+                <div key={model.name} className="flex items-center justify-between p-1.5 glass rounded text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <div 
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: Object.values(modelColors)[index] || '#6B7280' }}
+                    />
+                    <span className="text-white font-medium capitalize">{model.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-white font-semibold">{model.value.toLocaleString()}</div>
+                    <div className="text-xs text-neutral-400">{model.percentage.toFixed(1)}%</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-white font-semibold">{model.value.toLocaleString()}</div>
-                  <div className="text-xs text-neutral-400">{model.percentage.toFixed(1)}%</div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           </CardContent>
         </Card>
 
-        {/* Detailed Metrics */}
+        {/* Compact Performance Metrics */}
         <Card variant="glass">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Activity className="w-5 h-5" />
+          <CardHeader className="pb-2 p-3">
+            <CardTitle className="text-sm flex items-center gap-1">
+              <Activity className="w-3 h-3" />
               Performance Metrics
             </CardTitle>
-            <CardDescription>Key insights and trends</CardDescription>
+            <CardDescription className="text-xs">Key insights and trends</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
 
-          <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-2">
             {/* Burn Rate Trend */}
-            <div className="glass p-4 rounded-xl">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-neutral-300">Current Burn Rate</span>
-                <span className="text-2xl font-bold text-white">{stats.burnRate.toLocaleString()}</span>
+            <div className="glass p-2 rounded-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-neutral-300">Burn Rate</span>
+                <span className="text-sm font-bold text-white">{stats.burnRate.toLocaleString()}</span>
               </div>
-              <div className="text-sm text-neutral-400">tokens per hour</div>
-              <div className="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div className="text-xs text-neutral-400 mb-1">tokens/hour</div>
+              <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
                 <div 
                   className={`h-full rounded-full transition-all duration-500 ${
                     stats.burnRate > 1000 ? 'bg-red-500' : 
@@ -437,15 +442,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats, preferences }) => {
             </div>
 
             {/* Usage Efficiency */}
-            <div className="glass p-4 rounded-xl">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-neutral-300">Usage Efficiency</span>
-                <span className="text-2xl font-bold text-white">
+            <div className="glass p-2 rounded-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-neutral-300">Efficiency</span>
+                <span className="text-sm font-bold text-white">
                   {((stats.tokensUsed / stats.tokenLimit) * 100).toFixed(1)}%
                 </span>
               </div>
-              <div className="text-sm text-neutral-400">of plan utilized</div>
-              <div className="mt-2 h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div className="text-xs text-neutral-400 mb-1">plan utilized</div>
+              <div className="h-1 bg-gray-700 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
                   style={{ width: `${stats.percentageUsed}%` }}
@@ -455,26 +460,26 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats, preferences }) => {
 
             {/* Predicted Depletion */}
             {stats.predictedDepleted && (
-              <div className="glass p-4 rounded-xl">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-neutral-300">Predicted Depletion</span>
-                  <span className="text-lg font-bold text-orange-400">
+              <div className="glass p-2 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-neutral-300">Depletion</span>
+                  <span className="text-xs font-bold text-orange-400">
                     {new Date(stats.predictedDepleted).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="text-sm text-neutral-400">at current usage rate</div>
+                <div className="text-xs text-neutral-400">current rate</div>
               </div>
             )}
 
             {/* Cost Per Token */}
-            <div className="glass p-4 rounded-xl">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-neutral-300">Avg Cost/Token</span>
-                <span className="text-2xl font-bold text-white">
+            <div className="glass p-2 rounded-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-neutral-300">Avg Cost</span>
+                <span className="text-sm font-bold text-white">
                   ${(stats.today.totalCost / stats.today.totalTokens * 1000).toFixed(3)}
                 </span>
               </div>
-              <div className="text-sm text-neutral-400">per 1k tokens today</div>
+              <div className="text-xs text-neutral-400">per 1k tokens</div>
             </div>
           </div>
           </CardContent>
