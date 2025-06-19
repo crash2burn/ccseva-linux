@@ -1,7 +1,11 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } from 'electron';
 import * as path from 'path';
-import { CCUsageService } from './src/services/ccusageService';
-import { NotificationService } from './src/services/notificationService';
+import { fileURLToPath } from 'url';
+import { CCUsageService } from './src/services/ccusageService.js';
+import { NotificationService } from './src/services/notificationService.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class CCMonitorApp {
   private tray: Tray | null = null;

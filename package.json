@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "webpack --mode development --watch",
-    "build": "webpack --mode production && tsc main.ts preload.ts --outDir dist",
+    "build": "webpack --mode production && tsc --project tsconfig.main.json",
     "electron-dev": "concurrently \"npm run dev\" \"wait-on dist/bundle.js && electron .\"",
     "pack": "electron-builder",
     "dist": "npm run build && electron-builder"
@@ -14,6 +14,7 @@
   "keywords": ["electron", "claude-code", "usage-monitor", "macos", "menu-bar", "ai", "tokens"],
   "author": "Claude Code",
   "license": "MIT",
+  "type": "module",
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.0.3",

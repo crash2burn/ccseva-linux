@@ -130,6 +130,41 @@ Following patterns from successful projects like `claude-usage-tracker-for-mac`:
 3. **Separate today vs historical data**: Make separate calls for current day and historical data
 4. **Robust error handling**: Gracefully handle empty responses, malformed JSON, and missing fields
 
+## Recent Updates and Improvements
+
+### ccusage Integration Refactor (Latest)
+- **Updated to use ccusage CLI best practices** following patterns from `claude-usage-tracker-for-mac`
+- **Dual API calls**: Separate `ccusage daily --json --days 30` and `ccusage daily --json --days 1` for historical vs current data
+- **Enhanced field compatibility**: Supports both `totalTokens`/`costUSD` and `total_tokens`/`cost_usd` field naming
+- **Improved error handling**: Graceful degradation when ccusage CLI fails or returns malformed data
+- **Package metadata updates**: Renamed to `claude-code-monitor`, added proper description, keywords, MIT license
+
+### Project Structure Evolution
+```
+ccmonitor/ (now claude-code-monitor)
+├── main.ts                     # Electron main process with tray management
+├── preload.ts                  # Secure IPC bridge
+├── src/
+│   ├── App.tsx                 # Main React application container
+│   ├── components/             # UI components (UsageCard, ProgressBar, etc.)
+│   ├── services/               # Business logic services
+│   │   ├── ccusageService.ts   # ccusage CLI integration (recently refactored)
+│   │   └── notificationService.ts # macOS notification management
+│   ├── types/usage.ts          # TypeScript interfaces
+│   └── styles/index.css        # Tailwind CSS with custom themes
+├── package.json                # Updated metadata and dependencies
+├── CLAUDE.md                   # This documentation file
+├── README.md                   # User-facing documentation
+└── .gitignore                  # Git exclusions for build artifacts
+```
+
+### Git Repository Status
+- **Initialized git repository** with comprehensive .gitignore
+- **Two commits made**:
+  1. Initial commit with full feature set
+  2. Refactor commit improving ccusage integration
+- **Clean working tree** ready for development
+
 ## Testing the App
 
 Since there are no automated tests, manual verification checklist:
@@ -139,3 +174,5 @@ Since there are no automated tests, manual verification checklist:
 4. Notifications appear at usage thresholds
 5. Data updates every 30 seconds
 6. Error states handle missing ccusage gracefully
+7. **ccusage CLI integration**: Verify `npx ccusage daily --json` works before running app
+8. **Field compatibility**: App handles both old and new ccusage output field formats
