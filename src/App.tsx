@@ -296,7 +296,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <div className="app-background" />
       
-      <div className="relative min-h-screen flex">
+      <div className="relative flex h-screen overflow-hidden">
         {/* Sidebar */}
         <Sidebar
           currentView={state.currentView}
@@ -308,10 +308,8 @@ const App: React.FC = () => {
         />
 
         {/* Main Content */}
-        <main className={`flex-1 transition-all duration-300 ${
-          state.sidebarExpanded ? 'ml-64' : 'ml-16'
-        }`}>
-          <div className="p-6 max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 max-w-7xl mx-auto min-h-full">
             {/* Header */}
             <header className="mb-8">
               <div className="flex items-center justify-between">
@@ -345,7 +343,7 @@ const App: React.FC = () => {
             </header>
 
             {/* Content */}
-            <div className="space-y-6">
+            <div className="space-y-6 pb-12">
               {state.currentView === 'dashboard' && (
                 <Dashboard
                   stats={currentStats}

@@ -61,8 +61,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={`
-      fixed left-0 top-0 h-full glass-card rounded-none border-l-0 border-t-0 border-b-0
-      transition-all duration-300 z-20
+      h-full glass-card rounded-none border-l-0 border-t-0 border-b-0
+      transition-all duration-300 flex-shrink-0
       ${expanded ? 'w-64' : 'w-16'}
     `}>
       
