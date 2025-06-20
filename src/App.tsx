@@ -71,7 +71,6 @@ const App: React.FC = () => {
       
       // Add success notification for manual refresh
       if (!showLoading) {
-        console.log('data', data);
         addNotification({
           type: 'success',
           title: 'Data Refreshed',
@@ -107,8 +106,7 @@ const App: React.FC = () => {
       const data = await window.electronAPI.refreshData();
       
       setState(prev => ({ ...prev, stats: data }));
-      console.log('data', data);
-      addNotification({
+       addNotification({
         type: 'success',
         title: 'Data Refreshed',
         message: 'Latest usage data loaded',

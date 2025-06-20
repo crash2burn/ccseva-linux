@@ -13,6 +13,9 @@ class CCMonitorApp {
   private usageService: CCUsageService;
   private notificationService: NotificationService;
   private updateInterval: NodeJS.Timeout | null = null;
+  private displayInterval: NodeJS.Timeout | null = null;
+  private showPercentage: boolean = true;
+  private cachedMenuBarData: any = null;
 
   constructor() {
     this.usageService = CCUsageService.getInstance();
@@ -26,6 +29,7 @@ class CCMonitorApp {
     this.createWindow();
     this.setupIPC();
     this.startUsagePolling();
+    this.startDisplayToggle();
 
     app.on('window-all-closed', () => {
       // Prevent app from quitting, keep in menu bar
@@ -77,10 +81,10 @@ class CCMonitorApp {
   private async updateTrayTitle() {
     try {
       const menuBarData = await this.usageService.getMenuBarData();
-      const percentage = Math.round(menuBarData.percentageUsed);
+      this.cachedMenuBarData = menuBarData;
       
-      // Update tray title with percentage
-      this.tray?.setTitle(`${percentage}%`);
+      // Update tray title based on current display mode
+      this.updateTrayDisplay();
       
       // Check for notifications (auto source)
       this.notificationService.checkAndNotify(menuBarData, 'auto');
@@ -88,7 +92,28 @@ class CCMonitorApp {
     } catch (error) {
       console.error('Error updating tray title:', error);
       this.tray?.setTitle('--');
+      this.cachedMenuBarData = null;
     }
+  }
+
+  private updateTrayDisplay() {
+    if (!this.cachedMenuBarData) return;
+    
+    if (this.showPercentage) {
+      const percentage = Math.round(this.cachedMenuBarData.percentageUsed);
+      this.tray?.setTitle(`${percentage}%`);
+    } else {
+      const cost = this.cachedMenuBarData.cost;
+      this.tray?.setTitle(`$${cost.toFixed(2)}`);
+    }
+  }
+
+  private startDisplayToggle() {
+    // Switch between percentage and cost every 3 seconds
+    this.displayInterval = setInterval(() => {
+      this.showPercentage = !this.showPercentage;
+      this.updateTrayDisplay();
+    }, 3000);
   }
 
   private createWindow() {
@@ -110,7 +135,7 @@ class CCMonitorApp {
         preload: path.join(__dirname, 'preload.js')
       }
     });
-    this.window.webContents.openDevTools();
+    // this.window.webContents.openDevTools();
 
     // Load the React app
     if (process.env.NODE_ENV === 'development') {
@@ -154,6 +179,9 @@ class CCMonitorApp {
     ipcMain.handle('quit-app', () => {
       if (this.updateInterval) {
         clearInterval(this.updateInterval);
+      }
+      if (this.displayInterval) {
+        clearInterval(this.displayInterval);
       }
       app.quit();
     });
