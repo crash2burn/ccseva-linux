@@ -6,6 +6,8 @@ export class NotificationService {
   private lastNotificationTime: number = 0;
   private readonly NOTIFICATION_COOLDOWN = 300000; // 5 minutes
   private lastWarningLevel: 'safe' | 'warning' | 'critical' = 'safe';
+  private lastNotificationData: string = '';
+  private notificationInProgress: boolean = false;
 
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
@@ -14,9 +16,17 @@ export class NotificationService {
     return NotificationService.instance;
   }
 
-  checkAndNotify(data: MenuBarData): void {
+  checkAndNotify(data: MenuBarData, source: 'auto' | 'manual' = 'auto'): void {
     const now = Date.now();
     const timeSinceLastNotification = now - this.lastNotificationTime;
+
+    // Create a unique identifier for this data state
+    const dataIdentifier = `${data.status}-${Math.round(data.percentageUsed)}-${data.tokensUsed}`;
+    
+    // Prevent duplicate notifications for the same data
+    if (this.lastNotificationData === dataIdentifier || this.notificationInProgress) {
+      return;
+    }
 
     // Only notify if enough time has passed and status has worsened
     if (timeSinceLastNotification < this.NOTIFICATION_COOLDOWN) {
@@ -39,9 +49,16 @@ export class NotificationService {
     }
 
     if (shouldNotify) {
+      this.notificationInProgress = true;
       this.sendNotification(title, body);
       this.lastNotificationTime = now;
       this.lastWarningLevel = data.status;
+      this.lastNotificationData = dataIdentifier;
+      
+      // Reset notification lock after a short delay
+      setTimeout(() => {
+        this.notificationInProgress = false;
+      }, 1000);
     }
   }
 

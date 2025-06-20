@@ -82,8 +82,8 @@ class CCMonitorApp {
       // Update tray title with percentage
       this.tray?.setTitle(`${percentage}%`);
       
-      // Check for notifications
-      this.notificationService.checkAndNotify(menuBarData);
+      // Check for notifications (auto source)
+      this.notificationService.checkAndNotify(menuBarData, 'auto');
       
     } catch (error) {
       console.error('Error updating tray title:', error);
@@ -110,6 +110,7 @@ class CCMonitorApp {
         preload: path.join(__dirname, 'preload.js')
       }
     });
+    this.window.webContents.openDevTools();
 
     // Load the React app
     if (process.env.NODE_ENV === 'development') {

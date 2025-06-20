@@ -68,9 +68,10 @@ const App: React.FC = () => {
         loading: false,
         error: null,
       }));
-
+      
       // Add success notification for manual refresh
       if (!showLoading) {
+        console.log('data', data);
         addNotification({
           type: 'success',
           title: 'Data Refreshed',
@@ -106,7 +107,7 @@ const App: React.FC = () => {
       const data = await window.electronAPI.refreshData();
       
       setState(prev => ({ ...prev, stats: data }));
-      
+      console.log('data', data);
       addNotification({
         type: 'success',
         title: 'Data Refreshed',
@@ -173,7 +174,24 @@ const App: React.FC = () => {
     // Handle usage updates from main process
     const handleUsageUpdate = () => {
       if (state.preferences.autoRefresh) {
-        loadUsageStats(false);
+        // Silent update from main process - no notification needed
+        setState(prev => ({ ...prev, loading: true, error: null }));
+        
+        window.electronAPI.getUsageStats().then(data => {
+          setState(prev => ({
+            ...prev,
+            stats: data,
+            loading: false,
+            error: null,
+          }));
+        }).catch(err => {
+          const errorMessage = err instanceof Error ? err.message : 'Failed to load usage stats';
+          setState(prev => ({
+            ...prev,
+            error: errorMessage,
+            loading: false,
+          }));
+        });
       }
     };
 
@@ -181,23 +199,12 @@ const App: React.FC = () => {
       window.electronAPI.onUsageUpdated(handleUsageUpdate);
     }
 
-    // Setup auto-refresh interval
-    let intervalId: NodeJS.Timeout | null = null;
-    if (state.preferences.autoRefresh) {
-      intervalId = setInterval(() => {
-        loadUsageStats(false);
-      }, state.preferences.refreshInterval);
-    }
-
     return () => {
       if (window.electronAPI) {
         window.electronAPI.removeUsageUpdatedListener(handleUsageUpdate);
       }
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
     };
-  }, [state.preferences.autoRefresh, state.preferences.refreshInterval]);
+  }, [state.preferences.autoRefresh]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -354,7 +361,6 @@ const App: React.FC = () => {
                   status={usageStatus}
                   timeRemaining={timeRemaining}
                   onRefresh={refreshData}
-                  preferences={state.preferences}
                 />
               )}
 
