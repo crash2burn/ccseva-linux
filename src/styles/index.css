@@ -303,19 +303,6 @@ body {
   box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
-.btn-success {
-  background: var(--gradient-success);
-  border-color: var(--color-success-light);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-warning {
-  background: var(--gradient-warning);
-  border-color: var(--color-warning-light);
-  box-shadow: var(--shadow-md);
-}
-
-
 .btn-ghost {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.2);
@@ -366,20 +353,6 @@ body {
   }
 }
 
-.progress-safe {
-  background: var(--gradient-success);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-}
-
-.progress-warning {
-  background: var(--gradient-warning);
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
-}
-
-.progress-critical {
-  background: var(--gradient-error);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-}
 
 /* Loading Animations */
 .loading-spinner {
@@ -581,9 +554,6 @@ body {
   }
 }
 
-.focusable:focus {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900;
-}
 
 ::selection {
   background: rgba(99, 102, 241, 0.3);
@@ -624,17 +594,4 @@ body {
   transition: stroke-dasharray 1s ease-in-out;
 }
 
-/* Pulse animation for status indicators */
-.status-pulse {
-  animation: statusPulse 2s infinite;
-}
-
-@keyframes statusPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
 

@@ -230,45 +230,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </label>
           </div>
 
-          {preferences.notifications && (
-            <div className="ml-11 space-y-4">
-              
-              {/* Notification Types */}
-              <div className="space-y-3">
-                <h4 className="text-white font-medium">Alert Types</h4>
-                
-                {[
-                  { id: 'usage70', label: '70% Usage Warning', icon: '⚠️', enabled: true },
-                  { id: 'usage90', label: '90% Usage Critical', icon: '🚨', enabled: true },
-                  { id: 'dailyUsage', label: 'Daily Usage Summary', icon: '📊', enabled: false },
-                  { id: 'highBurnRate', label: 'High Burn Rate Alert', icon: '🔥', enabled: true },
-                ].map((alert) => (
-                  <label key={alert.id} className="flex items-center justify-between py-2">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-lg">{alert.icon}</span>
-                      <span className="text-white/80 text-sm">{alert.label}</span>
-                    </div>
-                    
-                    <div className="relative">
-                      <div
-                        className={`
-                          w-10 h-5 rounded-full cursor-pointer transition-colors duration-300
-                          ${alert.enabled ? 'bg-green-500' : 'bg-white/20'}
-                        `}
-                      >
-                        <div
-                          className={`
-                            w-4 h-4 bg-white rounded-full transition-transform duration-300 mt-0.5
-                            ${alert.enabled ? 'transform translate-x-5 ml-0.5' : 'ml-0.5'}
-                          `}
-                        />
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -276,59 +237,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {activeTab === 'advanced' && (
         <div className="glass-card p-6 hover-lift space-y-6">
           
-          {/* Data Export */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">📤</span>
-              <div>
-                <div className="text-white font-medium">Data Export</div>
-                <div className="text-white/60 text-sm">Export your usage data</div>
-              </div>
-            </div>
-
-            <div className="ml-11 flex space-x-3">
-              <button className="btn btn-primary hover-lift">
-                Export CSV
-              </button>
-              <button className="btn hover-lift">
-                Export JSON
-              </button>
-            </div>
-          </div>
-
-          {/* Reset Settings */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">🔄</span>
-              <div>
-                <div className="text-white font-medium">Reset</div>
-                <div className="text-white/60 text-sm">Restore default settings</div>
-              </div>
-            </div>
-
-            <div className="ml-11">
-              <button className="btn btn-danger hover-lift">
-                Reset All Settings
-              </button>
-            </div>
-          </div>
-
-          {/* Cache Management */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">🗄️</span>
-              <div>
-                <div className="text-white font-medium">Cache</div>
-                <div className="text-white/60 text-sm">Manage cached data</div>
-              </div>
-            </div>
-
-            <div className="ml-11">
-              <button className="btn hover-lift">
-                Clear Cache
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

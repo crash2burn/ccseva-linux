@@ -31,7 +31,6 @@
   "license": "MIT",
   "type": "module",
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.0.3",
     "concurrently": "^9.1.2",
     "css-loader": "^7.1.2",
@@ -54,7 +53,6 @@
     "autoprefixer": "^10.4.21",
     "ccusage": "^13.0.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.518.0",
     "postcss": "^8.5.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
