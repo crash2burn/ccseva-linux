@@ -139,7 +139,7 @@ When using the `ccusage` package API:
 
 ### Project Structure Evolution
 ```
-ccmonitor/ (now claude-code-monitor)
+cctray/ (now cctray)
 ├── main.ts                     # Electron main process with tray management
 ├── preload.ts                  # Secure IPC bridge
 ├── src/

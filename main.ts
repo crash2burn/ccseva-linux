@@ -7,7 +7,7 @@ import { NotificationService } from './src/services/notificationService.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-class CCMonitorApp {
+class CCTrayApp {
   private tray: Tray | null = null;
   private window: BrowserWindow | null = null;
   private usageService: CCUsageService;
@@ -43,32 +43,12 @@ class CCMonitorApp {
   }
 
   private createTray() {
-    // Create a simple text-based menu bar icon
-    const iconPath = path.join(__dirname, '../assets/icon.png');
-    let icon: Electron.NativeImage;
+    // Create a text-only menu bar (no icon)
+    // Use an empty 1x1 transparent image as placeholder
+    const emptyIcon = nativeImage.createEmpty();
     
-    try {
-      icon = nativeImage.createFromPath(iconPath);
-      if (icon.isEmpty()) {
-        throw new Error('Icon file not found or empty');
-      }
-    } catch (error) {
-      // Fallback: create a simple colored square
-      icon = nativeImage.createFromBuffer(Buffer.from([
-        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
-        0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10,
-        0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0xF3, 0xFF, 0x61, 0x00, 0x00, 0x00,
-        0x2E, 0x49, 0x44, 0x41, 0x54, 0x38, 0x8D, 0x63, 0xFC, 0xFF, 0xFF, 0x3F,
-        0x03, 0x35, 0x00, 0x8B, 0x91, 0x81, 0x01, 0x02, 0x8A, 0x91, 0x81, 0x01,
-        0x46, 0x06, 0x06, 0x18, 0x18, 0x60, 0x64, 0x80, 0x81, 0x01, 0x46, 0x06,
-        0x18, 0x18, 0x60, 0x64, 0x80, 0x91, 0x81, 0x81, 0x01, 0x02, 0x8A, 0x91,
-        0x81, 0x01, 0x00, 0x43, 0x5F, 0x01, 0x3F, 0x36, 0x8E, 0xC9, 0x47, 0x00,
-        0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
-      ]));
-    }
-
-    this.tray = new Tray(icon);
-    this.tray.setToolTip('Claude Code Monitor');
+    this.tray = new Tray(emptyIcon);
+    this.tray.setToolTip('CCTray');
     
     // Update tray title with usage percentage
     this.updateTrayTitle();
@@ -117,7 +97,7 @@ class CCMonitorApp {
   }
 
   private createWindow() {
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+    const { width } = screen.getPrimaryDisplay().workAreaSize;
     
     this.window = new BrowserWindow({
       width: 600,
@@ -225,14 +205,8 @@ class CCMonitorApp {
     }
   }
 
-  private async refreshData() {
-    await this.updateTrayTitle();
-    if (this.window && !this.window.isDestroyed()) {
-      this.window.webContents.send('usage-updated');
-    }
-  }
 }
 
 // Initialize the app
-const ccMonitorApp = new CCMonitorApp();
-ccMonitorApp.initialize().catch(console.error);
+const ccTrayApp = new CCTrayApp();
+ccTrayApp.initialize().catch(console.error);

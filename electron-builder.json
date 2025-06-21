@@ -1,6 +1,6 @@
 {
-  "appId": "com.ccmonitor.app",
-  "productName": "Claude Code Monitor",
+  "appId": "com.cctray.app",
+  "productName": "CCTray",
   "directories": {
     "output": "release"
   },
@@ -10,15 +10,57 @@
   ],
   "mac": {
     "category": "public.app-category.developer-tools",
+    "icon": "assets/icon.icns",
     "target": [
       {
         "target": "dmg",
         "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "mas",
+        "arch": ["x64", "arm64"]
       }
-    ]
+    ],
+    "entitlements": "entitlements.mas.plist",
+    "entitlementsInherit": "entitlements.mas.inherit.plist",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "extendInfo": {
+      "LSUIElement": true,
+      "CFBundleDisplayName": "CCTray",
+      "CFBundleName": "CCTray",
+      "CFBundleExecutable": "CCTray",
+      "NSHumanReadableCopyright": "Copyright © 2024 CCTray. All rights reserved.",
+      "CFBundleDocumentTypes": [],
+      "LSMinimumSystemVersion": "10.15.0"
+    }
+  },
+  "mas": {
+    "category": "public.app-category.developer-tools",
+    "icon": "assets/icon.icns",
+    "entitlements": "entitlements.mas.plist",
+    "entitlementsInherit": "entitlements.mas.inherit.plist",
+    "hardenedRuntime": false,
+    "gatekeeperAssess": false,
+    "binaries": [],
+    "extendInfo": {
+      "LSUIElement": true,
+      "CFBundleDisplayName": "CCTray",
+      "CFBundleName": "CCTray",
+      "CFBundleExecutable": "CCTray",
+      "NSHumanReadableCopyright": "Copyright © 2024 CCTray. All rights reserved.",
+      "CFBundleDocumentTypes": [],
+      "LSMinimumSystemVersion": "10.15.0",
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+          "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+        }
+      ]
+    }
   },
   "dmg": {
-    "title": "Claude Code Monitor",
+    "title": "CCTray",
     "icon": "assets/icon.icns"
   },
   "win": {

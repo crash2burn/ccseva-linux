@@ -1,8 +1,8 @@
-# Claude Code Monitor 🤖
+# CCTray 🤖
 
-A beautiful Mac menu bar Electron app for monitoring your Claude Code usage in real-time. Track token consumption, costs, and usage patterns with an elegant interface.
+A beautiful Mac menu bar Electron app for tracking your Claude Code usage in real-time. Monitor token consumption, costs, and usage patterns with an elegant interface.
 
-![Claude Code Monitor](./assets/screenshot.png)
+![CCTray](./assets/screenshot.png)
 
 ## Features
 
@@ -41,7 +41,7 @@ A beautiful Mac menu bar Electron app for monitoring your Claude Code usage in r
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd ccmonitor
+cd cctray
 
 # Install dependencies
 npm install
@@ -70,7 +70,7 @@ npm run dist
 ## Usage
 
 ### First Launch
-1. **Start the app** - The Claude Code Monitor icon appears in your menu bar
+1. **Start the app** - The CCTray icon appears in your menu bar
 2. **Click the icon** - View detailed usage statistics in the dropdown
 3. **Right-click** - Access context menu with refresh and quit options
 
@@ -117,7 +117,7 @@ Modify notification behavior in `src/services/notificationService.ts`:
 
 ### Project Structure
 ```
-ccmonitor/
+cctray/
 ├── main.ts              # Electron main process
 ├── preload.ts           # Electron preload script
 ├── src/
@@ -246,4 +246,4 @@ Built with ❤️ using:
 
 ---
 
-**Note**: This is an unofficial tool for monitoring Claude Code usage. It requires a valid Claude Code installation and configuration to function properly.
+**Note**: This is an unofficial tool for tracking Claude Code usage. It requires a valid Claude Code installation and configuration to function properly.

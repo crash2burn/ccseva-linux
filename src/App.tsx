@@ -305,13 +305,21 @@ const App: React.FC = () => {
             {/* Compact Header */}
             <header className="mb-4">
               <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h1 className="text-lg font-bold text-gradient mb-1">
-                    Claude Monitor
-                  </h1>
-                  <p className="text-xs text-neutral-400">
-                    Track API usage
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 flex-shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                      <circle cx="12" cy="12" r="11" fill="#8B5CF6"/>
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C13.8214 20 15.4983 19.4024 16.8358 18.3914C15.8231 17.0375 15.1667 15.352 15.1667 13.5C15.1667 9.35786 11.8088 6 7.66667 6C7.25363 6 6.84888 6.04259 6.45976 6.12411C7.59756 4.81331 9.65863 4 12 4Z" fill="white"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 className="text-lg font-bold text-gradient mb-1">
+                      CCTray
+                    </h1>
+                    <p className="text-xs text-neutral-400">
+                      Track API usage
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -387,7 +395,7 @@ const App: React.FC = () => {
                   <h2 className="text-2xl font-bold text-white mb-4">Coming Soon</h2>
                   <p className="text-neutral-300 max-w-md mx-auto">
                     {state.currentView === 'models' && 'Model-specific usage breakdown and comparison tools.'}
-                    {state.currentView === 'about' && 'Learn more about Claude Credits Monitor and its features.'}
+                    {state.currentView === 'about' && 'Learn more about CCTray and its features.'}
                   </p>
                 </div>
               )}

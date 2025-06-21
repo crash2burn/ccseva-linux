@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Sandbox - Required for all child processes -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	
+	<!-- Inherit parent entitlements -->
+	<key>com.apple.security.inherit</key>
+	<true/>
+	
+	<!-- JIT compilation disabled for security -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<false/>
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<false/>
+	<key>com.apple.security.cs.allow-dyld-environment-variables</key>
+	<false/>
+</dict>
+</plist>
