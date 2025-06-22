@@ -366,7 +366,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Quick Actions */}
-      <div className="glass-card p-4">
+      {/* <div className="glass-card p-4">
         <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
         
         <div className="grid grid-cols-2 gap-3">
@@ -384,7 +384,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             Export Data
           </button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
