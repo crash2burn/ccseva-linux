@@ -53,6 +53,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }).format(amount);
   };
 
+  // Calculate time progress through reset cycle (like Python script)
+  const getTimeProgress = (): number => {
+    if (!stats.resetInfo?.timeUntilReset) return 0;
+    
+    // Assuming a 24-hour cycle for daily resets
+    const totalCycleDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const timeElapsed = totalCycleDuration - stats.resetInfo.timeUntilReset;
+    
+    return Math.max(0, Math.min(100, (timeElapsed / totalCycleDuration) * 100));
+  };
+
+  // Format time until reset
+  const formatTimeUntilReset = (): string => {
+    if (!stats.resetInfo?.timeUntilReset) return 'No reset info';
+    
+    const milliseconds = stats.resetInfo.timeUntilReset;
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
   return (
     <div className="space-y-4">
       {/* Hero Section */}
@@ -91,51 +116,105 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        {/* Main Usage Circle */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="relative">
-            <svg width="200" height="200" className="transform -rotate-90">
-              {/* Background circle */}
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.1)"
-                strokeWidth="8"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="100"
-                cy="100"
-                r="90"
-                fill="none"
-                stroke={`url(#gradient-${status})`}
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 90}`}
-                strokeDashoffset={`${2 * Math.PI * 90 * (1 - stats.percentageUsed / 100)}`}
-                className="transition-all duration-1000 ease-out"
-              />
-              <defs>
-                <linearGradient id={`gradient-${status}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor={status === 'critical' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#10b981'} />
-                  <stop offset="100%" stopColor={status === 'critical' ? '#dc2626' : status === 'warning' ? '#d97706' : '#059669'} />
-                </linearGradient>
-              </defs>
-            </svg>
-            
-            {/* Center content */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">
-                  {Math.round(stats.percentageUsed)}%
+        {/* Dual Progress Display - Token and Time */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Token Usage Circle */}
+          <div className="flex items-center justify-center">
+            <div className="relative">
+              <svg width="180" height="180" className="transform -rotate-90">
+                {/* Background circle */}
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="75"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="8"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="75"
+                  fill="none"
+                  stroke={`url(#gradient-token-${status})`}
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 75}`}
+                  strokeDashoffset={`${2 * Math.PI * 75 * (1 - stats.percentageUsed / 100)}`}
+                  className="transition-all duration-1000 ease-out"
+                />
+                <defs>
+                  <linearGradient id={`gradient-token-${status}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor={status === 'critical' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#10b981'} />
+                    <stop offset="100%" stopColor={status === 'critical' ? '#dc2626' : status === 'warning' ? '#d97706' : '#059669'} />
+                  </linearGradient>
+                </defs>
+              </svg>
+              
+              {/* Center content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {Math.round(stats.percentageUsed)}%
+                  </div>
+                  <div className="text-sm text-neutral-400 uppercase tracking-wide">
+                    🟢 Tokens
+                  </div>
+                  <div className="text-xs text-neutral-500 mt-1">
+                    {getStatusIcon()} {status}
+                  </div>
                 </div>
-                <div className="text-sm text-neutral-400 uppercase tracking-wide">
-                  Used Today
-                </div>
-                <div className="text-xs text-neutral-500 mt-1">
-                  {getStatusIcon()} {status.toUpperCase()}
+              </div>
+            </div>
+          </div>
+
+          {/* Time Progress Circle */}
+          <div className="flex items-center justify-center">
+            <div className="relative">
+              <svg width="180" height="180" className="transform -rotate-90">
+                {/* Background circle */}
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="75"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeWidth="8"
+                />
+                {/* Time progress circle */}
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="75"
+                  fill="none"
+                  stroke="url(#gradient-time)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 75}`}
+                  strokeDashoffset={`${2 * Math.PI * 75 * (1 - getTimeProgress() / 100)}`}
+                  className="transition-all duration-1000 ease-out"
+                />
+                <defs>
+                  <linearGradient id="gradient-time" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              
+              {/* Center content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {Math.round(getTimeProgress())}%
+                  </div>
+                  <div className="text-sm text-neutral-400 uppercase tracking-wide">
+                    ⏰ Time
+                  </div>
+                  <div className="text-xs text-neutral-500 mt-1">
+                    {formatTimeUntilReset()}
+                  </div>
                 </div>
               </div>
             </div>

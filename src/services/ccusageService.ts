@@ -8,6 +8,7 @@ import {
   UserConfiguration 
 } from '../types/usage.js';
 import { ResetTimeService } from './resetTimeService.js';
+import { SessionTracker } from './sessionTracker.js';
 import { loadSessionBlockData, loadDailyUsageData } from 'ccusage/data-loader';
 
 interface SessionBlock {
@@ -34,12 +35,14 @@ export class CCUsageService {
   private lastUpdate: number = 0;
   private readonly CACHE_DURATION = 3000; // 3 seconds like Python script
   private resetTimeService: ResetTimeService;
+  private sessionTracker: SessionTracker;
   private historicalBlocks: SessionBlock[] = []; // Store session blocks for analysis
   private currentPlan: 'Pro' | 'Max5' | 'Max20' | 'Custom' = 'Pro';
   private detectedTokenLimit: number = 7000;
 
   constructor() {
     this.resetTimeService = ResetTimeService.getInstance();
+    this.sessionTracker = SessionTracker.getInstance();
   }
 
   static getInstance(): CCUsageService {
@@ -135,6 +138,9 @@ export class CCUsageService {
     const resetInfo = this.resetTimeService.calculateResetInfo();
     const prediction = this.calculatePredictionInfo(tokensUsed, tokenLimit, velocity, resetInfo);
     
+    // Update session tracking with 5-hour rolling windows
+    const sessionTracking = this.sessionTracker.updateFromBlocks(blocks);
+    
     // Use daily data if provided, otherwise convert from blocks
     let processedDailyData: DailyUsage[];
     if (dailyData) {
@@ -183,7 +189,9 @@ export class CCUsageService {
       tokenLimit,
       tokensUsed,
       tokensRemaining: Math.max(0, tokenLimit - tokensUsed),
-      percentageUsed: Math.min(100, (tokensUsed / tokenLimit) * 100)
+      percentageUsed: Math.min(100, (tokensUsed / tokenLimit) * 100),
+      // Enhanced session tracking
+      sessionTracking
     };
   }
 

@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { UsageStats } from './types/usage';
 import { Dashboard } from './components/Dashboard';
 import { Analytics } from './components/Analytics';
+import { LiveMonitoring } from './components/LiveMonitoring';
+import { TerminalView } from './components/TerminalView';
 import { NavigationTabs } from './components/NavigationTabs';
 import { SettingsPanel } from './components/SettingsPanel';
 import { NotificationSystem } from './components/NotificationSystem';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
-type ViewType = 'dashboard' | 'analytics' | 'settings';
+type ViewType = 'dashboard' | 'live' | 'analytics' | 'terminal' | 'settings';
 
 interface AppState {
   currentView: ViewType;
@@ -29,6 +31,8 @@ interface AppState {
     theme: 'auto' | 'light' | 'dark';
     notifications: boolean;
     animationsEnabled: boolean;
+    timezone?: string;
+    resetHour?: number;
   };
 }
 
@@ -46,6 +50,8 @@ const App: React.FC = () => {
       theme: 'auto',
       notifications: true,
       animationsEnabled: true,
+      timezone: 'America/Los_Angeles',
+      resetHour: 0,
     },
   });
 
@@ -223,7 +229,15 @@ const App: React.FC = () => {
             break;
           case '2':
             event.preventDefault();
+            navigateTo('live');
+            break;
+          case '3':
+            event.preventDefault();
             navigateTo('analytics');
+            break;
+          case '4':
+            event.preventDefault();
+            navigateTo('terminal');
             break;
           case ',':
             event.preventDefault();
@@ -366,10 +380,24 @@ const App: React.FC = () => {
                 />
               )}
 
+              {state.currentView === 'live' && (
+                <LiveMonitoring
+                  stats={currentStats}
+                  onRefresh={refreshData}
+                />
+              )}
+
               {state.currentView === 'analytics' && (
                 <Analytics
                   stats={currentStats}
                   preferences={state.preferences}
+                />
+              )}
+
+              {state.currentView === 'terminal' && (
+                <TerminalView
+                  stats={currentStats}
+                  onRefresh={refreshData}
                 />
               )}
 

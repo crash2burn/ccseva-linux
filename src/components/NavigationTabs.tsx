@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
-type ViewType = 'dashboard' | 'analytics' | 'settings';
+type ViewType = 'dashboard' | 'live' | 'analytics' | 'terminal' | 'settings';
 
 interface NavigationTabsProps {
   currentView: ViewType;
@@ -21,6 +21,18 @@ const BarChartIcon = () => (
   </svg>
 );
 
+const LiveIcon = () => (
+  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  </svg>
+);
+
+const TerminalIcon = () => (
+  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3" />
+  </svg>
+);
+
 const tabs = [
   {
     id: 'dashboard' as ViewType,
@@ -29,10 +41,22 @@ const tabs = [
     description: 'Overview and quick stats'
   },
   {
+    id: 'live' as ViewType,
+    name: 'Live',
+    icon: LiveIcon,
+    description: 'Real-time monitoring'
+  },
+  {
     id: 'analytics' as ViewType,
     name: 'Analytics', 
     icon: BarChartIcon,
     description: 'Usage trends and insights'
+  },
+  {
+    id: 'terminal' as ViewType,
+    name: 'Terminal',
+    icon: TerminalIcon,
+    description: 'Terminal-style interface'
   }
 ];
 
@@ -47,7 +71,7 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
       onValueChange={(value) => onNavigate(value as ViewType)}
       className={className}
     >
-      <TabsList className="grid w-full grid-cols-2 h-8">
+      <TabsList className="grid w-full grid-cols-4 h-8">
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
           return (

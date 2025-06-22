@@ -62,6 +62,7 @@ export interface UsageStats {
   tokensUsed: number;
   tokensRemaining: number;
   percentageUsed: number;
+  sessionTracking?: SessionTracking; // 5-hour rolling session tracking
   // Enhanced features
   enhancedResetInfo?: {
     nextResetTime: string;
@@ -117,6 +118,41 @@ export interface UserConfiguration {
   customTokenLimit?: number; // for custom plans
 }
 
+export interface SessionInfo {
+  id: string;
+  startTime: Date;
+  endTime?: Date;
+  isActive: boolean;
+  isGap: boolean;
+  tokensUsed: number;
+  duration: number; // milliseconds
+  models: string[];
+  costUSD: number;
+  sessionType: 'active' | 'completed' | 'gap';
+}
+
+export interface SessionWindow {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number; // 5 hours in milliseconds
+  sessions: SessionInfo[];
+  totalTokens: number;
+  totalCost: number;
+  isComplete: boolean;
+}
+
+export interface SessionTracking {
+  currentSession: SessionInfo | null;
+  activeWindow: SessionWindow;
+  recentSessions: SessionInfo[];
+  sessionHistory: SessionWindow[];
+  windowDuration: number; // 5 hours in milliseconds
+  lastActivity: Date;
+  sessionsInWindow: number;
+  averageSessionLength: number;
+}
+
 export interface MenuBarData {
   tokensUsed: number;
   tokenLimit: number;
@@ -125,4 +161,5 @@ export interface MenuBarData {
   cost: number;
   timeUntilReset?: string; // formatted time until reset
   resetInfo?: ResetTimeInfo; // detailed reset information
+  sessionTracking?: SessionTracking; // 5-hour rolling session tracking
 }
