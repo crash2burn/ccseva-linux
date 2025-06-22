@@ -20,17 +20,60 @@ export interface DailyUsage {
   };
 }
 
+export interface ResetTimeInfo {
+  nextResetTime: string; // ISO string of next reset
+  timeUntilReset: number; // milliseconds until reset
+  resetHour: number; // hour when reset occurs (0-23)
+  timezone: string; // timezone identifier (e.g., 'America/Los_Angeles')
+  percentUntilReset: number; // percentage of billing cycle completed (0-100)
+  daysInCycle: number; // total days in current billing cycle
+  daysSinceReset: number; // days elapsed since last reset
+}
+
+export interface VelocityInfo {
+  current: number; // current tokens per hour
+  average24h: number; // 24-hour rolling average tokens per hour
+  average7d: number; // 7-day average tokens per hour
+  trend: 'increasing' | 'decreasing' | 'stable'; // trend direction
+  trendPercent: number; // percentage change from previous period
+  peakHour: number; // hour of day with highest usage (0-23)
+  isAccelerating: boolean; // true if usage rate is increasing
+}
+
+export interface PredictionInfo {
+  depletionTime: string | null; // predicted depletion time
+  confidence: number; // confidence level 0-100
+  daysRemaining: number; // estimated days until depletion
+  recommendedDailyLimit: number; // suggested daily token limit
+  onTrackForReset: boolean; // will tokens last until reset
+}
+
 export interface UsageStats {
   today: DailyUsage;
   thisWeek: DailyUsage[];
   thisMonth: DailyUsage[];
-  burnRate: number; // tokens per hour
-  predictedDepleted: string | null; // when tokens will run out
+  burnRate: number; // tokens per hour (legacy, use velocity.current)
+  velocity: VelocityInfo; // enhanced burn rate analysis
+  prediction: PredictionInfo; // intelligent predictions
+  resetInfo: ResetTimeInfo; // reset time tracking
+  predictedDepleted: string | null; // when tokens will run out (legacy)
   currentPlan: 'Pro' | 'Max5' | 'Max20' | 'Custom';
   tokenLimit: number;
   tokensUsed: number;
   tokensRemaining: number;
   percentageUsed: number;
+}
+
+export interface UserConfiguration {
+  resetHour: number; // hour when tokens reset (0-23)
+  timezone: string; // user's timezone
+  updateInterval: number; // milliseconds between updates
+  warningThresholds: {
+    low: number; // percentage for first warning
+    high: number; // percentage for critical warning
+  };
+  plan: 'Pro' | 'Max5' | 'Max20' | 'Custom' | 'auto'; // 'auto' for auto-detection
+  customTokenLimit?: number; // for custom plans
 }
 
 export interface MenuBarData {
@@ -39,4 +82,6 @@ export interface MenuBarData {
   percentageUsed: number;
   status: 'safe' | 'warning' | 'critical';
   cost: number;
+  timeUntilReset?: string; // formatted time until reset
+  resetInfo?: ResetTimeInfo; // detailed reset information
 }
