@@ -15,7 +15,7 @@ import {
   getDaysInMonth
 } from 'date-fns';
 import { toZonedTime, fromZonedTime, format as formatTz } from 'date-fns-tz';
-import { ResetTimeInfo, UserConfiguration } from '../types/usage';
+import { ResetTimeInfo, UserConfiguration } from '../types/usage.js';
 
 export class ResetTimeService {
   private static instance: ResetTimeService;

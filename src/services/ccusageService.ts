@@ -6,16 +6,37 @@ import {
   PredictionInfo, 
   ResetTimeInfo,
   UserConfiguration 
-} from '../types/usage';
-import { ResetTimeService } from './resetTimeService';
+} from '../types/usage.js';
+import { ResetTimeService } from './resetTimeService.js';
+import { loadSessionBlockData, loadDailyUsageData } from 'ccusage/data-loader';
+
+interface SessionBlock {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  actualEndTime?: Date;
+  isActive: boolean;
+  isGap?: boolean;
+  entries: any[];
+  tokenCounts: {
+    inputTokens: number;
+    outputTokens: number;
+    cacheCreationInputTokens: number;
+    cacheReadInputTokens: number;
+  };
+  costUSD: number;
+  models: string[];
+}
 
 export class CCUsageService {
   private static instance: CCUsageService;
   private cachedStats: UsageStats | null = null;
   private lastUpdate: number = 0;
-  private readonly CACHE_DURATION = 30000; // 30 seconds
+  private readonly CACHE_DURATION = 3000; // 3 seconds like Python script
   private resetTimeService: ResetTimeService;
-  private historicalData: any[] = []; // Store historical data for trend analysis
+  private historicalBlocks: SessionBlock[] = []; // Store session blocks for analysis
+  private currentPlan: 'Pro' | 'Max5' | 'Max20' | 'Custom' = 'Pro';
+  private detectedTokenLimit: number = 7000;
 
   constructor() {
     this.resetTimeService = ResetTimeService.getInstance();
@@ -30,6 +51,9 @@ export class CCUsageService {
 
   updateConfiguration(config: Partial<UserConfiguration>): void {
     this.resetTimeService.updateConfiguration(config);
+    if (config.plan) {
+      this.currentPlan = config.plan === 'auto' ? 'Custom' : config.plan;
+    }
     // Clear cache to force recalculation with new config
     this.cachedStats = null;
   }
@@ -43,14 +67,27 @@ export class CCUsageService {
     }
 
     try {
-      // Get daily usage data using the ccusage data-loader API
-      const { loadDailyUsageData } = await import('ccusage/data-loader');
-      const dailyData = await loadDailyUsageData();
+      // Get both session blocks and daily data for complete information
+      const [blocks, dailyData] = await Promise.all([
+        loadSessionBlockData({
+          sessionDurationHours: 5, // Claude uses 5-hour sessions
+          mode: 'calculate' // Calculate costs from tokens for accuracy
+        }),
+        loadDailyUsageData({
+          mode: 'calculate' // Calculate costs from tokens
+        })
+      ]);
       
-      const stats = this.parseUsageData(dailyData);
+      if (!blocks || blocks.length === 0) {
+        console.error('No blocks data received');
+        return this.getMockStats();
+      }
+      
+      const stats = this.parseBlocksData(blocks, dailyData);
       
       this.cachedStats = stats;
       this.lastUpdate = now;
+      this.historicalBlocks = blocks;
       
       return stats;
     } catch (error) {
@@ -60,6 +97,266 @@ export class CCUsageService {
       // Return mock data for development/testing
       return this.getMockStats();
     }
+  }
+
+  /**
+   * Parse blocks data similar to Python implementation
+   */
+  private parseBlocksData(blocks: SessionBlock[], dailyData?: any[]): UsageStats {
+    // Find active block
+    const activeBlock = blocks.find(block => block.isActive && !block.isGap);
+    
+    if (!activeBlock) {
+      console.log('No active session found');
+      return this.getDefaultStats();
+    }
+    
+    // Get tokens from active session
+    const tokensUsed = this.getTotalTokensFromBlock(activeBlock);
+    
+    // Auto-detect token limit from highest previous session if needed
+    if (this.currentPlan === 'Custom' || (this.currentPlan === 'Pro' && tokensUsed > 7000)) {
+      this.detectedTokenLimit = this.getMaxTokensFromBlocks(blocks);
+      if (tokensUsed > 7000 && this.currentPlan === 'Pro') {
+        // Auto-switch to custom like Python script
+        this.currentPlan = 'Custom';
+      }
+    } else {
+      this.detectedTokenLimit = this.getTokenLimit(this.currentPlan);
+    }
+    
+    const tokenLimit = this.detectedTokenLimit;
+    
+    // Calculate burn rate from last hour across all sessions
+    const burnRate = this.calculateHourlyBurnRate(blocks);
+    
+    // Calculate enhanced metrics
+    const velocity = this.calculateVelocityFromBlocks(blocks, burnRate);
+    const resetInfo = this.resetTimeService.calculateResetInfo();
+    const prediction = this.calculatePredictionInfo(tokensUsed, tokenLimit, velocity, resetInfo);
+    
+    // Use daily data if provided, otherwise convert from blocks
+    let processedDailyData: DailyUsage[];
+    if (dailyData) {
+      // Process the daily data from ccusage, filtering out synthetic models
+      processedDailyData = dailyData.map(day => ({
+        date: day.date,
+        totalTokens: day.inputTokens + day.outputTokens + day.cacheCreationTokens + day.cacheReadTokens,
+        totalCost: day.totalCost,
+        models: day.modelBreakdowns
+          .filter((mb: any) => mb.modelName !== '<synthetic>')
+          .reduce((acc: any, mb: any) => {
+            acc[mb.modelName] = {
+              tokens: mb.inputTokens + mb.outputTokens + mb.cacheCreationTokens + mb.cacheReadTokens,
+              cost: mb.cost
+            };
+            return acc;
+          }, {})
+      }));
+    } else {
+      processedDailyData = this.convertBlocksToDailyUsage(blocks);
+    }
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayData = processedDailyData.find(d => d.date === todayStr) || this.getEmptyDailyUsage();
+    
+    return {
+      today: todayData,
+      thisWeek: processedDailyData.filter(d => {
+        const date = new Date(d.date);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return date >= weekAgo;
+      }),
+      thisMonth: processedDailyData.filter(d => {
+        const date = new Date(d.date);
+        const monthAgo = new Date();
+        monthAgo.setDate(monthAgo.getDate() - 30);
+        return date >= monthAgo;
+      }),
+      burnRate,
+      velocity,
+      prediction,
+      resetInfo,
+      predictedDepleted: prediction.depletionTime,
+      currentPlan: this.currentPlan,
+      tokenLimit,
+      tokensUsed,
+      tokensRemaining: Math.max(0, tokenLimit - tokensUsed),
+      percentageUsed: Math.min(100, (tokensUsed / tokenLimit) * 100)
+    };
+  }
+
+  /**
+   * Get total tokens from a session block
+   */
+  private getTotalTokensFromBlock(block: SessionBlock): number {
+    const counts = block.tokenCounts;
+    return counts.inputTokens + counts.outputTokens + 
+           counts.cacheCreationInputTokens + counts.cacheReadInputTokens;
+  }
+
+  /**
+   * Get maximum tokens from all previous blocks (like Python's get_token_limit)
+   */
+  private getMaxTokensFromBlocks(blocks: SessionBlock[]): number {
+    let maxTokens = 0;
+    
+    for (const block of blocks) {
+      if (!block.isGap && !block.isActive) {
+        const totalTokens = this.getTotalTokensFromBlock(block);
+        if (totalTokens > maxTokens) {
+          maxTokens = totalTokens;
+        }
+      }
+    }
+    
+    // Return the highest found, or default to pro if none found
+    return maxTokens > 0 ? maxTokens : 7000;
+  }
+
+  /**
+   * Calculate hourly burn rate based on Python implementation
+   */
+  private calculateHourlyBurnRate(blocks: SessionBlock[]): number {
+    if (!blocks || blocks.length === 0) return 0;
+    
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    let totalTokens = 0;
+    
+    for (const block of blocks) {
+      if (block.isGap) continue;
+      
+      const startTime = block.startTime;
+      
+      // Determine session end time
+      let sessionEnd: Date;
+      if (block.isActive) {
+        sessionEnd = now;
+      } else if (block.actualEndTime) {
+        sessionEnd = block.actualEndTime;
+      } else {
+        sessionEnd = block.endTime;
+      }
+      
+      // Skip if session ended before the last hour
+      if (sessionEnd < oneHourAgo) continue;
+      
+      // Calculate overlap with last hour
+      const sessionStartInHour = startTime > oneHourAgo ? startTime : oneHourAgo;
+      const sessionEndInHour = sessionEnd < now ? sessionEnd : now;
+      
+      if (sessionEndInHour <= sessionStartInHour) continue;
+      
+      // Calculate portion of tokens used in the last hour
+      const totalSessionDuration = (sessionEnd.getTime() - startTime.getTime()) / (1000 * 60); // minutes
+      const hourDuration = (sessionEndInHour.getTime() - sessionStartInHour.getTime()) / (1000 * 60); // minutes
+      
+      if (totalSessionDuration > 0) {
+        const blockTotalTokens = this.getTotalTokensFromBlock(block);
+        const tokensInHour = blockTotalTokens * (hourDuration / totalSessionDuration);
+        totalTokens += tokensInHour;
+      }
+    }
+    
+    // Return tokens per minute like Python script
+    return totalTokens / 60;
+  }
+
+  /**
+   * Convert blocks to daily usage for backward compatibility
+   */
+  private convertBlocksToDailyUsage(blocks: SessionBlock[]): DailyUsage[] {
+    const dailyMap = new Map<string, DailyUsage>();
+    
+    for (const block of blocks) {
+      if (block.isGap) continue;
+      
+      const date = block.startTime.toISOString().split('T')[0];
+      
+      if (!dailyMap.has(date)) {
+        dailyMap.set(date, {
+          date,
+          totalTokens: 0,
+          totalCost: 0,
+          models: {}
+        });
+      }
+      
+      const daily = dailyMap.get(date)!;
+      const blockTokens = this.getTotalTokensFromBlock(block);
+      daily.totalTokens += blockTokens;
+      daily.totalCost += block.costUSD;
+      
+      // Aggregate model usage, filtering out synthetic
+      const realModels = block.models.filter(m => m !== '<synthetic>');
+      for (const model of realModels) {
+        if (!daily.models[model]) {
+          daily.models[model] = { tokens: 0, cost: 0 };
+        }
+        // Approximate token distribution across models
+        const modelTokens = Math.floor(blockTokens / realModels.length);
+        const modelCost = block.costUSD / realModels.length;
+        daily.models[model].tokens += modelTokens;
+        daily.models[model].cost += modelCost;
+      }
+    }
+    
+    // Convert to array and sort by date
+    return Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  /**
+   * Calculate velocity info from blocks
+   */
+  private calculateVelocityFromBlocks(blocks: SessionBlock[], currentBurnRate: number): VelocityInfo {
+    const now = new Date();
+    
+    // Calculate 24-hour average
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const last24HourBlocks = blocks.filter(b => !b.isGap && b.startTime >= oneDayAgo);
+    let tokens24h = 0;
+    for (const block of last24HourBlocks) {
+      tokens24h += this.getTotalTokensFromBlock(block);
+    }
+    const average24h = tokens24h / 24; // tokens per hour
+    
+    // Calculate 7-day average
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const last7DayBlocks = blocks.filter(b => !b.isGap && b.startTime >= oneWeekAgo);
+    let tokens7d = 0;
+    for (const block of last7DayBlocks) {
+      tokens7d += this.getTotalTokensFromBlock(block);
+    }
+    const average7d = tokens7d / (7 * 24); // tokens per hour
+    
+    // Trend analysis
+    const trendPercent = average24h > 0 ? ((currentBurnRate * 60 - average24h) / average24h) * 100 : 0;
+    let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
+    
+    if (Math.abs(trendPercent) > 15) {
+      trend = trendPercent > 0 ? 'increasing' : 'decreasing';
+    }
+    
+    return {
+      current: currentBurnRate * 60, // convert to tokens per hour
+      average24h,
+      average7d,
+      trend,
+      trendPercent: Math.round(trendPercent * 10) / 10,
+      peakHour: 14, // Simplified for now
+      isAccelerating: trend === 'increasing' && trendPercent > 20
+    };
+  }
+
+  private getEmptyDailyUsage(): DailyUsage {
+    return {
+      date: new Date().toISOString().split('T')[0],
+      totalTokens: 0,
+      totalCost: 0,
+      models: {}
+    };
   }
 
   async getMenuBarData(): Promise<MenuBarData> {
@@ -186,71 +483,6 @@ export class CCUsageService {
     return result;
   }
 
-  private parseUsageData(dailyData: any): UsageStats {
-    try {
-      // The API returns structured data, no need to parse JSON
-      const dailyArray = Array.isArray(dailyData) ? dailyData : [];
-      
-      // Get today's data from the daily array
-      const todayStr = new Date().toISOString().split('T')[0];
-      const todayArray = dailyArray.filter((item: any) => item.date === todayStr);
-      
-      // Calculate totals
-      const totalTokens = dailyArray.reduce((sum: number, item: any) => {
-        return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
-      }, 0);
-      
-      const totalCost = dailyArray.reduce((sum: number, item: any) => {
-        return sum + (item.totalCost || item.cost || 0);
-      }, 0);
-      
-      // Today's usage
-      const todayTokens = todayArray.reduce((sum: number, item: any) => {
-        return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
-      }, 0);
-      
-      const todayCost = todayArray.reduce((sum: number, item: any) => {
-        return sum + (item.totalCost || item.cost || 0);
-      }, 0);
-
-      // Determine plan and limits based on current month usage
-      const currentPlan = this.detectPlan(totalTokens);
-      const tokenLimit = this.getTokenLimit(currentPlan);
-      
-      // Calculate enhanced metrics
-      const burnRate = this.calculateBurnRate(dailyArray);
-      const velocity = this.calculateVelocityInfo(dailyArray);
-      const resetInfo = this.resetTimeService.calculateResetInfo();
-      const prediction = this.calculatePredictionInfo(totalTokens, tokenLimit, velocity, resetInfo);
-      
-      const todayDate = new Date().toISOString().split('T')[0];
-      
-      return {
-        today: {
-          date: todayDate,
-          totalTokens: todayTokens,
-          totalCost: todayCost,
-          models: this.groupByModel(todayArray)
-        },
-        thisWeek: this.groupByDay(dailyArray, 7),
-        thisMonth: this.groupByDay(dailyArray, 30),
-        burnRate, // legacy field
-        velocity,
-        prediction,
-        resetInfo,
-        predictedDepleted: prediction.depletionTime, // legacy field
-        currentPlan,
-        tokenLimit,
-        tokensUsed: totalTokens,
-        tokensRemaining: Math.max(0, tokenLimit - totalTokens),
-        percentageUsed: Math.min(100, (totalTokens / tokenLimit) * 100)
-      };
-    } catch (error) {
-      console.error('Error parsing usage data:', error);
-      return this.getMockStats();
-    }
-  }
-
   private detectPlan(totalTokens: number): 'Pro' | 'Max5' | 'Max20' | 'Custom' {
     if (totalTokens <= 7000) return 'Pro';
     if (totalTokens <= 35000) return 'Max5';
@@ -265,20 +497,6 @@ export class CCUsageService {
       case 'Max20': return 140000;
       default: return 500000; // Custom high limit
     }
-  }
-
-  private calculateBurnRate(data: any[]): number {
-    const last24Hours = data.filter(item => {
-      const itemDate = new Date(item.date);
-      const now = new Date();
-      const hoursDiff = (now.getTime() - itemDate.getTime()) / (1000 * 60 * 60);
-      return hoursDiff <= 24;
-    });
-
-    const totalTokens = last24Hours.reduce((sum, item) => {
-      return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
-    }, 0);
-    return Math.round(totalTokens / 24); // tokens per hour
   }
 
   private calculatePredictedDepletion(tokensUsed: number, tokenLimit: number, burnRate: number): string | null {
@@ -387,6 +605,23 @@ export class CCUsageService {
       tokensRemaining: 7000,
       percentageUsed: 0
     };
+  }
+
+  /**
+   * Calculate burn rate from daily data (for legacy compatibility)
+   */
+  private calculateBurnRate(data: any[]): number {
+    const last24Hours = data.filter(item => {
+      const itemDate = new Date(item.date);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - itemDate.getTime()) / (1000 * 60 * 60);
+      return hoursDiff <= 24;
+    });
+
+    const totalTokens = last24Hours.reduce((sum, item) => {
+      return sum + (item.inputTokens || 0) + (item.outputTokens || 0) + (item.cacheCreationTokens || 0);
+    }, 0);
+    return Math.round(totalTokens / 24); // tokens per hour
   }
 
   /**

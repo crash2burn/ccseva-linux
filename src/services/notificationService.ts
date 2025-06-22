@@ -1,5 +1,5 @@
 import { Notification } from 'electron';
-import { MenuBarData } from '../types/usage';
+import { MenuBarData } from '../types/usage.js';
 
 export class NotificationService {
   private static instance: NotificationService;
