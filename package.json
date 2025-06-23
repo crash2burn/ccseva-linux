@@ -1,7 +1,7 @@
 {
-  "name": "claude-monitor",
+  "name": "ccdeva",
   "version": "1.0.0",
-  "description": "Claude Monitor - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
+  "description": "CCDeva - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
@@ -16,7 +16,14 @@
     "prepare:mas": "npm run build && npm run check:icons && npm run check:entitlements",
     "check:icons": "test -f assets/icon.icns || echo 'WARNING: icon.icns not found. See assets/ICON_README.md'",
     "check:entitlements": "test -f entitlements.mas.plist && test -f entitlements.mas.inherit.plist || echo 'ERROR: Entitlements files missing'",
-    "validate:mas": "npm run check:icons && npm run check:entitlements && echo 'MAS validation passed'"
+    "validate:mas": "npm run check:icons && npm run check:entitlements && echo 'MAS validation passed'",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
+    "format": "biome format --write ./src *.ts *.js",
+    "format:check": "biome format ./src *.ts *.js",
+    "check": "biome check ./src *.ts *.js",
+    "check:fix": "biome check --write ./src *.ts *.js",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "electron",
@@ -29,8 +36,17 @@
   ],
   "author": "Claude Code",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Iamshankhadeep/ccseva.git"
+  },
+  "homepage": "https://github.com/Iamshankhadeep/ccseva#readme",
+  "bugs": {
+    "url": "https://github.com/Iamshankhadeep/ccseva/issues"
+  },
   "type": "module",
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/node": "^24.0.3",
     "concurrently": "^9.1.2",
     "css-loader": "^7.1.2",

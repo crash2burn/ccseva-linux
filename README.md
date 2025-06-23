@@ -1,8 +1,14 @@
-# CCTray 🤖
+# CCDeva 🤖
 
-A beautiful Mac menu bar Electron app for tracking your Claude Code usage in real-time. Monitor token consumption, costs, and usage patterns with an elegant interface.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/release/Iamshankhadeep/ccseva.svg)](https://github.com/Iamshankhadeep/ccseva/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Iamshankhadeep/ccseva/ci.yml?branch=main)](https://github.com/Iamshankhadeep/ccseva/actions)
+[![Downloads](https://img.shields.io/github/downloads/Iamshankhadeep/ccseva/total.svg)](https://github.com/Iamshankhadeep/ccseva/releases)
+[![macOS](https://img.shields.io/badge/macOS-10.15%2B-blue)](https://github.com/Iamshankhadeep/ccseva)
 
-![CCTray](./assets/screenshot.png)
+A beautiful macOS menu bar app for tracking your Claude Code usage in real-time. Monitor token consumption, costs, and usage patterns with an elegant interface.
+
+![CCDeva](./assets/screenshot.png)
 
 ## Features
 
@@ -40,8 +46,8 @@ A beautiful Mac menu bar Electron app for tracking your Claude Code usage in rea
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd cctray
+git clone https://github.com/Iamshankhadeep/ccseva.git
+cd ccseva
 
 # Install dependencies
 npm install
@@ -52,6 +58,15 @@ npm run build
 # Start the app
 npm start
 ```
+
+### Download Pre-built Binaries
+
+Download the latest release from the [GitHub Releases](https://github.com/Iamshankhadeep/ccseva/releases) page:
+
+1. **macOS (Apple Silicon)**: `CCDeva-darwin-arm64.dmg`
+2. **macOS (Intel)**: `CCDeva-darwin-x64.dmg`
+
+Simply download the appropriate DMG file, open it, and drag the app to your Applications folder.
 
 ### Development Mode
 
@@ -117,7 +132,7 @@ Modify notification behavior in `src/services/notificationService.ts`:
 
 ### Project Structure
 ```
-cctray/
+ccseva/
 ├── main.ts              # Electron main process
 ├── preload.ts           # Electron preload script
 ├── src/
@@ -126,6 +141,7 @@ cctray/
 │   ├── types/           # TypeScript definitions
 │   └── styles/          # CSS and styling
 ├── assets/              # Icons and images
+├── .github/             # GitHub workflows and templates
 └── dist/                # Built application
 ```
 
@@ -159,6 +175,13 @@ npm start           # Start Electron app
 npm run electron-dev # Development with hot reload
 npm run pack        # Package app
 npm run dist        # Build and distribute
+
+# Code Quality
+npm run lint        # Run Biome linter
+npm run lint:fix    # Fix linting issues
+npm run format      # Format code with Biome
+npm run format:check # Check code formatting
+npm run type-check  # TypeScript type checking
 ```
 
 ### Adding Features
@@ -218,18 +241,23 @@ DEBUG=true npm start
 
 ## Contributing
 
-### Development Setup
-1. Fork the repository
-2. Create feature branch
-3. Install dependencies
-4. Make changes with tests
-5. Submit pull request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information.
+
+### Quick Start for Contributors
+
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Install dependencies**: `npm install`
+4. **Make your changes**
+5. **Run quality checks**: `npm run check:fix`
+6. **Test your changes**: `npm run build && npm start`
+7. **Submit a pull request**
 
 ### Code Style
 - **TypeScript** - Strict mode enabled
-- **ESLint** - Follow project configuration
-- **Prettier** - Auto-formatting on save
+- **Biome** - Linting and formatting
 - **React** - Functional components with hooks
+- **Conventional Commits** - Clear commit messages
 
 ## License
 

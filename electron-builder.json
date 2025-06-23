@@ -1,6 +1,6 @@
 {
-  "appId": "com.cctray.app",
-  "productName": "Claude Monitor",
+  "appId": "com.ccdeva.app",
+  "productName": "CCDeva",
   "directories": {
     "output": "release"
   },
@@ -27,10 +27,10 @@
     "gatekeeperAssess": false,
     "extendInfo": {
       "LSUIElement": true,
-      "CFBundleDisplayName": "Claude Monitor",
-      "CFBundleName": "Claude Monitor",
-      "CFBundleExecutable": "Claude Monitor",
-      "NSHumanReadableCopyright": "Copyright © 2024 Claude Monitor. All rights reserved.",
+      "CFBundleDisplayName": "CCDeva",
+      "CFBundleName": "CCDeva",
+      "CFBundleExecutable": "CCDeva",
+      "NSHumanReadableCopyright": "Copyright © 2024 CCDeva. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0"
     }
@@ -45,10 +45,10 @@
     "binaries": [],
     "extendInfo": {
       "LSUIElement": true,
-      "CFBundleDisplayName": "Claude Monitor",
-      "CFBundleName": "Claude Monitor",
-      "CFBundleExecutable": "Claude Monitor",
-      "NSHumanReadableCopyright": "Copyright © 2024 Claude Monitor. All rights reserved.",
+      "CFBundleDisplayName": "CCDeva",
+      "CFBundleName": "CCDeva",
+      "CFBundleExecutable": "CCDeva",
+      "NSHumanReadableCopyright": "Copyright © 2024 CCDeva. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0",
       "NSPrivacyAccessedAPITypes": [
@@ -60,7 +60,7 @@
     }
   },
   "dmg": {
-    "title": "Claude Monitor",
+    "title": "CCDeva",
     "icon": "assets/icon.icns"
   },
   "win": {
