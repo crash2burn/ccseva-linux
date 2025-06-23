@@ -24,9 +24,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const getStatusColor = () => {
     switch (status) {
-      case 'critical': return 'from-red-500 to-red-600';
-      case 'warning': return 'from-yellow-500 to-orange-500';
-      default: return 'from-green-500 to-emerald-500';
+      case 'critical': return 'from-red-600 to-red-700';
+      case 'warning': return 'from-orange-500 to-orange-600';
+      default: return 'from-green-600 to-emerald-600';
     }
   };
 
@@ -84,10 +84,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gradient mb-2">
+            <h2 className="text-xl font-bold text-gradient mb-2 font-primary">
               Usage Dashboard
             </h2>
-            <p className="text-neutral-400">
+            <p className="text-neutral-400 text-sm font-primary">
               Real-time monitoring of your Claude API usage
             </p>
           </div>
@@ -155,13 +155,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {/* Center content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-white mb-1">
+                  <div className="text-3xl font-bold text-neutral-100 mb-1 font-primary">
                     {Math.round(stats.percentageUsed)}%
                   </div>
-                  <div className="text-sm text-neutral-400 uppercase tracking-wide">
-                    🟢 Tokens
+                  <div className="text-sm text-neutral-400 uppercase tracking-wide font-primary">
+                    Tokens
                   </div>
-                  <div className="text-xs text-neutral-500 mt-1">
+                  <div className="text-xs text-neutral-500 mt-1 font-primary">
                     {getStatusIcon()} {status}
                   </div>
                 </div>
@@ -197,8 +197,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 />
                 <defs>
                   <linearGradient id="gradient-time" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#3b82f6" />
-                    <stop offset="100%" stopColor="#8b5cf6" />
+                    <stop offset="0%" stopColor="rgba(204, 120, 92, 1)" />
+                    <stop offset="100%" stopColor="rgba(255, 107, 53, 1)" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -206,13 +206,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {/* Center content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-white mb-1">
+                  <div className="text-3xl font-bold text-neutral-100 mb-1 font-primary">
                     {Math.round(getTimeProgress())}%
                   </div>
-                  <div className="text-sm text-neutral-400 uppercase tracking-wide">
-                    ⏰ Time
+                  <div className="text-sm text-neutral-400 uppercase tracking-wide font-primary">
+                    Time
                   </div>
-                  <div className="text-xs text-neutral-500 mt-1">
+                  <div className="text-xs text-neutral-500 mt-1 font-primary">
                     {formatTimeUntilReset()}
                   </div>
                 </div>
@@ -224,31 +224,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Key Metrics Row */}
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-neutral-100 font-primary">
               {formatNumber(stats.tokensUsed)}
             </div>
-            <div className="text-sm text-neutral-400">Tokens Used</div>
-            <div className="text-xs text-neutral-500">
+            <div className="text-sm text-neutral-400 font-primary">Tokens Used</div>
+            <div className="text-xs text-neutral-500 font-primary">
               of {formatNumber(stats.tokenLimit)}
             </div>
           </div>
           
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-neutral-100 font-primary">
               {formatCurrency(stats.today.totalCost)}
             </div>
-            <div className="text-sm text-neutral-400">Cost Today</div>
-            <div className="text-xs text-neutral-500">
+            <div className="text-sm text-neutral-warm-400 font-primary">Cost Today</div>
+            <div className="text-xs text-neutral-500 font-primary">
               {stats.today.totalTokens.toLocaleString()} tokens
             </div>
           </div>
           
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-neutral-100 font-primary">
               {formatNumber(stats.tokensRemaining)}
             </div>
-            <div className="text-sm text-neutral-400">Remaining</div>
-            <div className="text-xs text-neutral-500">
+            <div className="text-sm text-neutral-warm-400 font-primary">Remaining</div>
+            <div className="text-xs text-neutral-500 font-primary">
               {timeRemaining}
             </div>
           </div>
@@ -266,17 +266,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-neutral-100 font-primary">
                 {stats.currentPlan}
               </h3>
-              <p className="text-sm text-neutral-400">Current Plan</p>
+              <p className="text-sm text-neutral-400 font-primary">Current Plan</p>
             </div>
           </div>
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-400">Daily Limit</span>
-              <span className="text-white font-medium">{formatNumber(stats.tokenLimit)}</span>
+              <span className="text-neutral-400 font-primary">Daily Limit</span>
+              <span className="text-neutral-100 font-medium font-primary">{formatNumber(stats.tokenLimit)}</span>
             </div>
             <div className="w-full bg-neutral-800 rounded-full h-2">
               <div 
@@ -290,30 +290,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Burn Rate */}
         <div className="glass-card p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-neutral-100 font-primary">
                 {formatNumber(stats.burnRate)}
               </h3>
-              <p className="text-sm text-neutral-400">Tokens/Hour</p>
+              <p className="text-sm text-neutral-400 font-primary">Tokens/Hour</p>
             </div>
           </div>
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-neutral-400">Depletion Time</span>
-              <span className="text-white font-medium">{timeRemaining}</span>
+              <span className="text-neutral-400 font-primary">Depletion Time</span>
+              <span className="text-neutral-100 font-medium font-primary">{timeRemaining}</span>
             </div>
-            <div className={`px-2 py-1 rounded-full text-xs font-medium text-center ${
+            <div className={`px-2 py-1 rounded-full text-xs font-medium text-center font-primary ${
               stats.burnRate > 1000 
-                ? 'bg-red-500/20 text-red-300' 
+                ? 'bg-red-600/20 text-red-300' 
                 : stats.burnRate > 500 
-                  ? 'bg-yellow-500/20 text-yellow-300'
-                  : 'bg-green-500/20 text-green-300'
+                  ? 'bg-orange-500/20 text-orange-300'
+                  : 'bg-green-600/20 text-green-300'
             }`}>
               {stats.burnRate > 1000 ? 'High Usage' : stats.burnRate > 500 ? 'Moderate Usage' : 'Normal Usage'}
             </div>
