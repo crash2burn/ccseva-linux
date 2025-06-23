@@ -1,6 +1,6 @@
 {
   "appId": "com.cctray.app",
-  "productName": "CCTray",
+  "productName": "Claude Monitor",
   "directories": {
     "output": "release"
   },
@@ -27,10 +27,10 @@
     "gatekeeperAssess": false,
     "extendInfo": {
       "LSUIElement": true,
-      "CFBundleDisplayName": "CCTray",
-      "CFBundleName": "CCTray",
-      "CFBundleExecutable": "CCTray",
-      "NSHumanReadableCopyright": "Copyright © 2024 CCTray. All rights reserved.",
+      "CFBundleDisplayName": "Claude Monitor",
+      "CFBundleName": "Claude Monitor",
+      "CFBundleExecutable": "Claude Monitor",
+      "NSHumanReadableCopyright": "Copyright © 2024 Claude Monitor. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0"
     }
@@ -45,10 +45,10 @@
     "binaries": [],
     "extendInfo": {
       "LSUIElement": true,
-      "CFBundleDisplayName": "CCTray",
-      "CFBundleName": "CCTray",
-      "CFBundleExecutable": "CCTray",
-      "NSHumanReadableCopyright": "Copyright © 2024 CCTray. All rights reserved.",
+      "CFBundleDisplayName": "Claude Monitor",
+      "CFBundleName": "Claude Monitor",
+      "CFBundleExecutable": "Claude Monitor",
+      "NSHumanReadableCopyright": "Copyright © 2024 Claude Monitor. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0",
       "NSPrivacyAccessedAPITypes": [
@@ -60,7 +60,7 @@
     }
   },
   "dmg": {
-    "title": "CCTray",
+    "title": "Claude Monitor",
     "icon": "assets/icon.icns"
   },
   "win": {

@@ -1,7 +1,7 @@
 {
-  "name": "cctray",
+  "name": "claude-monitor",
   "version": "1.0.0",
-  "description": "CCTray - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
+  "description": "Claude Monitor - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
