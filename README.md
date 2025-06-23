@@ -1,4 +1,4 @@
-# CCDeva 🤖
+# CCSeva 🤖
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub release](https://img.shields.io/github/release/Iamshankhadeep/ccseva.svg)](https://github.com/Iamshankhadeep/ccseva/releases)
@@ -8,7 +8,7 @@
 
 A beautiful macOS menu bar app for tracking your Claude Code usage in real-time. Monitor token consumption, costs, and usage patterns with an elegant interface.
 
-![CCDeva](./assets/screenshot.png)
+![CCSeva](./assets/screenshot.png)
 
 ## Features
 
@@ -63,8 +63,8 @@ npm start
 
 Download the latest release from the [GitHub Releases](https://github.com/Iamshankhadeep/ccseva/releases) page:
 
-1. **macOS (Apple Silicon)**: `CCDeva-darwin-arm64.dmg`
-2. **macOS (Intel)**: `CCDeva-darwin-x64.dmg`
+1. **macOS (Apple Silicon)**: `CCSeva-darwin-arm64.dmg`
+2. **macOS (Intel)**: `CCSeva-darwin-x64.dmg`
 
 Simply download the appropriate DMG file, open it, and drag the app to your Applications folder.
 
@@ -85,7 +85,7 @@ npm run dist
 ## Usage
 
 ### First Launch
-1. **Start the app** - The CCTray icon appears in your menu bar
+1. **Start the app** - The CCSeva icon appears in your menu bar
 2. **Click the icon** - View detailed usage statistics in the dropdown
 3. **Right-click** - Access context menu with refresh and quit options
 

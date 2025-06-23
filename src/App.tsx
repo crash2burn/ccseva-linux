@@ -324,7 +324,7 @@ const App: React.FC = () => {
                   </div>
                   <div>
                     <h1 className="text-lg font-bold text-gradient mb-1">
-                      CCTray
+                      CCSeva
                     </h1>
                     <p className="text-xs text-neutral-400">
                       Track API usage

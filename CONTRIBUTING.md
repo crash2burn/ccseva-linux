@@ -1,6 +1,6 @@
-# Contributing to CCDeva
+# Contributing to CCSeva
 
-Thank you for your interest in contributing to CCDeva! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to CCSeva! This document provides guidelines and information for contributors.
 
 ## Development Setup
 
@@ -190,4 +190,4 @@ Don't hesitate to ask questions in GitHub Issues or Discussions. We're here to h
 
 ---
 
-Thank you for contributing to CCDeva! 🚀
+Thank you for contributing to CCSeva! 🚀

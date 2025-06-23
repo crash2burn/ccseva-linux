@@ -1,7 +1,7 @@
 {
-  "name": "ccdeva",
+  "name": "ccseva",
   "version": "1.0.0",
-  "description": "CCDeva - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
+  "description": "CCSeva - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",

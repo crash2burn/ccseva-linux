@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CCDeva will be documented in this file.
+All notable changes to CCSeva will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Version 1.0.0 - Initial Release
 
-This is the first stable release of CCDeva, providing a comprehensive solution for tracking Claude Code usage on macOS. The application has been thoroughly tested and optimized for performance and user experience.
+This is the first stable release of CCSeva, providing a comprehensive solution for tracking Claude Code usage on macOS. The application has been thoroughly tested and optimized for performance and user experience.
 
 **Key Highlights:**
 - Real-time token usage monitoring in your menu bar

@@ -1,6 +1,6 @@
 {
-  "appId": "com.ccdeva.app",
-  "productName": "CCDeva",
+  "appId": "com.ccseva.app",
+  "productName": "CCSeva",
   "directories": {
     "output": "release"
   },
@@ -27,10 +27,10 @@
     "gatekeeperAssess": false,
     "extendInfo": {
       "LSUIElement": true,
-      "CFBundleDisplayName": "CCDeva",
-      "CFBundleName": "CCDeva",
-      "CFBundleExecutable": "CCDeva",
-      "NSHumanReadableCopyright": "Copyright © 2024 CCDeva. All rights reserved.",
+      "CFBundleDisplayName": "CCSeva",
+      "CFBundleName": "CCSeva",
+      "CFBundleExecutable": "CCSeva",
+      "NSHumanReadableCopyright": "Copyright © 2024 CCSeva. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0"
     }
@@ -45,10 +45,10 @@
     "binaries": [],
     "extendInfo": {
       "LSUIElement": true,
-      "CFBundleDisplayName": "CCDeva",
-      "CFBundleName": "CCDeva",
-      "CFBundleExecutable": "CCDeva",
-      "NSHumanReadableCopyright": "Copyright © 2024 CCDeva. All rights reserved.",
+      "CFBundleDisplayName": "CCSeva",
+      "CFBundleName": "CCSeva",
+      "CFBundleExecutable": "CCSeva",
+      "NSHumanReadableCopyright": "Copyright © 2024 CCSeva. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0",
       "NSPrivacyAccessedAPITypes": [
@@ -60,7 +60,7 @@
     }
   },
   "dmg": {
-    "title": "CCDeva",
+    "title": "CCSeva",
     "icon": "assets/icon.icns"
   },
   "win": {

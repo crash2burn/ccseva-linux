@@ -7,7 +7,7 @@ import { NotificationService } from './src/services/notificationService.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-class CCTrayApp {
+class CCSevaApp {
   private tray: Tray | null = null;
   private window: BrowserWindow | null = null;
   private usageService: CCUsageService;
@@ -48,7 +48,7 @@ class CCTrayApp {
     const emptyIcon = nativeImage.createEmpty();
     
     this.tray = new Tray(emptyIcon);
-    this.tray.setToolTip('CCTray');
+    this.tray.setToolTip('CCSeva');
     
     // Update tray title with usage percentage
     this.updateTrayTitle();
@@ -208,5 +208,5 @@ class CCTrayApp {
 }
 
 // Initialize the app
-const ccTrayApp = new CCTrayApp();
-ccTrayApp.initialize().catch(console.error);
+const ccSevaApp = new CCSevaApp();
+ccSevaApp.initialize().catch(console.error);

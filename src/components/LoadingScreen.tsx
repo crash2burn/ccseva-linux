@@ -20,7 +20,7 @@ export const LoadingScreen: React.FC = () => {
 
         {/* Loading Text */}
         <h2 className="text-white text-xl font-bold mb-3 text-shadow">
-          CCTray
+          CCSeva
         </h2>
         <p className="text-white/80 text-sm mb-6">
           Initializing usage tracking...

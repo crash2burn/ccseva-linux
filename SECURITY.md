@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We actively support the following versions of CCDeva with security updates:
+We actively support the following versions of CCSeva with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -41,7 +41,7 @@ When reporting a security vulnerability, please include:
 
 ### Application Security
 
-CCDeva implements several security measures:
+CCSeva implements several security measures:
 
 - **Sandboxed Renderer**: Electron renderer process runs in a sandbox
 - **Context Isolation**: Preload scripts use context isolation
@@ -138,7 +138,7 @@ Security updates should be installed immediately:
 
 ```bash
 # Update to latest version
-npm install -g ccdeva@latest
+npm install -g ccseva@latest
 
 # Or download from GitHub releases
 # https://github.com/Iamshankhadeep/ccseva/releases
@@ -153,4 +153,4 @@ For security-related questions or concerns:
 
 ---
 
-Thank you for helping keep CCDeva secure! 🔒
+Thank you for helping keep CCSeva secure! 🔒

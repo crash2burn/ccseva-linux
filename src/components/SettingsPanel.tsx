@@ -45,7 +45,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Header */}
       <div className="glass-card p-6 hover-lift">
         <h2 className="text-white text-2xl font-bold mb-3 text-shadow">Settings</h2>
-        <p className="text-white/70">Customize your CCTray experience</p>
+        <p className="text-white/70">Customize your CCSeva experience</p>
       </div>
 
       {/* Tabs */}
