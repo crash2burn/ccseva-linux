@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Button } from './ui/button';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -68,18 +69,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              <button
+              <Button
+                type="button"
                 onClick={this.handleReset}
-                className="btn btn-primary w-full hover-lift"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:scale-105"
               >
                 Try Again
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={this.handleReload}
-                className="btn w-full hover-lift"
+                variant="outline"
+                className="w-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 transition-all duration-200 hover:scale-105"
               >
                 Reload Application
-              </button>
+              </Button>
             </div>
 
             {/* Help Text */}

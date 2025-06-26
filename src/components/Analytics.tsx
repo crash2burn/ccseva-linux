@@ -1,5 +1,7 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UsageStats } from '../types/usage';
+import type React from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import type { UsageStats } from '../types/usage';
+import { Button } from './ui/button';
 
 interface AnalyticsProps {
   stats: UsageStats;
@@ -192,12 +194,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
           {/* Time Range */}
           <div className="flex bg-neutral-800/50 rounded-xl p-1 backdrop-blur-sm border border-white/10">
             {(['7d', '30d'] as ChartTimeRange[]).map((range) => (
-              <button
+              <Button
                 key={range}
                 onClick={() => setTimeRange(range)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                variant="ghost"
+                size="sm"
+                className={`px-3 py-1.5 h-auto rounded-lg text-sm font-medium transition-all ${
                   timeRange === range
-                    ? 'bg-blue-500 text-white shadow-lg'
+                    ? 'bg-blue-500 text-white shadow-lg hover:bg-blue-600'
                     : 'text-neutral-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -205,7 +209,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 {range === '7d' ? '7 Days' : '30 Days'}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -216,12 +220,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               { type: 'line', label: 'Line', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
               { type: 'bar', label: 'Bar', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10' }
             ] as { type: ChartType; label: string; icon: string }[]).map(({ type, label, icon }) => (
-              <button
+              <Button
                 key={type}
                 onClick={() => setChartType(type)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                variant="ghost"
+                size="sm"
+                className={`px-3 py-1.5 h-auto rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
                   chartType === type
-                    ? 'bg-purple-500 text-white shadow-lg'
+                    ? 'bg-purple-500 text-white shadow-lg hover:bg-purple-600'
                     : 'text-neutral-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -229,7 +235,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
                 </svg>
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -239,12 +245,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               { metric: 'tokens', label: 'Tokens', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
               { metric: 'cost', label: 'Cost', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' }
             ] as { metric: 'tokens' | 'cost'; label: string; icon: string }[]).map(({ metric, label, icon }) => (
-              <button
+              <Button
                 key={metric}
                 onClick={() => setSelectedMetric(metric)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
+                variant="ghost"
+                size="sm"
+                className={`px-3 py-1.5 h-auto rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
                   selectedMetric === metric
-                    ? 'bg-emerald-500 text-white shadow-lg'
+                    ? 'bg-emerald-500 text-white shadow-lg hover:bg-emerald-600'
                     : 'text-neutral-400 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -252,7 +260,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
                 </svg>
                 {label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

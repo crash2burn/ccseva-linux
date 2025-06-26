@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { Button } from './ui/button';
 
 interface Notification {
   id: string;
@@ -69,6 +71,15 @@ const NotificationItem: React.FC<{
         ${isLeaving ? 'opacity-0 scale-95' : ''}
       `}
       onClick={handleRemove}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleRemove();
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label="Dismiss notification"
     >
       {/* Progress bar */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 rounded-b-lg overflow-hidden">
@@ -93,17 +104,21 @@ const NotificationItem: React.FC<{
             <h4 className="text-white font-semibold text-sm truncate">
               {notification.title}
             </h4>
-            <button
+            <Button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 handleRemove();
               }}
-              className="text-white/40 hover:text-white/80 transition-colors ml-2"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors ml-2"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>Close notification</title>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </Button>
           </div>
           
           <p className="text-white/80 text-sm leading-relaxed mb-2">

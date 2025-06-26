@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { UsageStats } from '../types/usage';
+import type React from 'react';
+import { useState } from 'react';
+import type { UsageStats } from '../types/usage';
+import { Button } from './ui/button';
 
 interface SettingsPanelProps {
   preferences: {
@@ -11,7 +13,7 @@ interface SettingsPanelProps {
     timezone?: string;
     resetHour?: number;
   };
-  onUpdatePreferences: (preferences: any) => void;
+  onUpdatePreferences: (preferences: Partial<SettingsPanelProps['preferences']>) => void;
   stats: UsageStats;
 }
 
@@ -21,7 +23,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   stats
 }) => {
 
-  const handlePreferenceChange = (key: string, value: any) => {
+  const handlePreferenceChange = (key: string, value: boolean | number | string) => {
     onUpdatePreferences({ [key]: value });
   };
 
@@ -65,6 +67,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 />
                 <div
                   onClick={() => handlePreferenceChange('autoRefresh', !preferences.autoRefresh)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handlePreferenceChange('autoRefresh', !preferences.autoRefresh);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="switch"
+                  aria-checked={preferences.autoRefresh}
+                  aria-label="Auto refresh toggle"
                   className={`
                     w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
                     ${preferences.autoRefresh ? 'bg-blue-500' : 'bg-white/20'}
@@ -85,7 +97,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <div className="text-white/70 text-sm">Refresh interval</div>
                 <select
                   value={preferences.refreshInterval}
-                  onChange={(e) => handlePreferenceChange('refreshInterval', parseInt(e.target.value))}
+                  onChange={(e) => handlePreferenceChange('refreshInterval', Number.parseInt(e.target.value))}
                   className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
                 >
                   {refreshIntervalOptions.map((option) => (
@@ -110,20 +122,21 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
             <div className="ml-11 grid grid-cols-3 gap-3">
               {['auto', 'light', 'dark'].map((theme) => (
-                <button
+                <Button
                   key={theme}
                   onClick={() => handlePreferenceChange('theme', theme)}
+                  variant="outline"
                   className={`
-                    p-3 rounded-lg border text-sm font-medium transition-all duration-300 hover-scale
+                    p-3 h-auto flex-col text-sm font-medium transition-all duration-300 hover:scale-105
                     ${preferences.theme === theme 
-                      ? 'border-blue-400 bg-blue-500/20 text-white' 
-                      : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40'
+                      ? 'border-blue-400 bg-blue-500/20 text-white hover:bg-blue-500/30' 
+                      : 'border-white/20 bg-white/5 text-white/70 hover:border-white/40 hover:bg-white/10'
                     }
                   `}
                 >
                   {theme === 'auto' && '🌓'} {theme === 'light' && '☀️'} {theme === 'dark' && '🌙'}
                   <div className="capitalize mt-1">{theme}</div>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -148,6 +161,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 />
                 <div
                   onClick={() => handlePreferenceChange('notifications', !preferences.notifications)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handlePreferenceChange('notifications', !preferences.notifications);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="switch"
+                  aria-checked={preferences.notifications}
+                  aria-label="Notifications toggle"
                   className={`
                     w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
                     ${preferences.notifications ? 'bg-blue-500' : 'bg-white/20'}
@@ -237,7 +260,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <div className="text-white/70 text-sm mb-1">Reset Hour</div>
                   <select
                     value={preferences.resetHour || 0}
-                    onChange={(e) => handlePreferenceChange('resetHour', parseInt(e.target.value))}
+                    onChange={(e) => handlePreferenceChange('resetHour', Number.parseInt(e.target.value))}
                     className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
                   >
                     {Array.from({ length: 24 }, (_, i) => (

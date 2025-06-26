@@ -153,6 +153,23 @@ export interface SessionTracking {
   averageSessionLength: number;
 }
 
+export interface CCUsageBlock {
+  id?: string;
+  startTime: string;
+  endTime?: string;
+  actualEndTime?: string;
+  isActive: boolean;
+  isGap?: boolean;
+  models?: string[];
+  costUSD?: number;
+  tokenCounts?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    cacheCreationInputTokens?: number;
+    cacheReadInputTokens?: number;
+  };
+}
+
 export interface MenuBarData {
   tokensUsed: number;
   tokenLimit: number;

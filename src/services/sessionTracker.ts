@@ -1,4 +1,4 @@
-import { SessionInfo, SessionWindow, SessionTracking } from '../types/usage';
+import { type SessionInfo, SessionWindow, type SessionTracking, type CCUsageBlock } from '../types/usage';
 
 export class SessionTracker {
   private static instance: SessionTracker;
@@ -46,7 +46,7 @@ export class SessionTracker {
   /**
    * Update session tracking based on token usage data from ccusage blocks
    */
-  updateFromBlocks(blocks: any[]): SessionTracking {
+  updateFromBlocks(blocks: CCUsageBlock[]): SessionTracking {
     const now = new Date();
     
     // Convert ccusage blocks to session format
@@ -67,26 +67,50 @@ export class SessionTracker {
   /**
    * Convert ccusage session blocks to SessionInfo objects
    */
-  private convertBlocksToSessions(blocks: any[]): SessionInfo[] {
-    return blocks.map((block, index) => {
-      const startTime = new Date(block.startTime);
-      const endTime = block.actualEndTime ? new Date(block.actualEndTime) : 
-                     block.endTime ? new Date(block.endTime) : new Date();
-      
-      return {
-        id: block.id || this.generateSessionId(index),
-        startTime,
-        endTime: block.isActive ? undefined : endTime,
-        isActive: block.isActive,
-        isGap: block.isGap || false,
-        tokensUsed: this.getTotalTokensFromBlock(block),
-        duration: block.isActive ? Date.now() - startTime.getTime() : endTime.getTime() - startTime.getTime(),
-        models: block.models || [],
-        costUSD: block.costUSD || 0,
-        sessionType: (block.isActive ? 'active' : 
-                     block.isGap ? 'gap' : 'completed') as 'active' | 'gap' | 'completed'
-      };
-    }).filter(session => !session.isGap); // Filter out gap sessions
+  private convertBlocksToSessions(blocks: CCUsageBlock[]): SessionInfo[] {
+    return blocks
+      .map((block, index) => this.convertBlockToSession(block, index))
+      .filter(session => !session.isGap); // Filter out gap sessions
+  }
+
+  private convertBlockToSession(block: CCUsageBlock, index: number): SessionInfo {
+    const startTime = new Date(block.startTime);
+    const endTime = this.determineEndTime(block);
+    
+    return {
+      id: block.id || this.generateSessionId(index),
+      startTime,
+      endTime: block.isActive ? undefined : endTime,
+      isActive: block.isActive,
+      isGap: block.isGap || false,
+      tokensUsed: this.getTotalTokensFromBlock(block),
+      duration: this.calculateDuration(block.isActive, startTime, endTime),
+      models: block.models || [],
+      costUSD: block.costUSD || 0,
+      sessionType: this.determineSessionType(block)
+    };
+  }
+
+  private determineEndTime(block: CCUsageBlock): Date {
+    if (block.actualEndTime) {
+      return new Date(block.actualEndTime);
+    }
+    if (block.endTime) {
+      return new Date(block.endTime);
+    }
+    return new Date();
+  }
+
+  private calculateDuration(isActive: boolean, startTime: Date, endTime: Date): number {
+    return isActive 
+      ? Date.now() - startTime.getTime() 
+      : endTime.getTime() - startTime.getTime();
+  }
+
+  private determineSessionType(block: CCUsageBlock): 'active' | 'gap' | 'completed' {
+    if (block.isActive) return 'active';
+    if (block.isGap) return 'gap';
+    return 'completed';
   }
 
   /**
@@ -259,7 +283,7 @@ export class SessionTracker {
   /**
    * Helper method to get total tokens from a block (matches ccusageService pattern)
    */
-  private getTotalTokensFromBlock(block: any): number {
+  private getTotalTokensFromBlock(block: CCUsageBlock): number {
     const counts = block.tokenCounts || {};
     return (counts.inputTokens || 0) + (counts.outputTokens || 0) + 
            (counts.cacheCreationInputTokens || 0) + (counts.cacheReadInputTokens || 0);

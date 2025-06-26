@@ -1,4 +1,4 @@
-import { 
+import type { 
   UsageStats, 
   DailyUsage, 
   MenuBarData, 
@@ -32,13 +32,13 @@ interface SessionBlock {
 export class CCUsageService {
   private static instance: CCUsageService;
   private cachedStats: UsageStats | null = null;
-  private lastUpdate: number = 0;
+  private lastUpdate = 0;
   private readonly CACHE_DURATION = 3000; // 3 seconds like Python script
   private resetTimeService: ResetTimeService;
   private sessionTracker: SessionTracker;
   private historicalBlocks: SessionBlock[] = []; // Store session blocks for analysis
   private currentPlan: 'Pro' | 'Max5' | 'Max20' | 'Custom' = 'Pro';
-  private detectedTokenLimit: number = 7000;
+  private detectedTokenLimit = 7000;
 
   constructor() {
     this.resetTimeService = ResetTimeService.getInstance();
@@ -139,7 +139,7 @@ export class CCUsageService {
     const prediction = this.calculatePredictionInfo(tokensUsed, tokenLimit, velocity, resetInfo);
     
     // Update session tracking with 5-hour rolling windows
-    const sessionTracking = this.sessionTracker.updateFromBlocks(blocks);
+    const sessionTracking = this.sessionTracker.updateFromBlocks(this.convertSessionBlocksToCC(blocks));
     
     // Use daily data if provided, otherwise convert from blocks
     let processedDailyData: DailyUsage[];
@@ -193,6 +193,23 @@ export class CCUsageService {
       // Enhanced session tracking
       sessionTracking
     };
+  }
+
+  /**
+   * Convert SessionBlock array to CCUsageBlock array for compatibility
+   */
+  private convertSessionBlocksToCC(blocks: SessionBlock[]): import('../types/usage.js').CCUsageBlock[] {
+    return blocks.map(block => ({
+      id: block.id,
+      startTime: block.startTime.toISOString(),
+      endTime: block.endTime.toISOString(),
+      actualEndTime: block.actualEndTime?.toISOString(),
+      isActive: block.isActive,
+      isGap: block.isGap,
+      models: block.models,
+      costUSD: block.costUSD,
+      tokenCounts: block.tokenCounts
+    }));
   }
 
   /**

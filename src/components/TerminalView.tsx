@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { UsageStats } from '../types/usage';
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import type { UsageStats } from '../types/usage';
+import { Button } from './ui/button';
 
 interface TerminalViewProps {
   stats: UsageStats;
@@ -56,13 +58,13 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
     return num.toLocaleString();
   };
 
-  const generateProgressBar = (percentage: number, width: number = 20): string => {
+  const generateProgressBar = (percentage: number, width = 20): string => {
     const filled = Math.round((percentage / 100) * width);
     const empty = width - filled;
     return '█'.repeat(filled) + '░'.repeat(empty);
   };
 
-  const generateTimeProgressBar = (percentage: number, width: number = 20): string => {
+  const generateTimeProgressBar = (percentage: number, width = 20): string => {
     const filled = Math.round((percentage / 100) * width);
     const empty = width - filled;
     return '▓'.repeat(filled) + '▒'.repeat(empty);
@@ -225,12 +227,14 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
         <div className="flex items-center gap-2">
           <span className="text-green-400">ccmonitor@terminal</span>
           <span className="text-gray-400">$</span>
-          <button
+          <Button
             onClick={onRefresh}
-            className="text-yellow-400 hover:text-yellow-300 transition-colors"
+            variant="ghost"
+            size="sm"
+            className="h-auto p-0 text-yellow-400 hover:text-yellow-300 hover:bg-transparent transition-colors"
           >
             refresh
-          </button>
+          </Button>
           <span className="text-gray-600">|</span>
           <span className="text-blue-400">status</span>
           <span className="text-gray-600">|</span>

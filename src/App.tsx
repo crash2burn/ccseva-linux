@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { UsageStats } from './types/usage';
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import type { UsageStats } from './types/usage';
 import { Dashboard } from './components/Dashboard';
 import { Analytics } from './components/Analytics';
 import { TerminalView } from './components/TerminalView';
@@ -7,6 +8,7 @@ import { NavigationTabs } from './components/NavigationTabs';
 import { SettingsPanel } from './components/SettingsPanel';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Button } from './components/ui/button';
 
 type ViewType = 'dashboard' | 'live' | 'analytics' | 'terminal' | 'settings';
 
@@ -286,12 +288,12 @@ const App: React.FC = () => {
             </div>
             <h2 className="text-xl font-bold text-white mb-4">Connection Error</h2>
             <p className="text-neutral-300 mb-6">{state.error}</p>
-            <button
+            <Button
               onClick={() => loadUsageStats()}
-              className="btn btn-primary w-full"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20 transition-all duration-200"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -337,25 +339,29 @@ const App: React.FC = () => {
                     </span>
                   </div>
                   
-                  <button
+                  <Button
                     onClick={refreshData}
-                    className="btn btn-ghost hover-scale p-1"
+                    variant="ghost"
+                    size="icon"
+                    className="p-1 hover:bg-white/10 hover:scale-105 transition-all duration-200"
                     title="Refresh Data (⌘R)"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                  </button>
+                  </Button>
                   
-                  <button
+                  <Button
                     onClick={() => window.electronAPI?.quitApp()}
-                    className="btn btn-ghost hover-scale p-1 text-red-400 hover:text-red-300"
+                    variant="ghost"
+                    size="icon"
+                    className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:scale-105 transition-all duration-200"
                     title="Quit Application (⌘Q)"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               </div>
 

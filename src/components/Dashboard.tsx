@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { UsageStats } from '../types/usage';
+import type React from 'react';
+import { useState } from 'react';
+import type { UsageStats } from '../types/usage';
+import { Button } from './ui/button';
 
 interface DashboardProps {
   stats: UsageStats;
@@ -92,10 +94,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </p>
           </div>
           
-          <button
+          <Button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className={`btn btn-primary flex items-center gap-2 ${
+            className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 ${
               isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
@@ -113,7 +115,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               />
             </svg>
             {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
+          </Button>
         </div>
 
         {/* Dual Progress Display - Token and Time */}

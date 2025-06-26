@@ -1,13 +1,13 @@
 import { Notification } from 'electron';
-import { MenuBarData } from '../types/usage.js';
+import type { MenuBarData } from '../types/usage.js';
 
 export class NotificationService {
   private static instance: NotificationService;
-  private lastNotificationTime: number = 0;
+  private lastNotificationTime = 0;
   private readonly NOTIFICATION_COOLDOWN = 300000; // 5 minutes
   private lastWarningLevel: 'safe' | 'warning' | 'critical' = 'safe';
-  private lastNotificationData: string = '';
-  private notificationInProgress: boolean = false;
+  private lastNotificationData = '';
+  private notificationInProgress = false;
 
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {

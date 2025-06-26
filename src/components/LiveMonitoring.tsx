@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { UsageStats } from '../types/usage';
+import type React from 'react';
+import { useState, useEffect, useRef } from 'react';
+import type { UsageStats } from '../types/usage';
+import { Button } from './ui/button';
 
 interface LiveMonitoringProps {
   stats: UsageStats;
@@ -145,12 +147,18 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
               </div>
             </div>
             
-            <button
+            <Button
               onClick={() => setIsLiveMode(!isLiveMode)}
-              className={`btn ${isLiveMode ? 'btn-secondary' : 'btn-primary'} text-sm px-3 py-1`}
+              variant={isLiveMode ? "secondary" : "default"}
+              size="sm"
+              className={`text-sm px-3 py-1 transition-all duration-200 ${
+                isLiveMode 
+                  ? 'bg-gray-600 hover:bg-gray-700 text-white' 
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20'
+              }`}
             >
               {isLiveMode ? 'Pause' : 'Resume'}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -315,29 +323,32 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
       {/* Quick Actions */}
       <div className="glass-card p-4">
         <div className="grid grid-cols-3 gap-3">
-          <button 
+          <Button 
             onClick={onRefresh}
-            className="btn btn-ghost flex items-center justify-center gap-2 py-3"
+            variant="ghost"
+            className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
           >
             <span>🔄</span>
             Force Refresh
-          </button>
+          </Button>
           
-          <button 
+          <Button 
             onClick={() => addLogEntry('info', 'Manual checkpoint created', '📍')}
-            className="btn btn-ghost flex items-center justify-center gap-2 py-3"
+            variant="ghost"
+            className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
           >
             <span>📍</span>
             Checkpoint
-          </button>
+          </Button>
           
-          <button 
+          <Button 
             onClick={() => setLogs([])}
-            className="btn btn-ghost flex items-center justify-center gap-2 py-3"
+            variant="ghost"
+            className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
           >
             <span>🗑️</span>
             Clear Logs
-          </button>
+          </Button>
         </div>
       </div>
     </div>
