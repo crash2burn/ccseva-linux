@@ -34,12 +34,12 @@ jobs:
       run: npm run dist:mac
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        # Code signing (uncomment when ready to sign):
-        # CSC_LINK: ${{ secrets.CSC_LINK }}
-        # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-        # APPLE_ID: ${{ secrets.APPLE_ID }}
-        # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        # Code signing - uncomment and set secrets in repository
+        CSC_LINK: ${{ secrets.CSC_LINK }}
+        CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     
     - name: Verify build artifacts
       run: |
@@ -57,7 +57,6 @@ jobs:
         name: distributables-${{ github.ref_name }}
         path: |
           release/*.dmg
-          release/*.zip
           release/*.yml
           release/latest-mac.yml
     
@@ -67,7 +66,6 @@ jobs:
       with:
         files: |
           release/*.dmg
-          release/*.zip
         draft: false
         prerelease: contains(github.ref, 'beta') || contains(github.ref, 'alpha') || contains(github.ref, 'rc')
         generate_release_notes: true
