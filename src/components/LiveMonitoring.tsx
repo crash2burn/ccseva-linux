@@ -2,6 +2,7 @@ import type React from 'react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 // Helper functions
 const getUsageStatus = (percentage: number): 'safe' | 'warning' | 'critical' => {
@@ -82,7 +83,8 @@ const StatusCard: React.FC<{
   colorClass: string;
   subtitle: string;
 }> = ({ title, emoji, value, progress, colorClass, subtitle }) => (
-  <div className="glass p-4 rounded-xl">
+  <Card className="bg-neutral-800/50 border-neutral-700">
+    <CardContent className="p-4">
     <div className="flex items-center justify-between mb-2">
       <span className="text-sm text-neutral-400">{title}</span>
       <span className="text-lg">{emoji}</span>
@@ -95,7 +97,8 @@ const StatusCard: React.FC<{
       />
     </div>
     <div className="text-xs text-neutral-400">{subtitle}</div>
-  </div>
+    </CardContent>
+  </Card>
 );
 
 interface LiveMonitoringProps {
@@ -191,7 +194,8 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
   return (
     <div className="space-y-4">
       {/* Header with Controls */}
-      <div className="glass-card p-5">
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold text-gradient mb-1">Live Monitoring</h2>
@@ -243,10 +247,12 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
             subtitle={`${stats.resetInfo ? formatTimeRemaining(stats.resetInfo.timeUntilReset) : 'No reset info'} until reset`}
           />
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Terminal-style Output */}
-      <div className="glass-card p-5">
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-bold text-white">Live Feed</h3>
@@ -291,11 +297,15 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
             </div>
           </div>
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Current Session Info */}
-      <div className="glass-card p-5">
-        <h3 className="text-lg font-bold text-white mb-4">Current Session</h3>
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardHeader>
+          <CardTitle className="text-white">Current Session</CardTitle>
+        </CardHeader>
+        <CardContent>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
@@ -332,10 +342,12 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
             <div className="text-xs text-neutral-500 mt-1">🎯 Prediction</div>
           </div>
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
-      <div className="glass-card p-4">
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardContent className="p-4">
         <div className="grid grid-cols-3 gap-3">
           <Button
             onClick={onRefresh}
@@ -364,7 +376,8 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
             Clear Logs
           </Button>
         </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -2,6 +2,9 @@ import type React from 'react';
 import { useState } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Switch } from './ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface SettingsPanelProps {
   preferences: {
@@ -36,13 +39,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   return (
     <div className="space-y-6 stagger-children">
       {/* Header */}
-      <div className="glass-card p-6 hover-lift">
-        <h2 className="text-white text-2xl font-bold mb-3 text-shadow">Settings</h2>
-        <p className="text-white/70">Customize your CCSeva experience</p>
-      </div>
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardHeader>
+          <CardTitle className="text-white text-2xl">Settings</CardTitle>
+          <CardDescription className="text-white/70">Customize your CCSeva experience</CardDescription>
+        </CardHeader>
+      </Card>
 
       {/* General Settings */}
-      <div className="glass-card p-6 hover-lift space-y-6">
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardContent className="p-6 space-y-6">
         {/* Auto Refresh */}
         <div className="space-y-3">
           <label className="flex items-center justify-between">
@@ -54,56 +60,30 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </div>
             </div>
 
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={preferences.autoRefresh}
-                onChange={(e) => handlePreferenceChange('autoRefresh', e.target.checked)}
-                className="sr-only"
-              />
-              <div
-                onClick={() => handlePreferenceChange('autoRefresh', !preferences.autoRefresh)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handlePreferenceChange('autoRefresh', !preferences.autoRefresh);
-                  }
-                }}
-                tabIndex={0}
-                role="switch"
-                aria-checked={preferences.autoRefresh}
-                aria-label="Auto refresh toggle"
-                className={`
-                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
-                    ${preferences.autoRefresh ? 'bg-blue-500' : 'bg-white/20'}
-                  `}
-              >
-                <div
-                  className={`
-                      w-5 h-5 bg-white rounded-full transition-transform duration-300 mt-0.5
-                      ${preferences.autoRefresh ? 'transform translate-x-6 ml-0.5' : 'ml-0.5'}
-                    `}
-                />
-              </div>
-            </div>
+            <Switch
+              checked={preferences.autoRefresh}
+              onCheckedChange={(checked) => handlePreferenceChange('autoRefresh', checked)}
+            />
           </label>
 
           {preferences.autoRefresh && (
             <div className="ml-11 space-y-2">
               <div className="text-white/70 text-sm">Refresh interval</div>
-              <select
-                value={preferences.refreshInterval}
-                onChange={(e) =>
-                  handlePreferenceChange('refreshInterval', Number.parseInt(e.target.value))
-                }
-                className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
+              <Select
+                value={preferences.refreshInterval.toString()}
+                onValueChange={(value) => handlePreferenceChange('refreshInterval', Number.parseInt(value))}
               >
-                {refreshIntervalOptions.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-gray-800">
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {refreshIntervalOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value.toString()}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -151,38 +131,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </div>
             </div>
 
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={preferences.notifications}
-                onChange={(e) => handlePreferenceChange('notifications', e.target.checked)}
-                className="sr-only"
-              />
-              <div
-                onClick={() => handlePreferenceChange('notifications', !preferences.notifications)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handlePreferenceChange('notifications', !preferences.notifications);
-                  }
-                }}
-                tabIndex={0}
-                role="switch"
-                aria-checked={preferences.notifications}
-                aria-label="Notifications toggle"
-                className={`
-                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
-                    ${preferences.notifications ? 'bg-blue-500' : 'bg-white/20'}
-                  `}
-              >
-                <div
-                  className={`
-                      w-5 h-5 bg-white rounded-full transition-transform duration-300 mt-0.5
-                      ${preferences.notifications ? 'transform translate-x-6 ml-0.5' : 'ml-0.5'}
-                    `}
-                />
-              </div>
-            </div>
+            <Switch
+              checked={preferences.notifications}
+              onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
+            />
           </label>
         </div>
 
@@ -204,31 +156,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onChange={(e) => handlePreferenceChange('animationsEnabled', e.target.checked)}
                 className="sr-only"
               />
-              <div
-                onClick={() =>
-                  handlePreferenceChange('animationsEnabled', !preferences.animationsEnabled)
-                }
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handlePreferenceChange('animationsEnabled', !preferences.animationsEnabled);
-                  }
-                }}
-                tabIndex={0}
-                role="switch"
-                aria-checked={preferences.animationsEnabled}
-                className={`
-                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400
-                    ${preferences.animationsEnabled ? 'bg-blue-500' : 'bg-white/20'}
-                  `}
-              >
-                <div
-                  className={`
-                      w-5 h-5 bg-white rounded-full transition-transform duration-300 mt-0.5
-                      ${preferences.animationsEnabled ? 'transform translate-x-6 ml-0.5' : 'ml-0.5'}
-                    `}
-                />
-              </div>
+              <Switch
+                checked={preferences.animationsEnabled}
+                onCheckedChange={(checked) => handlePreferenceChange('animationsEnabled', checked)}
+              />
             </div>
           </label>
         </div>
@@ -246,63 +177,45 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </div>
 
           <div className="ml-11 space-y-3">
-            <select
+            <Select
               value={preferences.timezone || 'America/Los_Angeles'}
-              onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
+              onValueChange={(value) => handlePreferenceChange('timezone', value)}
             >
-              <optgroup label="US Timezones" className="bg-gray-800">
-                <option value="America/Los_Angeles" className="bg-gray-800">
-                  Pacific Time (PT)
-                </option>
-                <option value="America/Denver" className="bg-gray-800">
-                  Mountain Time (MT)
-                </option>
-                <option value="America/Chicago" className="bg-gray-800">
-                  Central Time (CT)
-                </option>
-                <option value="America/New_York" className="bg-gray-800">
-                  Eastern Time (ET)
-                </option>
-              </optgroup>
-              <optgroup label="International" className="bg-gray-800">
-                <option value="Europe/London" className="bg-gray-800">
-                  London (GMT)
-                </option>
-                <option value="Europe/Paris" className="bg-gray-800">
-                  Paris (CET)
-                </option>
-                <option value="Asia/Tokyo" className="bg-gray-800">
-                  Tokyo (JST)
-                </option>
-                <option value="Asia/Shanghai" className="bg-gray-800">
-                  Shanghai (CST)
-                </option>
-                <option value="Australia/Sydney" className="bg-gray-800">
-                  Sydney (AEDT)
-                </option>
-                <option value="UTC" className="bg-gray-800">
-                  UTC
-                </option>
-              </optgroup>
-            </select>
+              <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                <SelectItem value="Europe/London">London (GMT)</SelectItem>
+                <SelectItem value="Europe/Paris">Paris (CET)</SelectItem>
+                <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
+                <SelectItem value="Asia/Shanghai">Shanghai (CST)</SelectItem>
+                <SelectItem value="Australia/Sydney">Sydney (AEDT)</SelectItem>
+                <SelectItem value="UTC">UTC</SelectItem>
+              </SelectContent>
+            </Select>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="text-white/70 text-sm mb-1">Reset Hour</div>
-                <select
-                  value={preferences.resetHour || 0}
-                  onChange={(e) =>
-                    handlePreferenceChange('resetHour', Number.parseInt(e.target.value))
-                  }
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
+                <Select
+                  value={(preferences.resetHour || 0).toString()}
+                  onValueChange={(value) => handlePreferenceChange('resetHour', Number.parseInt(value))}
                 >
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <option key={`reset-hour-${i.toString().padStart(2, '0')}`} value={i} className="bg-gray-800">
-                      {i.toString().padStart(2, '0')}:00
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={`reset-hour-${i.toString().padStart(2, '0')}`} value={i.toString()}>
+                        {i.toString().padStart(2, '0')}:00
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -334,7 +247,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
           </div>
         </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

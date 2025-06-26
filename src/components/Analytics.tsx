@@ -2,6 +2,8 @@ import type React from 'react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Separator } from './ui/separator';
 
 interface AnalyticsProps {
   stats: UsageStats;
@@ -172,24 +174,32 @@ const SummaryStats: React.FC<{
   avgDailyCost: number;
 }> = ({ totalWeekTokens, totalWeekCost, avgDailyTokens, avgDailyCost }) => (
   <div className="grid grid-cols-4 gap-3">
-    <div className="glass p-3 rounded-xl text-center">
-      <div className="text-xl font-bold text-white mb-1">{formatNumber(totalWeekTokens)}</div>
-      <div className="text-xs text-neutral-400">Total Tokens (7d)</div>
-    </div>
-    <div className="glass p-3 rounded-xl text-center">
-      <div className="text-xl font-bold text-white mb-1">{formatCurrency(totalWeekCost)}</div>
-      <div className="text-xs text-neutral-400">Total Cost (7d)</div>
-    </div>
-    <div className="glass p-3 rounded-xl text-center">
-      <div className="text-xl font-bold text-white mb-1">
-        {formatNumber(Math.round(avgDailyTokens))}
-      </div>
-      <div className="text-xs text-neutral-400">Avg Daily Tokens</div>
-    </div>
-    <div className="glass p-3 rounded-xl text-center">
-      <div className="text-xl font-bold text-white mb-1">{formatCurrency(avgDailyCost)}</div>
-      <div className="text-xs text-neutral-400">Avg Daily Cost</div>
-    </div>
+    <Card className="bg-neutral-900/50 border-neutral-800">
+      <CardContent className="p-3 text-center">
+        <div className="text-xl font-bold text-white mb-1">{formatNumber(totalWeekTokens)}</div>
+        <div className="text-xs text-neutral-400">Total Tokens (7d)</div>
+      </CardContent>
+    </Card>
+    <Card className="bg-neutral-900/50 border-neutral-800">
+      <CardContent className="p-3 text-center">
+        <div className="text-xl font-bold text-white mb-1">{formatCurrency(totalWeekCost)}</div>
+        <div className="text-xs text-neutral-400">Total Cost (7d)</div>
+      </CardContent>
+    </Card>
+    <Card className="bg-neutral-900/50 border-neutral-800">
+      <CardContent className="p-3 text-center">
+        <div className="text-xl font-bold text-white mb-1">
+          {formatNumber(Math.round(avgDailyTokens))}
+        </div>
+        <div className="text-xs text-neutral-400">Avg Daily Tokens</div>
+      </CardContent>
+    </Card>
+    <Card className="bg-neutral-900/50 border-neutral-800">
+      <CardContent className="p-3 text-center">
+        <div className="text-xl font-bold text-white mb-1">{formatCurrency(avgDailyCost)}</div>
+        <div className="text-xs text-neutral-400">Avg Daily Cost</div>
+      </CardContent>
+    </Card>
   </div>
 );
 
@@ -332,7 +342,8 @@ const MainChart: React.FC<{
   );
 
   return (
-    <div className="glass-card p-5">
+    <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+      <CardContent className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-white mb-1">
@@ -530,7 +541,8 @@ const MainChart: React.FC<{
           </div>
         )}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -551,7 +563,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
   return (
     <div className="space-y-4">
       {/* Header Section */}
-      <div className="glass-card p-5">
+      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+        <CardContent className="p-5">
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-xl font-bold text-gradient mb-1">Usage Analytics</h2>
@@ -585,7 +598,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
           avgDailyTokens={avgDailyTokens}
           avgDailyCost={avgDailyCost}
         />
-      </div>
+        </CardContent>
+      </Card>
 
       <MainChart
         chartData={chartData}
@@ -599,17 +613,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
       {/* Bottom Section - Model Distribution & Performance */}
       <div className="grid grid-cols-1 gap-4">
         {/* Model Distribution */}
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-white mb-1">Model Distribution</h3>
-              <p className="text-sm text-neutral-400">Today's usage by AI model</p>
-            </div>
+        <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white">Model Distribution</CardTitle>
+                <CardDescription>Today's usage by AI model</CardDescription>
+              </div>
 
-            <div className="glass px-3 py-1 rounded-lg">
-              <span className="text-xs text-neutral-300">{modelBreakdownData.length} models</span>
+              <div className="bg-neutral-800/50 px-3 py-1 rounded-lg border border-neutral-700">
+                <span className="text-xs text-neutral-300">{modelBreakdownData.length} models</span>
+              </div>
             </div>
-          </div>
+          </CardHeader>
+          <CardContent>
 
           {modelBreakdownData.length > 0 ? (
             <div className="flex items-center gap-8">
@@ -673,7 +690,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                 {modelBreakdownData.map((model) => (
                   <div
                     key={model.name}
-                    className="flex items-center justify-between p-4 glass rounded-xl"
+                    className="flex items-center justify-between p-4 bg-neutral-800/50 rounded-xl border border-neutral-700"
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -716,20 +733,21 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               <p className="text-sm">No model usage data available</p>
             </div>
           )}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Performance Metrics */}
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-white mb-1">Performance Metrics</h3>
-              <p className="text-sm text-neutral-400">Key insights and efficiency indicators</p>
-            </div>
-          </div>
+        <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+          <CardHeader>
+            <CardTitle className="text-white">Performance Metrics</CardTitle>
+            <CardDescription>Key insights and efficiency indicators</CardDescription>
+          </CardHeader>
+          <CardContent>
 
           <div className="grid grid-cols-2 gap-4">
             {/* Burn Rate */}
-            <div className="glass p-4 rounded-xl">
+            <Card className="bg-neutral-800/50 border-neutral-700">
+              <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
@@ -781,10 +799,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   style={{ width: `${Math.min((stats.burnRate / 2000) * 100, 100)}%` }}
                 />
               </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Efficiency */}
-            <div className="glass p-4 rounded-xl">
+            <Card className="bg-neutral-800/50 border-neutral-700">
+              <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
@@ -818,10 +838,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   style={{ width: `${Math.min(stats.percentageUsed, 100)}%` }}
                 />
               </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Depletion */}
-            <div className="glass p-4 rounded-xl">
+            <Card className="bg-neutral-800/50 border-neutral-700">
+              <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
@@ -847,10 +869,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               </div>
 
               <div className="text-xs text-neutral-400">at current burn rate</div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Average Cost */}
-            <div className="glass p-4 rounded-xl">
+            <Card className="bg-neutral-800/50 border-neutral-700">
+              <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
@@ -880,9 +904,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               </div>
 
               <div className="text-xs text-neutral-400">per 1,000 tokens</div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

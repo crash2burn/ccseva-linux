@@ -83,7 +83,6 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
         </div>
         <div className="text-green-500 text-xs mt-1">└─ Real-time terminal interface ─┘</div>
       </div>
-
       {/* Token Usage Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
@@ -103,6 +102,24 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
           </span>
         </div>
       </div>
+
+      {/* TODO: Time Progress Section */}
+      {/* <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <span className="text-blue-400">TIME PROGRESS:</span>
+          <span className="text-white font-bold">{getTimeProgress().toFixed(1)}%</span>
+          <span className="text-2xl">⏰</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-blue-500">[</span>
+          <span className="text-cyan-400 transition-all duration-1000">
+            {generateTimeProgressBar(animatedTimeProgress)}
+          </span>
+          <span className="text-blue-500">]</span>
+          <span className="text-gray-400 text-xs">{formatTimeUntilReset()} until reset</span>
+        </div>
+      </div> */}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-green-500/20">
@@ -142,7 +159,6 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
           </div>
         </div>
       </div>
-
       {/* Session Information */}
       {stats.sessionTracking && (
         <div className="pt-2 border-t border-green-500/20">
@@ -161,7 +177,6 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
           </div>
         </div>
       )}
-
       {/* Velocity Information */}
       {stats.velocity && (
         <div className="pt-2 border-t border-green-500/20">
@@ -196,7 +211,6 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
           </div>
         </div>
       )}
-
       {/* Command Line Interface */}
       <div className="pt-4 border-t border-green-500/30">
         <div className="flex items-center gap-2">
@@ -217,7 +231,6 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
           <span className="animate-pulse text-green-400 ml-2">█</span>
         </div>
       </div>
-
       {/* System Status */}
       <div className="text-xs text-gray-500 pt-2 border-t border-gray-700">
         <div className="flex justify-between">
