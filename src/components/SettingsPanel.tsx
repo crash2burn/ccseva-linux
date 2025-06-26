@@ -1,10 +1,10 @@
 import type React from 'react';
-import { useState } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Slider } from './ui/slider';
 
 interface SettingsPanelProps {
   preferences: {
@@ -51,7 +51,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <CardContent className="p-6 space-y-6">
         {/* Auto Refresh */}
         <div className="space-y-3">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-2xl">🔄</span>
               <div>
@@ -64,26 +64,29 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               checked={preferences.autoRefresh}
               onCheckedChange={(checked) => handlePreferenceChange('autoRefresh', checked)}
             />
-          </label>
+          </div>
 
           {preferences.autoRefresh && (
-            <div className="ml-11 space-y-2">
-              <div className="text-white/70 text-sm">Refresh interval</div>
-              <Select
-                value={preferences.refreshInterval.toString()}
-                onValueChange={(value) => handlePreferenceChange('refreshInterval', Number.parseInt(value))}
-              >
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {refreshIntervalOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value.toString()}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="ml-11 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-white/70 text-sm">Refresh interval</div>
+                <div className="text-white text-sm font-medium">
+                  {refreshIntervalOptions.find(opt => opt.value === preferences.refreshInterval)?.label || '30 seconds'}
+                </div>
+              </div>
+              <Slider
+                value={[preferences.refreshInterval]}
+                onValueChange={(value) => handlePreferenceChange('refreshInterval', value[0])}
+                min={15000}
+                max={300000}
+                step={15000}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-white/50">
+                <span>15s</span>
+                <span>1m</span>
+                <span>5m</span>
+              </div>
             </div>
           )}
         </div>
@@ -122,7 +125,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
         {/* Notifications */}
         <div className="space-y-3">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-2xl">🔔</span>
               <div>
@@ -135,12 +138,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               checked={preferences.notifications}
               onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
             />
-          </label>
+          </div>
         </div>
 
         {/* Animations */}
         <div className="space-y-3">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-2xl">✨</span>
               <div>
@@ -149,19 +152,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </div>
             </div>
 
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={preferences.animationsEnabled}
-                onChange={(e) => handlePreferenceChange('animationsEnabled', e.target.checked)}
-                className="sr-only"
-              />
-              <Switch
-                checked={preferences.animationsEnabled}
-                onCheckedChange={(checked) => handlePreferenceChange('animationsEnabled', checked)}
-              />
-            </div>
-          </label>
+            <Switch
+              checked={preferences.animationsEnabled}
+              onCheckedChange={(checked) => handlePreferenceChange('animationsEnabled', checked)}
+            />
+          </div>
         </div>
 
         {/* Timezone Configuration */}

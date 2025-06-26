@@ -5,6 +5,8 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 // Helper component for model usage item
 const ModelUsageItem = ({
@@ -34,7 +36,22 @@ const ModelUsageItem = ({
       <div className={`w-3 h-3 rounded-full ${getModelColor(index)}`} />
       <div className="flex-1">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-medium text-white">{modelName}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-sm font-medium text-white cursor-help">{modelName}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="text-center">
+                <p className="font-semibold">{modelName}</p>
+                <p className="text-sm mt-1">
+                  {formatNumber(modelData.tokens)} tokens • {formatCurrency(modelData.cost)}
+                </p>
+                <p className="text-xs mt-1 text-muted-foreground">
+                  {percentage.toFixed(1)}% of today's usage
+                </p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
           <span className="text-sm text-neutral-400">
             {formatNumber(modelData.tokens)} ({percentage.toFixed(1)}%)
           </span>
@@ -88,28 +105,80 @@ const getStatusHelpers = (status: 'safe' | 'warning' | 'critical') => {
   return { getStatusColor, getStatusIcon };
 };
 
-// Helper for time calculations
-const getTimeProgress = (resetInfo?: { timeUntilReset: number }): number => {
-  if (!resetInfo?.timeUntilReset) return 0;
 
-  const totalCycleDuration = 24 * 60 * 60 * 1000;
-  const timeElapsed = totalCycleDuration - resetInfo.timeUntilReset;
+// Component for hero header section
+const DashboardHeader: React.FC<{
+  isRefreshing: boolean;
+  onRefresh: () => void;
+}> = ({ isRefreshing, onRefresh }) => (
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h2 className="text-xl font-bold text-gradient mb-2 font-primary">Usage Dashboard</h2>
+      <p className="text-neutral-400 text-sm font-primary">
+        Real-time monitoring of your Claude API usage
+      </p>
+    </div>
 
-  return Math.max(0, Math.min(100, (timeElapsed / totalCycleDuration) * 100));
-};
+    <Button
+      onClick={onRefresh}
+      disabled={isRefreshing}
+      className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 ${
+        isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
+    >
+      <svg
+        className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        />
+      </svg>
+      {isRefreshing ? 'Refreshing...' : 'Refresh'}
+    </Button>
+  </div>
+);
 
-const formatTimeUntilReset = (resetInfo?: { timeUntilReset: number }): string => {
-  if (!resetInfo?.timeUntilReset) return 'No reset info';
+// Component for key metrics row
+const KeyMetricsRow: React.FC<{
+  stats: UsageStats;
+  timeRemaining: string;
+}> = ({ stats, timeRemaining }) => (
+  <div className="grid grid-cols-3 gap-4 text-center">
+    <div className="space-y-2">
+      <div className="text-2xl font-bold text-neutral-100 font-primary">
+        {formatNumber(stats.tokensUsed)}
+      </div>
+      <div className="text-sm text-neutral-400 font-primary">Tokens Used</div>
+      <div className="text-xs text-neutral-500 font-primary">
+        of {formatNumber(stats.tokenLimit)}
+      </div>
+    </div>
 
-  const milliseconds = resetInfo.timeUntilReset;
-  const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    <div className="space-y-2">
+      <div className="text-2xl font-bold text-neutral-100 font-primary">
+        {formatCurrency(stats.today.totalCost)}
+      </div>
+      <div className="text-sm text-neutral-warm-400 font-primary">Cost Today</div>
+      <div className="text-xs text-neutral-500 font-primary">
+        {stats.today.totalTokens.toLocaleString()} tokens
+      </div>
+    </div>
 
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-};
+    <div className="space-y-2">
+      <div className="text-2xl font-bold text-neutral-100 font-primary">
+        {formatNumber(stats.tokensRemaining)}
+      </div>
+      <div className="text-sm text-neutral-warm-400 font-primary">Remaining</div>
+      <div className="text-xs text-neutral-500 font-primary">{timeRemaining}</div>
+    </div>
+  </div>
+);
 
 // Component for circular progress charts
 const CircularProgressChart: React.FC<{
@@ -211,83 +280,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
+    <TooltipProvider>
     <div className="space-y-4">
       {/* Hero Section */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-gradient mb-2 font-primary">Usage Dashboard</h2>
-              <p className="text-neutral-400 text-sm font-primary">
-                Real-time monitoring of your Claude API usage
-              </p>
-            </div>
-
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 ${
-                isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <svg
-                className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
-            </Button>
-          </div>
+          <DashboardHeader isRefreshing={isRefreshing} onRefresh={handleRefresh} />
 
           {/* Dual Progress Display - Token and Time */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <CircularProgressChart
-              percentage={stats.percentageUsed}
-              status={status}
-              label="Tokens"
-              subtitle={status}
-              emoji={getStatusIcon()}
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <CircularProgressChart
+                    percentage={stats.percentageUsed}
+                    status={status}
+                    label="Tokens"
+                    subtitle={status}
+                    emoji={getStatusIcon()}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-center">
+                  <p className="font-semibold">{status === 'critical' ? '🔴 Critical Usage' : status === 'warning' ? '🟡 Warning Level' : '🟢 Safe Usage'}</p>
+                  <p className="text-sm mt-1">
+                    {status === 'critical' ? 'Over 90% of daily limit used' : 
+                     status === 'warning' ? '70-90% of daily limit used' : 
+                     'Less than 70% of daily limit used'}
+                  </p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
 
-          {/* Key Metrics Row */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-neutral-100 font-primary">
-                {formatNumber(stats.tokensUsed)}
-              </div>
-              <div className="text-sm text-neutral-400 font-primary">Tokens Used</div>
-              <div className="text-xs text-neutral-500 font-primary">
-                of {formatNumber(stats.tokenLimit)}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-neutral-100 font-primary">
-                {formatCurrency(stats.today.totalCost)}
-              </div>
-              <div className="text-sm text-neutral-warm-400 font-primary">Cost Today</div>
-              <div className="text-xs text-neutral-500 font-primary">
-                {stats.today.totalTokens.toLocaleString()} tokens
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-neutral-100 font-primary">
-                {formatNumber(stats.tokensRemaining)}
-              </div>
-              <div className="text-sm text-neutral-warm-400 font-primary">Remaining</div>
-              <div className="text-xs text-neutral-500 font-primary">{timeRemaining}</div>
-            </div>
-          </div>
+          <KeyMetricsRow stats={stats} timeRemaining={timeRemaining} />
         </CardContent>
       </Card>
 
@@ -315,9 +342,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-neutral-100 font-primary">
-                  {stats.currentPlan}
-                </h3>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <h3 className="text-lg font-bold text-neutral-100 font-primary cursor-help">
+                      {stats.currentPlan}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Your detected Claude plan based on daily token limit: {formatNumber(stats.tokenLimit)} tokens/day</p>
+                  </TooltipContent>
+                </Tooltip>
                 <p className="text-sm text-neutral-400 font-primary">Current Plan</p>
               </div>
             </div>
@@ -354,16 +388,37 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-neutral-100 font-primary">
-                  {formatNumber(stats.burnRate)}
-                </h3>
-                <p className="text-sm text-neutral-400 font-primary">Tokens/Hour</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <h3 className="text-lg font-bold text-neutral-100 font-primary cursor-help">
+                      {formatNumber(stats.burnRate)}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Rate of token consumption per hour based on your last 24 hours of usage</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm text-neutral-400 font-primary cursor-help">Tokens/Hour</p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Current burn rate - how fast you're consuming your daily token allowance</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-neutral-400 font-primary">Depletion Time</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-neutral-400 font-primary cursor-help">Depletion Time</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Estimated time until your daily token limit is reached at current usage rate</p>
+                  </TooltipContent>
+                </Tooltip>
                 <span className="text-neutral-100 font-medium font-primary">{timeRemaining}</span>
               </div>
               <Badge
@@ -486,8 +541,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Model Breakdown */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardHeader>
-          <CardTitle className="text-white">Model Usage</CardTitle>
-          <CardDescription>Today's distribution by model</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white">Model Usage</CardTitle>
+              <CardDescription>Today's distribution by model</CardDescription>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-400 hover:text-white">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 bg-neutral-800 border-neutral-700 text-white">
+                <div className="space-y-3">
+                  <div className="font-semibold">Model Usage Breakdown</div>
+                  <div className="text-sm text-neutral-300 space-y-2">
+                    <p>• <strong>Tokens:</strong> Number of tokens consumed by each model today</p>
+                    <p>• <strong>Cost:</strong> Estimated cost based on model pricing</p>
+                    <p>• <strong>Percentage:</strong> Share of your total daily usage</p>
+                    <p>• <strong>Colors:</strong> Purple (primary), Blue (secondary), Green (tertiary)</p>
+                  </div>
+                  <div className="text-xs text-neutral-400 border-t border-neutral-700 pt-2">
+                    Click on any model name for detailed tooltip information
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -544,5 +626,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div> */}
     </div>
+    </TooltipProvider>
   );
 };

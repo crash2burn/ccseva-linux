@@ -3,7 +3,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Separator } from './ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface AnalyticsProps {
   stats: UsageStats;
@@ -561,6 +561,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
   const avgDailyCost = totalWeekCost / 7;
 
   return (
+    <TooltipProvider>
     <div className="space-y-4">
       {/* Header Section */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
@@ -766,9 +767,16 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-white">
-                      {formatNumber(stats.burnRate)}
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-xl font-bold text-white cursor-help">
+                          {formatNumber(stats.burnRate)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Rate of token consumption per hour based on your last 24 hours of usage</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <div className="text-sm text-neutral-400">Burn Rate</div>
                   </div>
                 </div>
@@ -823,9 +831,16 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-white">
-                      {stats.percentageUsed.toFixed(1)}%
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-xl font-bold text-white cursor-help">
+                          {stats.percentageUsed.toFixed(1)}%
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Percentage of your daily token limit currently used</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <div className="text-sm text-neutral-400">Efficiency</div>
                   </div>
                 </div>
@@ -862,7 +877,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                     </svg>
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-white">{getDepletionText(stats)}</div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-xl font-bold text-white cursor-help">{getDepletionText(stats)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Estimated time until your daily token limit is reached at current usage rate</p>
+                      </TooltipContent>
+                    </Tooltip>
                     <div className="text-sm text-neutral-400">Depletion</div>
                   </div>
                 </div>
@@ -911,5 +933,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
         </Card>
       </div>
     </div>
+    </TooltipProvider>
   );
 };

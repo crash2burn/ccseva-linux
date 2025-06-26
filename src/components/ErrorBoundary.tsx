@@ -1,5 +1,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button } from './ui/button';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Card, CardContent } from './ui/card';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -38,7 +40,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         <div className="h-screen w-full gradient-bg flex items-center justify-center p-6">
-          <div className="glass-card max-w-lg w-full text-center stagger-children">
+          <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800 max-w-lg w-full">
+            <CardContent className="text-center stagger-children p-6">
             {/* Error Icon */}
             <div className="text-6xl mb-6 floating">💥</div>
 
@@ -52,16 +55,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             {/* Error Details (in development) */}
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-left">
-                <div className="text-red-400 font-mono text-sm mb-2">
+              <Alert variant="destructive" className="mb-6 text-left">
+                <AlertTitle className="font-mono text-sm">
                   {this.state.error.name}: {this.state.error.message}
-                </div>
+                </AlertTitle>
                 {this.state.errorInfo?.componentStack && (
-                  <div className="text-red-300/70 font-mono text-xs max-h-32 overflow-y-auto">
+                  <AlertDescription className="font-mono text-xs max-h-32 overflow-y-auto mt-2">
                     {this.state.errorInfo.componentStack}
-                  </div>
+                  </AlertDescription>
                 )}
-              </div>
+              </Alert>
             )}
 
             {/* Action Buttons */}
@@ -113,7 +116,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 </details>
               </div>
             )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
       );
     }

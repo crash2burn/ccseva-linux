@@ -9,6 +9,7 @@ import { SettingsPanel } from './components/SettingsPanel';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Button } from './components/ui/button';
+import { Toaster } from './components/ui/sonner';
 
 type ViewType = 'dashboard' | 'live' | 'analytics' | 'terminal' | 'settings';
 
@@ -441,6 +442,7 @@ const App: React.FC = () => {
           </div>
         </main>
       </div>
+      <Toaster />
     </ErrorBoundary>
   );
 };
