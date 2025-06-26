@@ -1,10 +1,15 @@
-import { type SessionInfo, SessionWindow, type SessionTracking, type CCUsageBlock } from '../types/usage';
+import {
+  type SessionInfo,
+  SessionWindow,
+  type SessionTracking,
+  type CCUsageBlock,
+} from '../types/usage';
 
 export class SessionTracker {
   private static instance: SessionTracker;
   private readonly WINDOW_DURATION = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
   private readonly SESSION_GAP_THRESHOLD = 10 * 60 * 1000; // 10 minutes gap threshold
-  
+
   private sessionTracking: SessionTracking;
 
   constructor() {
@@ -21,7 +26,7 @@ export class SessionTracker {
   private initializeSessionTracking(): SessionTracking {
     const now = new Date();
     const windowStart = new Date(now.getTime() - this.WINDOW_DURATION);
-    
+
     return {
       currentSession: null,
       activeWindow: {
@@ -32,14 +37,14 @@ export class SessionTracker {
         sessions: [],
         totalTokens: 0,
         totalCost: 0,
-        isComplete: false
+        isComplete: false,
       },
       recentSessions: [],
       sessionHistory: [],
       windowDuration: this.WINDOW_DURATION,
       lastActivity: now,
       sessionsInWindow: 0,
-      averageSessionLength: 0
+      averageSessionLength: 0,
     };
   }
 
@@ -48,19 +53,19 @@ export class SessionTracker {
    */
   updateFromBlocks(blocks: CCUsageBlock[]): SessionTracking {
     const now = new Date();
-    
+
     // Convert ccusage blocks to session format
     const sessions = this.convertBlocksToSessions(blocks);
-    
+
     // Update the active window with rolling 5-hour period
     this.updateActiveWindow(sessions, now);
-    
+
     // Identify current active session
     this.updateCurrentSession(sessions);
-    
+
     // Calculate session statistics
     this.calculateSessionStatistics();
-    
+
     return this.sessionTracking;
   }
 
@@ -70,13 +75,13 @@ export class SessionTracker {
   private convertBlocksToSessions(blocks: CCUsageBlock[]): SessionInfo[] {
     return blocks
       .map((block, index) => this.convertBlockToSession(block, index))
-      .filter(session => !session.isGap); // Filter out gap sessions
+      .filter((session) => !session.isGap); // Filter out gap sessions
   }
 
   private convertBlockToSession(block: CCUsageBlock, index: number): SessionInfo {
     const startTime = new Date(block.startTime);
     const endTime = this.determineEndTime(block);
-    
+
     return {
       id: block.id || this.generateSessionId(index),
       startTime,
@@ -87,7 +92,7 @@ export class SessionTracker {
       duration: this.calculateDuration(block.isActive, startTime, endTime),
       models: block.models || [],
       costUSD: block.costUSD || 0,
-      sessionType: this.determineSessionType(block)
+      sessionType: this.determineSessionType(block),
     };
   }
 
@@ -102,9 +107,7 @@ export class SessionTracker {
   }
 
   private calculateDuration(isActive: boolean, startTime: Date, endTime: Date): number {
-    return isActive 
-      ? Date.now() - startTime.getTime() 
-      : endTime.getTime() - startTime.getTime();
+    return isActive ? Date.now() - startTime.getTime() : endTime.getTime() - startTime.getTime();
   }
 
   private determineSessionType(block: CCUsageBlock): 'active' | 'gap' | 'completed' {
@@ -118,11 +121,9 @@ export class SessionTracker {
    */
   private updateActiveWindow(sessions: SessionInfo[], now: Date): void {
     const windowStart = new Date(now.getTime() - this.WINDOW_DURATION);
-    
+
     // Filter sessions within the 5-hour window
-    const sessionsInWindow = sessions.filter(session => 
-      session.startTime >= windowStart
-    );
+    const sessionsInWindow = sessions.filter((session) => session.startTime >= windowStart);
 
     this.sessionTracking.activeWindow = {
       id: this.sessionTracking.activeWindow.id,
@@ -132,7 +133,7 @@ export class SessionTracker {
       sessions: sessionsInWindow,
       totalTokens: sessionsInWindow.reduce((sum, session) => sum + session.tokensUsed, 0),
       totalCost: sessionsInWindow.reduce((sum, session) => sum + session.costUSD, 0),
-      isComplete: false
+      isComplete: false,
     };
 
     this.sessionTracking.sessionsInWindow = sessionsInWindow.length;
@@ -143,15 +144,15 @@ export class SessionTracker {
    * Identify and update the current active session
    */
   private updateCurrentSession(sessions: SessionInfo[]): void {
-    const activeSession = sessions.find(session => session.isActive);
-    
+    const activeSession = sessions.find((session) => session.isActive);
+
     if (activeSession) {
       this.sessionTracking.currentSession = activeSession;
       this.sessionTracking.lastActivity = new Date();
     } else {
       // Check if we should consider the last session as ongoing
       const lastSession = sessions[0]; // Assuming sessions are sorted by start time (newest first)
-      
+
       if (lastSession && this.isRecentActivity(lastSession)) {
         this.sessionTracking.currentSession = lastSession;
       } else {
@@ -165,8 +166,8 @@ export class SessionTracker {
    */
   private calculateSessionStatistics(): void {
     const { activeWindow } = this.sessionTracking;
-    const completedSessions = activeWindow.sessions.filter(s => !s.isActive);
-    
+    const completedSessions = activeWindow.sessions.filter((s) => !s.isActive);
+
     if (completedSessions.length > 0) {
       const totalDuration = completedSessions.reduce((sum, session) => sum + session.duration, 0);
       this.sessionTracking.averageSessionLength = totalDuration / completedSessions.length;
@@ -181,7 +182,7 @@ export class SessionTracker {
   private isRecentActivity(session: SessionInfo): boolean {
     const now = Date.now();
     const sessionEnd = session.endTime ? session.endTime.getTime() : session.startTime.getTime();
-    return (now - sessionEnd) < this.SESSION_GAP_THRESHOLD;
+    return now - sessionEnd < this.SESSION_GAP_THRESHOLD;
   }
 
   /**
@@ -196,21 +197,22 @@ export class SessionTracker {
     const { activeWindow, currentSession } = this.sessionTracking;
     const now = Date.now();
     const windowStart = activeWindow.startTime.getTime();
-    
+
     // Calculate window progress
     const windowElapsed = now - windowStart;
     const windowProgress = Math.min(100, (windowElapsed / this.WINDOW_DURATION) * 100);
-    
+
     // Calculate current session progress (assuming typical session is 1 hour)
-    const currentSessionProgress = currentSession ? 
-      Math.min(100, (currentSession.duration / (60 * 60 * 1000)) * 100) : 0;
-    
+    const currentSessionProgress = currentSession
+      ? Math.min(100, (currentSession.duration / (60 * 60 * 1000)) * 100)
+      : 0;
+
     // Calculate total active time in window
     const timeInWindow = activeWindow.sessions.reduce((sum, session) => {
       const sessionDuration = session.duration;
       return sum + sessionDuration;
     }, 0);
-    
+
     // Calculate efficiency (tokens per minute)
     const totalMinutes = timeInWindow / (1000 * 60);
     const efficiency = totalMinutes > 0 ? activeWindow.totalTokens / totalMinutes : 0;
@@ -219,7 +221,7 @@ export class SessionTracker {
       windowProgress,
       currentSessionProgress,
       timeInWindow,
-      efficiency
+      efficiency,
     };
   }
 
@@ -234,19 +236,23 @@ export class SessionTracker {
   } {
     const recentSessions = this.sessionTracking.recentSessions.slice(0, 3);
     const olderSessions = this.sessionTracking.recentSessions.slice(3, 6);
-    
-    const recentAverage = recentSessions.length > 0 ? 
-      recentSessions.reduce((sum, s) => sum + s.tokensUsed, 0) / recentSessions.length : 0;
-      
-    const historicalAverage = olderSessions.length > 0 ? 
-      olderSessions.reduce((sum, s) => sum + s.tokensUsed, 0) / olderSessions.length : 0;
-    
+
+    const recentAverage =
+      recentSessions.length > 0
+        ? recentSessions.reduce((sum, s) => sum + s.tokensUsed, 0) / recentSessions.length
+        : 0;
+
+    const historicalAverage =
+      olderSessions.length > 0
+        ? olderSessions.reduce((sum, s) => sum + s.tokensUsed, 0) / olderSessions.length
+        : 0;
+
     let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
     let trendPercentage = 0;
-    
+
     if (historicalAverage > 0) {
       trendPercentage = ((recentAverage - historicalAverage) / historicalAverage) * 100;
-      
+
       if (Math.abs(trendPercentage) > 15) {
         trend = trendPercentage > 0 ? 'increasing' : 'decreasing';
       }
@@ -256,7 +262,7 @@ export class SessionTracker {
       trend,
       recentAverage,
       historicalAverage,
-      trendPercentage: Math.round(trendPercentage * 10) / 10
+      trendPercentage: Math.round(trendPercentage * 10) / 10,
     };
   }
 
@@ -266,7 +272,7 @@ export class SessionTracker {
   formatDuration(milliseconds: number): string {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -285,8 +291,12 @@ export class SessionTracker {
    */
   private getTotalTokensFromBlock(block: CCUsageBlock): number {
     const counts = block.tokenCounts || {};
-    return (counts.inputTokens || 0) + (counts.outputTokens || 0) + 
-           (counts.cacheCreationInputTokens || 0) + (counts.cacheReadInputTokens || 0);
+    return (
+      (counts.inputTokens || 0) +
+      (counts.outputTokens || 0) +
+      (counts.cacheCreationInputTokens || 0) +
+      (counts.cacheReadInputTokens || 0)
+    );
   }
 
   /**
@@ -318,14 +328,14 @@ export class SessionTracker {
     const trend = this.getSessionTrend();
     const { currentSession, activeWindow } = this.sessionTracking;
 
-    const currentStatus = currentSession ? 
-      `Active session: ${this.formatDuration(currentSession.duration)}` :
-      'No active session';
+    const currentStatus = currentSession
+      ? `Active session: ${this.formatDuration(currentSession.duration)}`
+      : 'No active session';
 
     const windowSummary = `${activeWindow.sessions.length} sessions in 5h window`;
-    
-    const efficiency = progress.efficiency > 0 ? 
-      `${Math.round(progress.efficiency)} tokens/min` : 'No activity';
+
+    const efficiency =
+      progress.efficiency > 0 ? `${Math.round(progress.efficiency)} tokens/min` : 'No activity';
 
     let recommendation = '';
     if (trend.trend === 'increasing' && trend.trendPercentage > 30) {
@@ -342,7 +352,7 @@ export class SessionTracker {
       currentStatus,
       windowSummary,
       efficiency,
-      recommendation
+      recommendation,
     };
   }
 }

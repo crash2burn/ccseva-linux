@@ -22,7 +22,7 @@ export class NotificationService {
 
     // Create a unique identifier for this data state
     const dataIdentifier = `${data.status}-${Math.round(data.percentageUsed)}-${data.tokensUsed}`;
-    
+
     // Prevent duplicate notifications for the same data
     if (this.lastNotificationData === dataIdentifier || this.notificationInProgress) {
       return;
@@ -54,7 +54,7 @@ export class NotificationService {
       this.lastNotificationTime = now;
       this.lastWarningLevel = data.status;
       this.lastNotificationData = dataIdentifier;
-      
+
       // Reset notification lock after a short delay
       setTimeout(() => {
         this.notificationInProgress = false;
@@ -68,7 +68,7 @@ export class NotificationService {
         new Notification({
           title,
           body,
-          silent: false
+          silent: false,
         }).show();
       }
     } catch (error) {
@@ -82,7 +82,7 @@ export class NotificationService {
 
     const title = '📊 CCSeva: Daily Summary';
     const body = `Today: ${tokensUsed.toLocaleString()} tokens used, $${cost.toFixed(3)} spent`;
-    
+
     this.sendNotification(title, body);
   }
 }

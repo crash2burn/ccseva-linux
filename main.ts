@@ -24,7 +24,7 @@ class CCSevaApp {
 
   async initialize() {
     await app.whenReady();
-    
+
     this.createTray();
     this.createWindow();
     this.setupIPC();
@@ -46,10 +46,10 @@ class CCSevaApp {
     // Create a text-only menu bar (no icon)
     // Use an empty 1x1 transparent image as placeholder
     const emptyIcon = nativeImage.createEmpty();
-    
+
     this.tray = new Tray(emptyIcon);
     this.tray.setToolTip('CCSeva');
-    
+
     // Update tray title with usage percentage
     this.updateTrayTitle();
 
@@ -62,13 +62,12 @@ class CCSevaApp {
     try {
       const menuBarData = await this.usageService.getMenuBarData();
       this.cachedMenuBarData = menuBarData;
-      
+
       // Update tray title based on current display mode
       this.updateTrayDisplay();
-      
+
       // Check for notifications (auto source)
       this.notificationService.checkAndNotify(menuBarData, 'auto');
-      
     } catch (error) {
       console.error('Error updating tray title:', error);
       this.tray?.setTitle('--');
@@ -78,7 +77,7 @@ class CCSevaApp {
 
   private updateTrayDisplay() {
     if (!this.cachedMenuBarData) return;
-    
+
     if (this.showPercentage) {
       const percentage = Math.round(this.cachedMenuBarData.percentageUsed);
       this.tray?.setTitle(`${percentage}%`);
@@ -98,7 +97,7 @@ class CCSevaApp {
 
   private createWindow() {
     const { width } = screen.getPrimaryDisplay().workAreaSize;
-    
+
     this.window = new BrowserWindow({
       width: 600,
       height: 600,
@@ -112,8 +111,8 @@ class CCSevaApp {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        preload: path.join(__dirname, 'preload.js')
-      }
+        preload: path.join(__dirname, 'preload.js'),
+      },
     });
     // this.window.webContents.openDevTools();
 
@@ -171,7 +170,7 @@ class CCSevaApp {
     // Update every 30 seconds
     this.updateInterval = setInterval(async () => {
       await this.updateTrayTitle();
-      
+
       // Notify renderer if window is open
       if (this.window && !this.window.isDestroyed()) {
         this.window.webContents.send('usage-updated');
@@ -204,7 +203,6 @@ class CCSevaApp {
       }
     }
   }
-
 }
 
 // Initialize the app

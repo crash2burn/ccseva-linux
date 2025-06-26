@@ -33,7 +33,7 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
     const milliseconds = stats.resetInfo.timeUntilReset;
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -79,25 +79,19 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
             <span className="text-green-500">┌─</span> Claude Code Usage Monitor{' '}
             <span className="text-green-500">─┐</span>
           </div>
-          <div className="text-green-300 text-xs">
-            {new Date().toLocaleTimeString()}
-          </div>
+          <div className="text-green-300 text-xs">{new Date().toLocaleTimeString()}</div>
         </div>
-        <div className="text-green-500 text-xs mt-1">
-          └─ Real-time terminal interface ─┘
-        </div>
+        <div className="text-green-500 text-xs mt-1">└─ Real-time terminal interface ─┘</div>
       </div>
 
       {/* Token Usage Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
           <span className="text-green-400">TOKEN USAGE:</span>
-          <span className="text-white font-bold">
-            {animatedPercentage.toFixed(1)}%
-          </span>
+          <span className="text-white font-bold">{animatedPercentage.toFixed(1)}%</span>
           <span className="text-2xl">{getStatusEmoji()}</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <span className="text-green-500">[</span>
           <span className="text-yellow-400 transition-all duration-1000">
@@ -114,21 +108,17 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
       <div className="space-y-2">
         <div className="flex items-center gap-3">
           <span className="text-blue-400">TIME PROGRESS:</span>
-          <span className="text-white font-bold">
-            {getTimeProgress().toFixed(1)}%
-          </span>
+          <span className="text-white font-bold">{getTimeProgress().toFixed(1)}%</span>
           <span className="text-2xl">⏰</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <span className="text-blue-500">[</span>
           <span className="text-cyan-400 transition-all duration-1000">
             {generateTimeProgressBar(animatedTimeProgress)}
           </span>
           <span className="text-blue-500">]</span>
-          <span className="text-gray-400 text-xs">
-            {formatTimeUntilReset()} until reset
-          </span>
+          <span className="text-gray-400 text-xs">{formatTimeUntilReset()} until reset</span>
         </div>
       </div>
 
@@ -155,9 +145,7 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
         <div className="space-y-1">
           <div className="text-red-400 text-xs">COST TODAY:</div>
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold">
-              ${stats.today.totalCost.toFixed(3)}
-            </span>
+            <span className="text-white font-bold">${stats.today.totalCost.toFixed(3)}</span>
             <span className="text-gray-400 text-xs">USD</span>
             <span className="text-lg">💰</span>
           </div>
@@ -166,9 +154,7 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
         <div className="space-y-1">
           <div className="text-yellow-400 text-xs">REMAINING:</div>
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold">
-              {formatNumber(stats.tokensRemaining)}
-            </span>
+            <span className="text-white font-bold">{formatNumber(stats.tokensRemaining)}</span>
             <span className="text-gray-400 text-xs">tokens</span>
             <span className="text-lg">📈</span>
           </div>
@@ -182,9 +168,7 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div className="text-gray-400 text-xs">Active Sessions:</div>
-              <div className="text-white">
-                {stats.sessionTracking.sessionsInWindow} sessions
-              </div>
+              <div className="text-white">{stats.sessionTracking.sessionsInWindow} sessions</div>
             </div>
             <div className="space-y-1">
               <div className="text-gray-400 text-xs">Window Tokens:</div>
@@ -204,18 +188,27 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-xs">Trend:</span>
               <span className="text-white">
-                {stats.velocity.trend === 'increasing' ? '📈' : 
-                 stats.velocity.trend === 'decreasing' ? '📉' : '➡️'}
+                {stats.velocity.trend === 'increasing'
+                  ? '📈'
+                  : stats.velocity.trend === 'decreasing'
+                    ? '📉'
+                    : '➡️'}
                 {stats.velocity.trend}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-xs">Change:</span>
-              <span className={`text-sm ${
-                stats.velocity.trendPercent > 0 ? 'text-red-400' : 
-                stats.velocity.trendPercent < 0 ? 'text-green-400' : 'text-gray-400'
-              }`}>
-                {stats.velocity.trendPercent > 0 ? '+' : ''}{stats.velocity.trendPercent}%
+              <span
+                className={`text-sm ${
+                  stats.velocity.trendPercent > 0
+                    ? 'text-red-400'
+                    : stats.velocity.trendPercent < 0
+                      ? 'text-green-400'
+                      : 'text-gray-400'
+                }`}
+              >
+                {stats.velocity.trendPercent > 0 ? '+' : ''}
+                {stats.velocity.trendPercent}%
               </span>
             </div>
           </div>
@@ -246,7 +239,14 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
       {/* System Status */}
       <div className="text-xs text-gray-500 pt-2 border-t border-gray-700">
         <div className="flex justify-between">
-          <span>System: {stats.percentageUsed >= 90 ? 'CRITICAL' : stats.percentageUsed >= 70 ? 'WARNING' : 'NORMAL'}</span>
+          <span>
+            System:{' '}
+            {stats.percentageUsed >= 90
+              ? 'CRITICAL'
+              : stats.percentageUsed >= 70
+                ? 'WARNING'
+                : 'NORMAL'}
+          </span>
           <span>Uptime: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>

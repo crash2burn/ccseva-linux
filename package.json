@@ -13,10 +13,10 @@
     "dist:mac": "npm run build && electron-builder --mac",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
-    "format": "biome format --write ./src *.ts *.js",
-    "format:check": "biome format ./src *.ts *.js",
-    "check": "biome check ./src *.ts *.js",
-    "check:fix": "biome check --write ./src *.ts *.js",
+    "format": "biome format --write ./src",
+    "format:check": "biome format ./src",
+    "check": "biome check ./src",
+    "check:fix": "biome check --write ./src",
     "type-check": "tsc --noEmit"
   },
   "keywords": [

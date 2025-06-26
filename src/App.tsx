@@ -59,22 +59,22 @@ const App: React.FC = () => {
   const loadUsageStats = async (showLoading = true) => {
     try {
       if (showLoading) {
-        setState(prev => ({ ...prev, loading: true, error: null }));
+        setState((prev) => ({ ...prev, loading: true, error: null }));
       }
-      
+
       if (!window.electronAPI) {
         throw new Error('Electron API not available');
       }
-      
+
       const data = await window.electronAPI.getUsageStats();
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         stats: data,
         loading: false,
         error: null,
       }));
-      
+
       // Add success notification for manual refresh
       if (!showLoading) {
         addNotification({
@@ -85,8 +85,8 @@ const App: React.FC = () => {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load usage stats';
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         error: errorMessage,
         loading: false,
@@ -103,25 +103,25 @@ const App: React.FC = () => {
   // Force refresh data
   const refreshData = async () => {
     try {
-      setState(prev => ({ ...prev, error: null }));
-      
+      setState((prev) => ({ ...prev, error: null }));
+
       if (!window.electronAPI) {
         throw new Error('Electron API not available');
       }
-      
+
       const data = await window.electronAPI.refreshData();
-      
-      setState(prev => ({ ...prev, stats: data }));
-       addNotification({
+
+      setState((prev) => ({ ...prev, stats: data }));
+      addNotification({
         type: 'success',
         title: 'Data Refreshed',
         message: 'Latest usage data loaded',
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to refresh data';
-      
-      setState(prev => ({ ...prev, error: errorMessage }));
-      
+
+      setState((prev) => ({ ...prev, error: errorMessage }));
+
       addNotification({
         type: 'error',
         title: 'Refresh Failed',
@@ -131,14 +131,16 @@ const App: React.FC = () => {
   };
 
   // Add notification with auto-dismiss
-  const addNotification = (notification: Omit<AppState['notifications'][0], 'id' | 'timestamp'>) => {
+  const addNotification = (
+    notification: Omit<AppState['notifications'][0], 'id' | 'timestamp'>
+  ) => {
     const newNotification = {
       ...notification,
       id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
       timestamp: new Date(),
     };
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       notifications: [newNotification, ...prev.notifications.slice(0, 4)], // Keep max 5
     }));
@@ -151,15 +153,15 @@ const App: React.FC = () => {
 
   // Remove notification
   const removeNotification = (id: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      notifications: prev.notifications.filter(n => n.id !== id),
+      notifications: prev.notifications.filter((n) => n.id !== id),
     }));
   };
 
   // Update preferences
   const updatePreferences = (newPreferences: Partial<AppState['preferences']>) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       preferences: { ...prev.preferences, ...newPreferences },
     }));
@@ -167,9 +169,8 @@ const App: React.FC = () => {
 
   // Handle navigation
   const navigateTo = (view: ViewType) => {
-    setState(prev => ({ ...prev, currentView: view }));
+    setState((prev) => ({ ...prev, currentView: view }));
   };
-
 
   // Setup auto-refresh and event listeners
   useEffect(() => {
@@ -179,23 +180,26 @@ const App: React.FC = () => {
     const handleUsageUpdate = () => {
       if (state.preferences.autoRefresh) {
         // Silent update from main process - no notification needed
-        setState(prev => ({ ...prev, loading: true, error: null }));
-        
-        window.electronAPI.getUsageStats().then(data => {
-          setState(prev => ({
-            ...prev,
-            stats: data,
-            loading: false,
-            error: null,
-          }));
-        }).catch(err => {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to load usage stats';
-          setState(prev => ({
-            ...prev,
-            error: errorMessage,
-            loading: false,
-          }));
-        });
+        setState((prev) => ({ ...prev, loading: true, error: null }));
+
+        window.electronAPI
+          .getUsageStats()
+          .then((data) => {
+            setState((prev) => ({
+              ...prev,
+              stats: data,
+              loading: false,
+              error: null,
+            }));
+          })
+          .catch((err) => {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load usage stats';
+            setState((prev) => ({
+              ...prev,
+              error: errorMessage,
+              loading: false,
+            }));
+          });
       }
     };
 
@@ -282,8 +286,18 @@ const App: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center p-6">
           <div className="glass-card p-8 max-w-md w-full text-center">
             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
               </svg>
             </div>
             <h2 className="text-xl font-bold text-white mb-4">Connection Error</h2>
@@ -307,7 +321,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className="app-background" />
-      
+
       <div className="relative flex h-screen overflow-hidden">
         {/* Main Content - Full Width for Compact Mode */}
         <main className="flex-1 overflow-y-auto">
@@ -317,28 +331,34 @@ const App: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 flex-shrink-0">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                      <circle cx="12" cy="12" r="11" fill="#CC785C"/>
-                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C13.8214 20 15.4983 19.4024 16.8358 18.3914C15.8231 17.0375 15.1667 15.352 15.1667 13.5C15.1667 9.35786 11.8088 6 7.66667 6C7.25363 6 6.84888 6.04259 6.45976 6.12411C7.59756 4.81331 9.65863 4 12 4Z" fill="white"/>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-full h-full"
+                    >
+                      <circle cx="12" cy="12" r="11" fill="#CC785C" />
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C13.8214 20 15.4983 19.4024 16.8358 18.3914C15.8231 17.0375 15.1667 15.352 15.1667 13.5C15.1667 9.35786 11.8088 6 7.66667 6C7.25363 6 6.84888 6.04259 6.45976 6.12411C7.59756 4.81331 9.65863 4 12 4Z"
+                        fill="white"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h1 className="text-lg font-bold text-gradient mb-1">
-                      CCSeva
-                    </h1>
-                    <p className="text-xs text-neutral-400">
-                      Track API usage
-                    </p>
+                    <h1 className="text-lg font-bold text-gradient mb-1">CCSeva</h1>
+                    <p className="text-xs text-neutral-400">Track API usage</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <div className="glass px-2 py-1 rounded-lg">
                     <span className="text-xs text-neutral-300">
                       {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  
+
                   <Button
                     onClick={refreshData}
                     variant="ghost"
@@ -347,10 +367,15 @@ const App: React.FC = () => {
                     title="Refresh Data (⌘R)"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
                     </svg>
                   </Button>
-                  
+
                   <Button
                     onClick={() => window.electronAPI?.quitApp()}
                     variant="ghost"
@@ -359,7 +384,12 @@ const App: React.FC = () => {
                     title="Quit Application (⌘Q)"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </Button>
                 </div>
@@ -384,19 +414,12 @@ const App: React.FC = () => {
                 />
               )}
 
-
               {state.currentView === 'analytics' && (
-                <Analytics
-                  stats={currentStats}
-                  preferences={state.preferences}
-                />
+                <Analytics stats={currentStats} preferences={state.preferences} />
               )}
 
               {state.currentView === 'terminal' && (
-                <TerminalView
-                  stats={currentStats}
-                  onRefresh={refreshData}
-                />
+                <TerminalView stats={currentStats} onRefresh={refreshData} />
               )}
 
               {state.currentView === 'settings' && (
@@ -406,11 +429,9 @@ const App: React.FC = () => {
                   stats={currentStats}
                 />
               )}
-
             </div>
           </div>
         </main>
-
       </div>
     </ErrorBoundary>
   );

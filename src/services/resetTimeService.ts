@@ -1,7 +1,7 @@
-import { 
-  addDays, 
+import {
+  addDays,
   addMonths,
-  startOfDay, 
+  startOfDay,
   endOfDay,
   differenceInMilliseconds,
   differenceInDays,
@@ -12,14 +12,14 @@ import {
   setMilliseconds,
   isAfter,
   isBefore,
-  getDaysInMonth
+  getDaysInMonth,
 } from 'date-fns';
 import { toZonedTime, fromZonedTime, format as formatTz } from 'date-fns-tz';
 import type { ResetTimeInfo, UserConfiguration } from '../types/usage.js';
 
 export class ResetTimeService {
   private static instance: ResetTimeService;
-  
+
   // Default configuration based on Claude's standard reset time
   private defaultConfig: UserConfiguration = {
     resetHour: 9, // 9 AM Pacific (Claude's standard reset time)
@@ -27,10 +27,10 @@ export class ResetTimeService {
     updateInterval: 30000, // 30 seconds
     warningThresholds: {
       low: 70,
-      high: 90
+      high: 90,
     },
     plan: 'auto',
-    customTokenLimit: undefined
+    customTokenLimit: undefined,
   };
 
   private currentConfig: UserConfiguration;
@@ -63,19 +63,19 @@ export class ResetTimeService {
    */
   calculateResetInfo(currentDate: Date = new Date()): ResetTimeInfo {
     const { resetHour, timezone } = this.currentConfig;
-    
+
     // Convert current time to user's timezone
     const zonedNow = toZonedTime(currentDate, timezone);
-    
+
     // Calculate next reset time
     const nextReset = this.calculateNextResetTime(zonedNow, resetHour, timezone);
-    
+
     // Calculate time until reset
     const timeUntilReset = differenceInMilliseconds(nextReset, currentDate);
-    
+
     // Calculate billing cycle information
     const cycleInfo = this.calculateBillingCycleInfo(zonedNow, resetHour, timezone);
-    
+
     return {
       nextResetTime: nextReset.toISOString(),
       timeUntilReset: Math.max(0, timeUntilReset),
@@ -83,7 +83,7 @@ export class ResetTimeService {
       timezone,
       percentUntilReset: cycleInfo.percentCompleted,
       daysInCycle: cycleInfo.totalDays,
-      daysSinceReset: cycleInfo.daysElapsed
+      daysSinceReset: cycleInfo.daysElapsed,
     };
   }
 
@@ -93,13 +93,7 @@ export class ResetTimeService {
   private calculateNextResetTime(zonedNow: Date, resetHour: number, timezone: string): Date {
     // Create reset time for today
     let resetToday = setMilliseconds(
-      setSeconds(
-        setMinutes(
-          setHours(startOfDay(zonedNow), resetHour),
-          0
-        ),
-        0
-      ),
+      setSeconds(setMinutes(setHours(startOfDay(zonedNow), resetHour), 0), 0),
       0
     );
 
@@ -108,13 +102,7 @@ export class ResetTimeService {
       // Move to next month
       const nextMonth = addMonths(resetToday, 1);
       resetToday = setMilliseconds(
-        setSeconds(
-          setMinutes(
-            setHours(startOfDay(nextMonth), resetHour),
-            0
-          ),
-          0
-        ),
+        setSeconds(setMinutes(setHours(startOfDay(nextMonth), resetHour), 0), 0),
         0
       );
     }
@@ -126,20 +114,18 @@ export class ResetTimeService {
   /**
    * Calculate billing cycle information
    */
-  private calculateBillingCycleInfo(zonedNow: Date, resetHour: number, timezone: string): {
+  private calculateBillingCycleInfo(
+    zonedNow: Date,
+    resetHour: number,
+    timezone: string
+  ): {
     totalDays: number;
     daysElapsed: number;
     percentCompleted: number;
   } {
     // Find the start of current billing cycle (last reset)
     let currentCycleStart = setMilliseconds(
-      setSeconds(
-        setMinutes(
-          setHours(startOfDay(zonedNow), resetHour),
-          0
-        ),
-        0
-      ),
+      setSeconds(setMinutes(setHours(startOfDay(zonedNow), resetHour), 0), 0),
       0
     );
 
@@ -150,7 +136,7 @@ export class ResetTimeService {
 
     // Calculate next reset (end of current cycle)
     const nextReset = addMonths(currentCycleStart, 1);
-    
+
     // Calculate cycle information
     const totalDays = differenceInDays(nextReset, currentCycleStart);
     const daysElapsed = differenceInDays(zonedNow, currentCycleStart);
@@ -159,7 +145,7 @@ export class ResetTimeService {
     return {
       totalDays,
       daysElapsed,
-      percentCompleted
+      percentCompleted,
     };
   }
 
@@ -193,7 +179,7 @@ export class ResetTimeService {
   getFormattedResetTime(resetTime: string, timezone: string): string {
     const utcDate = new Date(resetTime);
     const zonedDate = toZonedTime(utcDate, timezone);
-    return formatTz(zonedDate, 'MMM d, yyyy \'at\' h:mm a zzz', { timeZone: timezone });
+    return formatTz(zonedDate, "MMM d, yyyy 'at' h:mm a zzz", { timeZone: timezone });
   }
 
   /**
@@ -207,24 +193,17 @@ export class ResetTimeService {
   /**
    * Get recommended daily token limit to last until reset
    */
-  calculateRecommendedDailyLimit(
-    tokensRemaining: number, 
-    resetInfo: ResetTimeInfo
-  ): number {
+  calculateRecommendedDailyLimit(tokensRemaining: number, resetInfo: ResetTimeInfo): number {
     const daysUntilReset = resetInfo.daysInCycle - resetInfo.daysSinceReset;
     if (daysUntilReset <= 0) return tokensRemaining;
-    
+
     return Math.floor(tokensRemaining / daysUntilReset);
   }
 
   /**
    * Determine if current usage is on track to last until reset
    */
-  isOnTrackForReset(
-    tokensUsed: number,
-    tokenLimit: number,
-    resetInfo: ResetTimeInfo
-  ): boolean {
+  isOnTrackForReset(tokensUsed: number, tokenLimit: number, resetInfo: ResetTimeInfo): boolean {
     const expectedUsageAtThisPoint = (resetInfo.percentUntilReset / 100) * tokenLimit;
     return tokensUsed <= expectedUsageAtThisPoint * 1.1; // Allow 10% buffer
   }
@@ -232,7 +211,7 @@ export class ResetTimeService {
   /**
    * Get available timezones for configuration
    */
-  static getCommonTimezones(): Array<{label: string, value: string}> {
+  static getCommonTimezones(): Array<{ label: string; value: string }> {
     return [
       { label: 'Pacific Time (Los Angeles)', value: 'America/Los_Angeles' },
       { label: 'Mountain Time (Denver)', value: 'America/Denver' },
@@ -242,7 +221,7 @@ export class ResetTimeService {
       { label: 'Central European Time (Paris)', value: 'Europe/Paris' },
       { label: 'Japan Standard Time (Tokyo)', value: 'Asia/Tokyo' },
       { label: 'Australian Eastern Time (Sydney)', value: 'Australia/Sydney' },
-      { label: 'UTC', value: 'UTC' }
+      { label: 'UTC', value: 'UTC' },
     ];
   }
 }

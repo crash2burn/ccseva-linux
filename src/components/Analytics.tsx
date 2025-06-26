@@ -36,20 +36,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
 
   const chartData = useMemo(() => {
     const rawData = timeRange === '7d' ? stats.thisWeek : stats.thisMonth;
-    
+
     return rawData.map((day, index) => ({
-      date: new Date(day.date).toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
+      date: new Date(day.date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       }),
-      shortDate: new Date(day.date).toLocaleDateString('en-US', { 
-        month: 'numeric', 
-        day: 'numeric' 
+      shortDate: new Date(day.date).toLocaleDateString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
       }),
       fullDate: day.date,
       totalTokens: day.totalTokens,
       totalCost: day.totalCost,
-      dayIndex: index
+      dayIndex: index,
     }));
   }, [stats, timeRange]);
 
@@ -58,7 +58,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
     if (!today.models || Object.keys(today.models).length === 0) {
       return [];
     }
-    
+
     return Object.entries(today.models).map(([model, data], index) => ({
       name: model
         .replace('claude-3-5-', '')
@@ -72,7 +72,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
       value: data.tokens,
       cost: data.cost,
       percentage: today.totalTokens > 0 ? (data.tokens / today.totalTokens) * 100 : 0,
-      color: index === 0 ? '#8B5CF6' : index === 1 ? '#3B82F6' : '#10B981'
+      color: index === 0 ? '#8B5CF6' : index === 1 ? '#3B82F6' : '#10B981',
     }));
   }, [stats]);
 
@@ -100,15 +100,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
 
   const getDepletionText = () => {
     if (!stats.predictedDepleted || stats.burnRate <= 0) return 'No depletion';
-    
+
     try {
       const depletionDate = new Date(stats.predictedDepleted);
       if (isNaN(depletionDate.getTime())) return 'No depletion';
-      
+
       const now = new Date();
       const diffTime = depletionDate.getTime() - now.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
+
       if (diffDays < 0) return 'Already depleted';
       if (diffDays === 0) return 'Today';
       if (diffDays === 1) return 'Tomorrow';
@@ -123,7 +123,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
   // Chart calculations
   const maxValue = useMemo(() => {
     if (chartData.length === 0) return 1;
-    const values = chartData.map(d => selectedMetric === 'tokens' ? d.totalTokens : d.totalCost);
+    const values = chartData.map((d) =>
+      selectedMetric === 'tokens' ? d.totalTokens : d.totalCost
+    );
     const max = Math.max(...values);
     return max > 0 ? max : 1;
   }, [chartData, selectedMetric]);
@@ -131,8 +133,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
   const chartWidth = chartDimensions.width;
   const chartHeight = chartDimensions.height;
   const padding = 40;
-  const plotWidth = chartWidth - (padding * 2);
-  const plotHeight = chartHeight - (padding * 2);
+  const plotWidth = chartWidth - padding * 2;
+  const plotHeight = chartHeight - padding * 2;
 
   // Generate chart path
   const generateChartPath = (type: ChartType) => {
@@ -142,22 +144,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
       const x = padding + (i / Math.max(chartData.length - 1, 1)) * plotWidth;
       const value = selectedMetric === 'tokens' ? d.totalTokens : d.totalCost;
       const normalizedValue = maxValue > 0 ? value / maxValue : 0;
-      const y = padding + plotHeight - (normalizedValue * plotHeight);
+      const y = padding + plotHeight - normalizedValue * plotHeight;
       return { x, y, value };
     });
 
     if (type === 'area') {
-      const pathData = points.map((point, i) => 
-        `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-      ).join(' ');
-      
+      const pathData = points
+        .map((point, i) => `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+        .join(' ');
+
       return `${pathData} L ${points[points.length - 1]?.x || padding} ${padding + plotHeight} L ${padding} ${padding + plotHeight} Z`;
     }
 
     if (type === 'line') {
-      return points.map((point, i) => 
-        `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-      ).join(' ');
+      return points.map((point, i) => `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
     }
 
     return '';
@@ -171,14 +171,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
       <div className="glass-card p-5">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-xl font-bold text-gradient mb-1">
-              Usage Analytics
-            </h2>
+            <h2 className="text-xl font-bold text-gradient mb-1">Usage Analytics</h2>
             <p className="text-sm text-neutral-400">
               Deep insights into your API consumption patterns
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="glass px-3 py-1 rounded-lg">
               <div className="flex items-center gap-2">
@@ -205,8 +203,18 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                     : 'text-neutral-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <svg className="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  className="w-4 h-4 inline mr-1.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
                 {range === '7d' ? '7 Days' : '30 Days'}
               </Button>
@@ -215,11 +223,21 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
 
           {/* Chart Type */}
           <div className="flex bg-neutral-800/50 rounded-xl p-1 backdrop-blur-sm border border-white/10">
-            {([
-              { type: 'area', label: 'Area', icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9' },
-              { type: 'line', label: 'Line', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
-              { type: 'bar', label: 'Bar', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10' }
-            ] as { type: ChartType; label: string; icon: string }[]).map(({ type, label, icon }) => (
+            {(
+              [
+                {
+                  type: 'area',
+                  label: 'Area',
+                  icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9',
+                },
+                { type: 'line', label: 'Line', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+                {
+                  type: 'bar',
+                  label: 'Bar',
+                  icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10',
+                },
+              ] as { type: ChartType; label: string; icon: string }[]
+            ).map(({ type, label, icon }) => (
               <Button
                 key={type}
                 onClick={() => setChartType(type)}
@@ -241,10 +259,16 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
 
           {/* Metric Toggle */}
           <div className="flex bg-neutral-800/50 rounded-xl p-1 backdrop-blur-sm border border-white/10">
-            {([
-              { metric: 'tokens', label: 'Tokens', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
-              { metric: 'cost', label: 'Cost', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1' }
-            ] as { metric: 'tokens' | 'cost'; label: string; icon: string }[]).map(({ metric, label, icon }) => (
+            {(
+              [
+                { metric: 'tokens', label: 'Tokens', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+                {
+                  metric: 'cost',
+                  label: 'Cost',
+                  icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1',
+                },
+              ] as { metric: 'tokens' | 'cost'; label: string; icon: string }[]
+            ).map(({ metric, label, icon }) => (
               <Button
                 key={metric}
                 onClick={() => setSelectedMetric(metric)}
@@ -268,15 +292,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
         {/* Summary Stats */}
         <div className="grid grid-cols-4 gap-3">
           <div className="glass p-3 rounded-xl text-center">
-            <div className="text-xl font-bold text-white mb-1">
-              {formatNumber(totalWeekTokens)}
-            </div>
+            <div className="text-xl font-bold text-white mb-1">{formatNumber(totalWeekTokens)}</div>
             <div className="text-xs text-neutral-400">Total Tokens (7d)</div>
           </div>
           <div className="glass p-3 rounded-xl text-center">
-            <div className="text-xl font-bold text-white mb-1">
-              {formatCurrency(totalWeekCost)}
-            </div>
+            <div className="text-xl font-bold text-white mb-1">{formatCurrency(totalWeekCost)}</div>
             <div className="text-xs text-neutral-400">Total Cost (7d)</div>
           </div>
           <div className="glass p-3 rounded-xl text-center">
@@ -286,9 +306,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
             <div className="text-xs text-neutral-400">Avg Daily Tokens</div>
           </div>
           <div className="glass p-3 rounded-xl text-center">
-            <div className="text-xl font-bold text-white mb-1">
-              {formatCurrency(avgDailyCost)}
-            </div>
+            <div className="text-xl font-bold text-white mb-1">{formatCurrency(avgDailyCost)}</div>
             <div className="text-xs text-neutral-400">Avg Daily Cost</div>
           </div>
         </div>
@@ -305,36 +323,41 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               {timeRange === '7d' ? 'Last 7 days' : 'Last 30 days'} • {chartType} visualization
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="glass px-3 py-1 rounded-lg">
               <span className="text-xs text-neutral-300">
-                Max: {selectedMetric === 'tokens' ? formatNumber(maxValue) : formatCurrency(maxValue)}
+                Max:{' '}
+                {selectedMetric === 'tokens' ? formatNumber(maxValue) : formatCurrency(maxValue)}
               </span>
             </div>
           </div>
         </div>
 
         {/* Chart Container */}
-        <div 
-          ref={chartContainerRef}
-          className="relative w-full"
-          style={{ height: chartHeight }}
-        >
+        <div ref={chartContainerRef} className="relative w-full" style={{ height: chartHeight }}>
           {chartWidth > 0 && (
-            <svg 
-              width={chartWidth} 
-              height={chartHeight} 
+            <svg
+              width={chartWidth}
+              height={chartHeight}
               className="absolute inset-0"
               style={{ overflow: 'visible' }}
             >
               <defs>
                 <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={selectedMetric === 'tokens' ? '#3B82F6' : '#10B981'} stopOpacity={0.3} />
-                  <stop offset="100%" stopColor={selectedMetric === 'tokens' ? '#3B82F6' : '#10B981'} stopOpacity={0.05} />
+                  <stop
+                    offset="0%"
+                    stopColor={selectedMetric === 'tokens' ? '#3B82F6' : '#10B981'}
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={selectedMetric === 'tokens' ? '#3B82F6' : '#10B981'}
+                    stopOpacity={0.05}
+                  />
                 </linearGradient>
               </defs>
-              
+
               {/* Grid Lines */}
               {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
                 <line
@@ -347,13 +370,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   strokeDasharray="2,2"
                 />
               ))}
-              
+
               {/* Y-Axis Labels */}
               {[1, 0.75, 0.5, 0.25, 0].map((ratio) => {
                 const value = maxValue * ratio;
                 const y = padding + plotHeight * (1 - ratio);
-                const displayValue = selectedMetric === 'tokens' ? formatNumber(value) : formatCurrency(value);
-                
+                const displayValue =
+                  selectedMetric === 'tokens' ? formatNumber(value) : formatCurrency(value);
+
                 return (
                   <text
                     key={ratio}
@@ -366,7 +390,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   </text>
                 );
               })}
-              
+
               {/* Chart Data */}
               {chartData.length > 0 && (
                 <>
@@ -378,7 +402,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                       strokeWidth="2"
                     />
                   )}
-                  
+
                   {chartType === 'line' && chartPath && (
                     <path
                       d={chartPath}
@@ -389,17 +413,20 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                       strokeLinejoin="round"
                     />
                   )}
-                  
+
                   {chartType === 'bar' && (
                     <>
                       {chartData.map((d, i) => {
-                        const barWidth = plotWidth / chartData.length * 0.7;
-                        const x = padding + (i * plotWidth / chartData.length) + (plotWidth / chartData.length - barWidth) / 2;
+                        const barWidth = (plotWidth / chartData.length) * 0.7;
+                        const x =
+                          padding +
+                          (i * plotWidth) / chartData.length +
+                          (plotWidth / chartData.length - barWidth) / 2;
                         const value = selectedMetric === 'tokens' ? d.totalTokens : d.totalCost;
                         const normalizedValue = maxValue > 0 ? value / maxValue : 0;
                         const barHeight = normalizedValue * plotHeight;
                         const y = padding + plotHeight - barHeight;
-                        
+
                         return (
                           <rect
                             key={i}
@@ -414,37 +441,41 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                       })}
                     </>
                   )}
-                  
+
                   {/* Data Points */}
-                  {chartType !== 'bar' && chartData.map((d, i) => {
-                    const x = padding + (i / Math.max(chartData.length - 1, 1)) * plotWidth;
-                    const value = selectedMetric === 'tokens' ? d.totalTokens : d.totalCost;
-                    const normalizedValue = maxValue > 0 ? value / maxValue : 0;
-                    const y = padding + plotHeight - (normalizedValue * plotHeight);
-                    
-                    return (
-                      <circle
-                        key={i}
-                        cx={x}
-                        cy={y}
-                        r="4"
-                        fill={selectedMetric === 'tokens' ? '#3B82F6' : '#10B981'}
-                        stroke="white"
-                        strokeWidth="2"
-                        className="hover:r-6 transition-all cursor-pointer"
-                      />
-                    );
-                  })}
+                  {chartType !== 'bar' &&
+                    chartData.map((d, i) => {
+                      const x = padding + (i / Math.max(chartData.length - 1, 1)) * plotWidth;
+                      const value = selectedMetric === 'tokens' ? d.totalTokens : d.totalCost;
+                      const normalizedValue = maxValue > 0 ? value / maxValue : 0;
+                      const y = padding + plotHeight - normalizedValue * plotHeight;
+
+                      return (
+                        <circle
+                          key={i}
+                          cx={x}
+                          cy={y}
+                          r="4"
+                          fill={selectedMetric === 'tokens' ? '#3B82F6' : '#10B981'}
+                          stroke="white"
+                          strokeWidth="2"
+                          className="hover:r-6 transition-all cursor-pointer"
+                        />
+                      );
+                    })}
                 </>
               )}
-              
+
               {/* X-Axis Labels */}
               {chartData.map((d, i) => {
-                const x = chartType === 'bar' 
-                  ? padding + (i * plotWidth / chartData.length) + (plotWidth / chartData.length) / 2
-                  : padding + (i / Math.max(chartData.length - 1, 1)) * plotWidth;
+                const x =
+                  chartType === 'bar'
+                    ? padding +
+                      (i * plotWidth) / chartData.length +
+                      plotWidth / chartData.length / 2
+                    : padding + (i / Math.max(chartData.length - 1, 1)) * plotWidth;
                 const y = chartHeight - 10;
-                
+
                 return (
                   <text
                     key={i}
@@ -459,13 +490,23 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               })}
             </svg>
           )}
-          
+
           {/* Empty State */}
           {chartData.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-neutral-400">
-                <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <svg
+                  className="w-16 h-16 mx-auto mb-4 opacity-50"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
                 </svg>
                 <p className="text-sm">No data available</p>
               </div>
@@ -483,11 +524,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               <h3 className="text-lg font-bold text-white mb-1">Model Distribution</h3>
               <p className="text-sm text-neutral-400">Today's usage by AI model</p>
             </div>
-            
+
             <div className="glass px-3 py-1 rounded-lg">
-              <span className="text-xs text-neutral-300">
-                {modelBreakdownData.length} models
-              </span>
+              <span className="text-xs text-neutral-300">{modelBreakdownData.length} models</span>
             </div>
           </div>
 
@@ -504,13 +543,17 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                     stroke="rgba(255, 255, 255, 0.1)"
                     strokeWidth="16"
                   />
-                  
+
                   {modelBreakdownData.map((model, index) => {
                     const circumference = 2 * Math.PI * 60;
                     const strokeDasharray = circumference;
-                    const strokeDashoffset = circumference - (model.percentage / 100) * circumference;
-                    const rotation = modelBreakdownData.slice(0, index).reduce((sum, prev) => sum + prev.percentage, 0) * 3.6;
-                    
+                    const strokeDashoffset =
+                      circumference - (model.percentage / 100) * circumference;
+                    const rotation =
+                      modelBreakdownData
+                        .slice(0, index)
+                        .reduce((sum, prev) => sum + prev.percentage, 0) * 3.6;
+
                     return (
                       <circle
                         key={model.name}
@@ -525,14 +568,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                         strokeLinecap="round"
                         style={{
                           transformOrigin: '80px 80px',
-                          transform: `rotate(${rotation}deg)`
+                          transform: `rotate(${rotation}deg)`,
                         }}
                         className="transition-all duration-500"
                       />
                     );
                   })}
                 </svg>
-                
+
                 {/* Center Content */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
@@ -547,7 +590,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               {/* Model List */}
               <div className="flex-1 space-y-3">
                 {modelBreakdownData.map((model) => (
-                  <div key={model.name} className="flex items-center justify-between p-4 glass rounded-xl">
+                  <div
+                    key={model.name}
+                    className="flex items-center justify-between p-4 glass rounded-xl"
+                  >
                     <div className="flex items-center gap-4">
                       <div
                         className="w-5 h-5 rounded-full"
@@ -555,17 +601,17 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                       />
                       <div>
                         <div className="text-base font-bold text-white">{model.name}</div>
-                        <div className="text-sm text-neutral-400">{model.percentage.toFixed(1)}% usage</div>
+                        <div className="text-sm text-neutral-400">
+                          {model.percentage.toFixed(1)}% usage
+                        </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-right">
                       <div className="text-base font-bold text-white">
                         {formatNumber(model.value)}
                       </div>
-                      <div className="text-sm text-neutral-400">
-                        {formatCurrency(model.cost)}
-                      </div>
+                      <div className="text-sm text-neutral-400">{formatCurrency(model.cost)}</div>
                     </div>
                   </div>
                 ))}
@@ -573,8 +619,18 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
             </div>
           ) : (
             <div className="text-center py-12 text-neutral-400">
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg
+                className="w-16 h-16 mx-auto mb-4 opacity-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
               <p className="text-sm">No model usage data available</p>
             </div>
@@ -596,8 +652,18 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                      />
                     </svg>
                   </div>
                   <div>
@@ -607,24 +673,29 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                     <div className="text-sm text-neutral-400">Burn Rate</div>
                   </div>
                 </div>
-                
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  stats.burnRate > 1000 
-                    ? 'bg-red-500/20 text-red-300' 
-                    : stats.burnRate > 500 
-                      ? 'bg-yellow-500/20 text-yellow-300'
-                      : 'bg-green-500/20 text-green-300'
-                }`}>
+
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    stats.burnRate > 1000
+                      ? 'bg-red-500/20 text-red-300'
+                      : stats.burnRate > 500
+                        ? 'bg-yellow-500/20 text-yellow-300'
+                        : 'bg-green-500/20 text-green-300'
+                  }`}
+                >
                   {stats.burnRate > 1000 ? 'High' : stats.burnRate > 500 ? 'Moderate' : 'Normal'}
                 </div>
               </div>
-              
+
               <div className="text-xs text-neutral-400 mb-2">tokens per hour</div>
               <div className="w-full bg-neutral-800 rounded-full h-2">
-                <div 
+                <div
                   className={`h-2 rounded-full transition-all duration-1000 ${
-                    stats.burnRate > 1000 ? 'bg-red-500' : 
-                    stats.burnRate > 500 ? 'bg-yellow-500' : 'bg-green-500'
+                    stats.burnRate > 1000
+                      ? 'bg-red-500'
+                      : stats.burnRate > 500
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
                   }`}
                   style={{ width: `${Math.min((stats.burnRate / 2000) * 100, 100)}%` }}
                 />
@@ -636,8 +707,18 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      />
                     </svg>
                   </div>
                   <div>
@@ -648,10 +729,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-xs text-neutral-400 mb-2">plan utilization</div>
               <div className="w-full bg-neutral-800 rounded-full h-2">
-                <div 
+                <div
                   className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
                   style={{ width: `${Math.min(stats.percentageUsed, 100)}%` }}
                 />
@@ -663,19 +744,27 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-white">
-                      {getDepletionText()}
-                    </div>
+                    <div className="text-xl font-bold text-white">{getDepletionText()}</div>
                     <div className="text-sm text-neutral-400">Depletion</div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-xs text-neutral-400">at current burn rate</div>
             </div>
 
@@ -684,22 +773,31 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                      />
                     </svg>
                   </div>
                   <div>
                     <div className="text-xl font-bold text-white">
-                      {stats.today.totalTokens > 0 
+                      {stats.today.totalTokens > 0
                         ? formatCurrency((stats.today.totalCost / stats.today.totalTokens) * 1000)
-                        : '$0.000'
-                      }
+                        : '$0.000'}
                     </div>
                     <div className="text-sm text-neutral-400">Avg Cost</div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-xs text-neutral-400">per 1,000 tokens</div>
             </div>
           </div>

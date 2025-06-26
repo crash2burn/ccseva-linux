@@ -38,7 +38,11 @@
       },
       "complexity": {
         "noExcessiveCognitiveComplexity": "warn"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
       }
+
     }
   },
   "formatter": {

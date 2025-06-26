@@ -23,7 +23,12 @@ const DashboardIcon = () => (
 const AnalyticsIcon = () => (
   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <title>Analytics</title>
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12v4m0 0v4m0-4h4m-4 0H3m14-8v8m0 0v4m0-4h4m-4 0h-4m-6-8V8m0 0V4m0 4h4m-4 0H3" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M7 12v4m0 0v4m0-4h4m-4 0H3m14-8v8m0 0v4m0-4h4m-4 0h-4m-6-8V8m0 0V4m0 4h4m-4 0H3"
+    />
   </svg>
 );
 
@@ -38,7 +43,12 @@ const TerminalIcon = () => (
 const SettingsIcon = () => (
   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <title>Settings</title>
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+    />
     <circle cx="12" cy="12" r="3" strokeWidth={1.5} />
   </svg>
 );
@@ -48,32 +58,32 @@ const tabs = [
     id: 'dashboard' as ViewType,
     name: 'Dashboard',
     icon: DashboardIcon,
-    description: 'Overview and quick stats'
+    description: 'Overview and quick stats',
   },
   {
     id: 'analytics' as ViewType,
-    name: 'Analytics', 
+    name: 'Analytics',
     icon: AnalyticsIcon,
-    description: 'Usage trends and insights'
+    description: 'Usage trends and insights',
   },
   {
     id: 'terminal' as ViewType,
     name: 'Terminal',
     icon: TerminalIcon,
-    description: 'Terminal-style interface'
+    description: 'Terminal-style interface',
   },
   {
     id: 'settings' as ViewType,
     name: 'Settings',
     icon: SettingsIcon,
-    description: 'Application settings'
-  }
+    description: 'Application settings',
+  },
 ];
 
 export const NavigationTabs: React.FC<NavigationTabsProps> = ({
   currentView,
   onNavigate,
-  className = ''
+  className = '',
 }) => {
   return (
     <Tabs
@@ -92,9 +102,7 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
               title={tab.description}
             >
               <IconComponent />
-              <span className="hidden sm:inline font-primary text-xs">
-                {tab.name}
-              </span>
+              <span className="hidden sm:inline font-primary text-xs">{tab.name}</span>
             </TabsTrigger>
           );
         })}

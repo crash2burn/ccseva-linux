@@ -39,15 +39,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <div className="h-screen w-full gradient-bg flex items-center justify-center p-6">
           <div className="glass-card max-w-lg w-full text-center stagger-children">
-            
             {/* Error Icon */}
             <div className="text-6xl mb-6 floating">💥</div>
-            
+
             {/* Error Title */}
-            <h2 className="text-white text-2xl font-bold mb-4 text-shadow">
-              Something went wrong
-            </h2>
-            
+            <h2 className="text-white text-2xl font-bold mb-4 text-shadow">Something went wrong</h2>
+
             {/* Error Description */}
             <p className="text-white/80 text-base mb-6 leading-relaxed">
               An unexpected error occurred in the application. This might be a temporary issue.
