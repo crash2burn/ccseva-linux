@@ -11,6 +11,56 @@ import { ResetTimeService } from './resetTimeService.js';
 import { SessionTracker } from './sessionTracker.js';
 import { loadSessionBlockData, loadDailyUsageData } from 'ccusage/data-loader';
 
+interface ModelBreakdown {
+  modelName: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
+  cost: number;
+}
+
+interface DailyDataEntry {
+  date: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
+  totalCost: number;
+  modelBreakdowns: ModelBreakdown[];
+}
+
+interface UsageDataItem {
+  date: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheCreationTokens?: number;
+  totalCost?: number;
+  cost?: number;
+  modelBreakdowns?: ModelBreakdown[];
+}
+
+// Define SessionBlock interface matching ccusage package structure
+interface LoadedUsageEntry {
+  timestamp: Date;
+  usage: {
+    inputTokens: number;
+    outputTokens: number;
+    cacheCreationInputTokens: number;
+    cacheReadInputTokens: number;
+  };
+  costUSD: number | null;
+  model: string;
+  version?: string;
+}
+
+interface TokenCounts {
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationInputTokens: number;
+  cacheReadInputTokens: number;
+}
+
 interface SessionBlock {
   id: string;
   startTime: Date;
@@ -18,13 +68,8 @@ interface SessionBlock {
   actualEndTime?: Date;
   isActive: boolean;
   isGap?: boolean;
-  entries: any[];
-  tokenCounts: {
-    inputTokens: number;
-    outputTokens: number;
-    cacheCreationInputTokens: number;
-    cacheReadInputTokens: number;
-  };
+  entries: LoadedUsageEntry[];
+  tokenCounts: TokenCounts;
   costUSD: number;
   models: string[];
 }
@@ -105,7 +150,7 @@ export class CCUsageService {
   /**
    * Parse blocks data similar to Python implementation
    */
-  private parseBlocksData(blocks: SessionBlock[], dailyData?: any[]): UsageStats {
+  private parseBlocksData(blocks: SessionBlock[], dailyData?: DailyDataEntry[]): UsageStats {
     // Find active block
     const activeBlock = blocks.find((block) => block.isActive && !block.isGap);
 
@@ -153,8 +198,8 @@ export class CCUsageService {
           day.inputTokens + day.outputTokens + day.cacheCreationTokens + day.cacheReadTokens,
         totalCost: day.totalCost,
         models: day.modelBreakdowns
-          .filter((mb: any) => mb.modelName !== '<synthetic>')
-          .reduce((acc: any, mb: any) => {
+          .filter((mb: ModelBreakdown) => mb.modelName !== '<synthetic>')
+          .reduce((acc: { [key: string]: { tokens: number; cost: number } }, mb: ModelBreakdown) => {
             acc[mb.modelName] = {
               tokens:
                 mb.inputTokens + mb.outputTokens + mb.cacheCreationTokens + mb.cacheReadTokens,
@@ -321,22 +366,24 @@ export class CCUsageService {
         });
       }
 
-      const daily = dailyMap.get(date)!;
-      const blockTokens = this.getTotalTokensFromBlock(block);
-      daily.totalTokens += blockTokens;
-      daily.totalCost += block.costUSD;
+      const daily = dailyMap.get(date);
+      if (daily) {
+        const blockTokens = this.getTotalTokensFromBlock(block);
+        daily.totalTokens += blockTokens;
+        daily.totalCost += block.costUSD;
 
-      // Aggregate model usage, filtering out synthetic
-      const realModels = block.models.filter((m) => m !== '<synthetic>');
-      for (const model of realModels) {
-        if (!daily.models[model]) {
-          daily.models[model] = { tokens: 0, cost: 0 };
+        // Aggregate model usage, filtering out synthetic
+        const realModels = block.models.filter((m: string) => m !== '<synthetic>');
+        for (const model of realModels) {
+          if (!daily.models[model]) {
+            daily.models[model] = { tokens: 0, cost: 0 };
+          }
+          // Approximate token distribution across models
+          const modelTokens = Math.floor(blockTokens / realModels.length);
+          const modelCost = block.costUSD / realModels.length;
+          daily.models[model].tokens += modelTokens;
+          daily.models[model].cost += modelCost;
         }
-        // Approximate token distribution across models
-        const modelTokens = Math.floor(blockTokens / realModels.length);
-        const modelCost = block.costUSD / realModels.length;
-        daily.models[model].tokens += modelTokens;
-        daily.models[model].cost += modelCost;
       }
     }
 
@@ -560,29 +607,45 @@ export class CCUsageService {
     return depletionDate.toISOString();
   }
 
-  private groupByModel(data: any[]): { [key: string]: { tokens: number; cost: number } } {
+  private groupByModel(data: UsageDataItem[]): { [key: string]: { tokens: number; cost: number } } {
     const models: { [key: string]: { tokens: number; cost: number } } = {};
 
-    data.forEach((item) => {
-      if (item.modelBreakdowns && Array.isArray(item.modelBreakdowns)) {
-        item.modelBreakdowns.forEach((breakdown: any) => {
-          const modelName = breakdown.modelName || 'unknown';
-          if (!models[modelName]) {
-            models[modelName] = { tokens: 0, cost: 0 };
-          }
-          models[modelName].tokens +=
-            (breakdown.inputTokens || 0) +
-            (breakdown.outputTokens || 0) +
-            (breakdown.cacheCreationTokens || 0);
-          models[modelName].cost += breakdown.cost || 0;
-        });
-      }
-    });
+    for (const item of data) {
+      this.processItemModelBreakdowns(item, models);
+    }
 
     return models;
   }
 
-  private groupByDay(data: any[], days: number): DailyUsage[] {
+  private processItemModelBreakdowns(
+    item: UsageDataItem,
+    models: { [key: string]: { tokens: number; cost: number } }
+  ): void {
+    if (!item.modelBreakdowns || !Array.isArray(item.modelBreakdowns)) {
+      return;
+    }
+
+    for (const breakdown of item.modelBreakdowns) {
+      this.aggregateModelData(breakdown, models);
+    }
+  }
+
+  private aggregateModelData(
+    breakdown: ModelBreakdown,
+    models: { [key: string]: { tokens: number; cost: number } }
+  ): void {
+    const modelName = breakdown.modelName || 'unknown';
+    if (!models[modelName]) {
+      models[modelName] = { tokens: 0, cost: 0 };
+    }
+    models[modelName].tokens +=
+      (breakdown.inputTokens || 0) +
+      (breakdown.outputTokens || 0) +
+      (breakdown.cacheCreationTokens || 0);
+    models[modelName].cost += breakdown.cost || 0;
+  }
+
+  private groupByDay(data: UsageDataItem[], days: number): DailyUsage[] {
     const result: DailyUsage[] = [];
     const now = new Date();
 
@@ -664,7 +727,7 @@ export class CCUsageService {
   /**
    * Calculate burn rate from daily data (for legacy compatibility)
    */
-  private calculateBurnRate(data: any[]): number {
+  private calculateBurnRate(data: UsageDataItem[]): number {
     const last24Hours = data.filter((item) => {
       const itemDate = new Date(item.date);
       const now = new Date();
@@ -683,7 +746,7 @@ export class CCUsageService {
   /**
    * Calculate enhanced velocity information based on Python implementation
    */
-  private calculateVelocityInfo(data: any[]): VelocityInfo {
+  private calculateVelocityInfo(data: UsageDataItem[]): VelocityInfo {
     const now = new Date();
 
     // Current burn rate (last 24 hours)
@@ -785,7 +848,7 @@ export class CCUsageService {
   /**
    * Calculate average burn rate for a given dataset
    */
-  private calculateAverageBurnRate(data: any[]): number {
+  private calculateAverageBurnRate(data: UsageDataItem[]): number {
     if (data.length === 0) return 0;
 
     const totalTokens = data.reduce((sum, item) => {
@@ -801,7 +864,7 @@ export class CCUsageService {
   /**
    * Calculate peak usage hour (simplified version)
    */
-  private calculatePeakUsageHour(data: any[]): number {
+  private calculatePeakUsageHour(data: UsageDataItem[]): number {
     // Simplified: assume afternoon hours are peak usage
     // In a real implementation, this would analyze hourly usage patterns
     return 14; // 2 PM

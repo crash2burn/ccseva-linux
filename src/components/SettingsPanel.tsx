@@ -298,7 +298,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
                 >
                   {Array.from({ length: 24 }, (_, i) => (
-                    <option key={`hour-${i}`} value={i} className="bg-gray-800">
+                    <option key={`reset-hour-${i.toString().padStart(2, '0')}`} value={i} className="bg-gray-800">
                       {i.toString().padStart(2, '0')}:00
                     </option>
                   ))}

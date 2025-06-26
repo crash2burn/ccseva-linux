@@ -42,27 +42,24 @@ const ModelUsageItem = ({ modelName, modelData, totalTokens, index }: {
   );
 };
 
-interface DashboardProps {
-  stats: UsageStats;
-  status: 'safe' | 'warning' | 'critical';
-  timeRemaining: string;
-  onRefresh: () => void;
-}
+// Helper for formatting numbers and currency
+const formatNumber = (num: number) => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toLocaleString();
+};
 
-export const Dashboard: React.FC<DashboardProps> = ({
-  stats,
-  status,
-  timeRemaining,
-  onRefresh,
-}) => {
-  const [isRefreshing, setIsRefreshing] = useState(false);
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    onRefresh();
-    setTimeout(() => setIsRefreshing(false), 500);
-  };
-
+// Helper for getting status-related values
+const getStatusHelpers = (status: 'safe' | 'warning' | 'critical') => {
   const getStatusColor = () => {
     switch (status) {
       case 'critical':
@@ -85,44 +82,137 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   };
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toLocaleString();
-  };
+  return { getStatusColor, getStatusIcon };
+};
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+// Helper for time calculations
+const getTimeProgress = (resetInfo?: { timeUntilReset: number }): number => {
+  if (!resetInfo?.timeUntilReset) return 0;
 
-  // Calculate time progress through reset cycle (like Python script)
-  const getTimeProgress = (): number => {
-    if (!stats.resetInfo?.timeUntilReset) return 0;
+  const totalCycleDuration = 24 * 60 * 60 * 1000;
+  const timeElapsed = totalCycleDuration - resetInfo.timeUntilReset;
 
-    // Assuming a 24-hour cycle for daily resets
-    const totalCycleDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-    const timeElapsed = totalCycleDuration - stats.resetInfo.timeUntilReset;
+  return Math.max(0, Math.min(100, (timeElapsed / totalCycleDuration) * 100));
+};
 
-    return Math.max(0, Math.min(100, (timeElapsed / totalCycleDuration) * 100));
-  };
+const formatTimeUntilReset = (resetInfo?: { timeUntilReset: number }): string => {
+  if (!resetInfo?.timeUntilReset) return 'No reset info';
 
-  // Format time until reset
-  const formatTimeUntilReset = (): string => {
-    if (!stats.resetInfo?.timeUntilReset) return 'No reset info';
+  const milliseconds = resetInfo.timeUntilReset;
+  const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
 
-    const milliseconds = stats.resetInfo.timeUntilReset;
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes}m`;
+};
 
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
+// Component for circular progress charts
+const CircularProgressChart: React.FC<{
+  percentage: number;
+  status?: 'safe' | 'warning' | 'critical';
+  label: string;
+  subtitle: string;
+  emoji: string;
+  isTime?: boolean;
+}> = ({ percentage, status, label, subtitle, emoji, isTime }) => (
+  <div className="flex items-center justify-center">
+    <div className="relative">
+      <svg width="180" height="180" className="transform -rotate-90">
+        <circle
+          cx="90"
+          cy="90"
+          r="75"
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.1)"
+          strokeWidth="8"
+        />
+        <circle
+          cx="90"
+          cy="90"
+          r="75"
+          fill="none"
+          stroke={isTime ? "url(#gradient-time)" : `url(#gradient-token-${status})`}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={`${2 * Math.PI * 75}`}
+          strokeDashoffset={`${2 * Math.PI * 75 * (1 - percentage / 100)}`}
+          className="transition-all duration-1000 ease-out"
+        />
+        {!isTime && status && (
+          <defs>
+            <linearGradient id={`gradient-token-${status}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop
+                offset="0%"
+                stopColor={
+                  status === 'critical'
+                    ? '#ef4444'
+                    : status === 'warning'
+                      ? '#f59e0b'
+                      : '#10b981'
+                }
+              />
+              <stop
+                offset="100%"
+                stopColor={
+                  status === 'critical'
+                    ? '#dc2626'
+                    : status === 'warning'
+                      ? '#d97706'
+                      : '#059669'
+                }
+              />
+            </linearGradient>
+          </defs>
+        )}
+        {isTime && (
+          <defs>
+            <linearGradient id="gradient-time" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(204, 120, 92, 1)" />
+              <stop offset="100%" stopColor="rgba(255, 107, 53, 1)" />
+            </linearGradient>
+          </defs>
+        )}
+      </svg>
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-3xl font-bold text-neutral-100 mb-1 font-primary">
+            {Math.round(percentage)}%
+          </div>
+          <div className="text-sm text-neutral-400 uppercase tracking-wide font-primary">
+            {label}
+          </div>
+          <div className="text-xs text-neutral-500 mt-1 font-primary">
+            {emoji} {subtitle}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+interface DashboardProps {
+  stats: UsageStats;
+  status: 'safe' | 'warning' | 'critical';
+  timeRemaining: string;
+  onRefresh: () => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({
+  stats,
+  status,
+  timeRemaining,
+  onRefresh,
+}) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { getStatusColor, getStatusIcon } = getStatusHelpers(status);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    onRefresh();
+    setTimeout(() => setIsRefreshing(false), 500);
   };
 
   return (
@@ -163,125 +253,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Dual Progress Display - Token and Time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {/* Token Usage Circle */}
-          <div className="flex items-center justify-center">
-            <div className="relative">
-              <svg width="180" height="180" className="transform -rotate-90">
-                {/* Background circle */}
-                <circle
-                  cx="90"
-                  cy="90"
-                  r="75"
-                  fill="none"
-                  stroke="rgba(255, 255, 255, 0.1)"
-                  strokeWidth="8"
-                />
-                {/* Progress circle */}
-                <circle
-                  cx="90"
-                  cy="90"
-                  r="75"
-                  fill="none"
-                  stroke={`url(#gradient-token-${status})`}
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 75}`}
-                  strokeDashoffset={`${2 * Math.PI * 75 * (1 - stats.percentageUsed / 100)}`}
-                  className="transition-all duration-1000 ease-out"
-                />
-                <defs>
-                  <linearGradient id={`gradient-token-${status}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop
-                      offset="0%"
-                      stopColor={
-                        status === 'critical'
-                          ? '#ef4444'
-                          : status === 'warning'
-                            ? '#f59e0b'
-                            : '#10b981'
-                      }
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={
-                        status === 'critical'
-                          ? '#dc2626'
-                          : status === 'warning'
-                            ? '#d97706'
-                            : '#059669'
-                      }
-                    />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Center content */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-neutral-100 mb-1 font-primary">
-                    {Math.round(stats.percentageUsed)}%
-                  </div>
-                  <div className="text-sm text-neutral-400 uppercase tracking-wide font-primary">
-                    Tokens
-                  </div>
-                  <div className="text-xs text-neutral-500 mt-1 font-primary">
-                    {getStatusIcon()} {status}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Time Progress Circle */}
-          <div className="flex items-center justify-center">
-            <div className="relative">
-              <svg width="180" height="180" className="transform -rotate-90">
-                {/* Background circle */}
-                <circle
-                  cx="90"
-                  cy="90"
-                  r="75"
-                  fill="none"
-                  stroke="rgba(255, 255, 255, 0.1)"
-                  strokeWidth="8"
-                />
-                {/* Time progress circle */}
-                <circle
-                  cx="90"
-                  cy="90"
-                  r="75"
-                  fill="none"
-                  stroke="url(#gradient-time)"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 75}`}
-                  strokeDashoffset={`${2 * Math.PI * 75 * (1 - getTimeProgress() / 100)}`}
-                  className="transition-all duration-1000 ease-out"
-                />
-                <defs>
-                  <linearGradient id="gradient-time" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="rgba(204, 120, 92, 1)" />
-                    <stop offset="100%" stopColor="rgba(255, 107, 53, 1)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              {/* Center content */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-neutral-100 mb-1 font-primary">
-                    {Math.round(getTimeProgress())}%
-                  </div>
-                  <div className="text-sm text-neutral-400 uppercase tracking-wide font-primary">
-                    Time
-                  </div>
-                  <div className="text-xs text-neutral-500 mt-1 font-primary">
-                    {formatTimeUntilReset()}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CircularProgressChart
+            percentage={stats.percentageUsed}
+            status={status}
+            label="Tokens"
+            subtitle={status}
+            emoji={getStatusIcon()}
+          />
+          
+          <CircularProgressChart
+            percentage={getTimeProgress(stats.resetInfo)}
+            label="Time"
+            subtitle={formatTimeUntilReset(stats.resetInfo)}
+            emoji="⏰"
+            isTime={true}
+          />
         </div>
 
         {/* Key Metrics Row */}

@@ -48,6 +48,56 @@ const formatNumber = (num: number) => {
   return num.toLocaleString();
 };
 
+// Component to render log entries
+const LogEntryComponent: React.FC<{ log: LogEntry }> = ({ log }) => (
+  <div
+    className={`flex items-start gap-2 ${
+      log.type === 'error'
+        ? 'text-red-400'
+        : log.type === 'warning'
+          ? 'text-yellow-400'
+          : log.type === 'success'
+            ? 'text-green-400'
+            : 'text-neutral-300'
+    }`}
+  >
+    <span className="text-neutral-500 text-xs w-16 flex-shrink-0">
+      {log.timestamp.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })}
+    </span>
+    <span className="text-sm">{log.emoji}</span>
+    <span className="flex-1">{log.message}</span>
+  </div>
+);
+
+// Component for status overview cards
+const StatusCard: React.FC<{
+  title: string;
+  emoji: string;
+  value: string;
+  progress: number;
+  colorClass: string;
+  subtitle: string;
+}> = ({ title, emoji, value, progress, colorClass, subtitle }) => (
+  <div className="glass p-4 rounded-xl">
+    <div className="flex items-center justify-between mb-2">
+      <span className="text-sm text-neutral-400">{title}</span>
+      <span className="text-lg">{emoji}</span>
+    </div>
+    <div className="text-2xl font-bold text-white mb-2">{value}</div>
+    <div className="w-full bg-neutral-800 rounded-full h-3 mb-2">
+      <div
+        className={`h-3 rounded-full bg-gradient-to-r ${colorClass} transition-all duration-1000`}
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+    <div className="text-xs text-neutral-400">{subtitle}</div>
+  </div>
+);
+
 interface LiveMonitoringProps {
   stats: UsageStats;
   onRefresh: () => void;
@@ -79,7 +129,7 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
 
     setLogs((prev) => {
       const updated = [newEntry, ...prev];
-      return updated.slice(0, 50); // Keep only last 50 entries
+      return updated.slice(0, 50);
     });
   }, []);
 
@@ -92,13 +142,13 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
 
   // Real-time updates every 3 seconds (like Python script)
   useEffect(() => {
-    if (isLiveMode) {
-      intervalRef.current = setInterval(() => {
-        onRefresh();
-        setLastUpdate(new Date());
-        addLogEntry('info', 'Data refreshed', '🔄');
-      }, 3000);
-    }
+    if (!isLiveMode) return;
+
+    intervalRef.current = setInterval(() => {
+      onRefresh();
+      setLastUpdate(new Date());
+      addLogEntry('info', 'Data refreshed', '🔄');
+    }, 3000);
 
     return () => {
       if (intervalRef.current) {
@@ -118,7 +168,6 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
     }
 
     if (timeUntilReset && timeUntilReset < 3600000) {
-      // Less than 1 hour
       addLogEntry('info', `Reset in ${formatTimeRemaining(timeUntilReset)}`, '⏰');
     }
   }, [stats.percentageUsed, stats.resetInfo?.timeUntilReset, addLogEntry]);
@@ -128,15 +177,16 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
   const tokensPercentage = Math.min(stats.percentageUsed, 100);
 
   // Calculate time progress (assuming reset info exists)
-  const timeProgress = stats.resetInfo
-    ? Math.max(
-        0,
-        Math.min(
-          100,
-          ((24 * 60 * 60 * 1000 - stats.resetInfo.timeUntilReset) / (24 * 60 * 60 * 1000)) * 100
-        )
-      )
-    : 0;
+  const getTimeProgress = (): number => {
+    if (!stats.resetInfo) return 0;
+    
+    const totalCycleDuration = 24 * 60 * 60 * 1000;
+    const timeElapsed = totalCycleDuration - stats.resetInfo.timeUntilReset;
+    
+    return Math.max(0, Math.min(100, (timeElapsed / totalCycleDuration) * 100));
+  };
+  
+  const timeProgress = getTimeProgress();
 
   return (
     <div className="space-y-4">
@@ -175,42 +225,23 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
 
         {/* Status Overview */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="glass p-4 rounded-xl">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-neutral-400">Token Usage</span>
-              <span className="text-lg">{getStatusEmoji(currentStatus)}</span>
-            </div>
-            <div className="text-2xl font-bold text-white mb-2">{tokensPercentage.toFixed(1)}%</div>
-            <div className="w-full bg-neutral-800 rounded-full h-3 mb-2">
-              <div
-                className={`h-3 rounded-full bg-gradient-to-r ${getStatusColor(currentStatus)} transition-all duration-1000`}
-                style={{ width: `${tokensPercentage}%` }}
-              />
-            </div>
-            <div className="text-xs text-neutral-400">
-              {formatNumber(stats.tokensUsed)} / {formatNumber(stats.tokenLimit)}
-            </div>
-          </div>
-
-          <div className="glass p-4 rounded-xl">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-neutral-400">Time Progress</span>
-              <span className="text-lg">⏰</span>
-            </div>
-            <div className="text-2xl font-bold text-white mb-2">{timeProgress.toFixed(1)}%</div>
-            <div className="w-full bg-neutral-800 rounded-full h-3 mb-2">
-              <div
-                className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
-                style={{ width: `${timeProgress}%` }}
-              />
-            </div>
-            <div className="text-xs text-neutral-400">
-              {stats.resetInfo
-                ? formatTimeRemaining(stats.resetInfo.timeUntilReset)
-                : 'No reset info'}{' '}
-              until reset
-            </div>
-          </div>
+          <StatusCard
+            title="Token Usage"
+            emoji={getStatusEmoji(currentStatus)}
+            value={`${tokensPercentage.toFixed(1)}%`}
+            progress={tokensPercentage}
+            colorClass={getStatusColor(currentStatus)}
+            subtitle={`${formatNumber(stats.tokensUsed)} / ${formatNumber(stats.tokenLimit)}`}
+          />
+          
+          <StatusCard
+            title="Time Progress"
+            emoji="⏰"
+            value={`${timeProgress.toFixed(1)}%`}
+            progress={timeProgress}
+            colorClass="from-blue-500 to-purple-500"
+            subtitle={`${stats.resetInfo ? formatTimeRemaining(stats.resetInfo.timeUntilReset) : 'No reset info'} until reset`}
+          />
         </div>
       </div>
 
@@ -248,30 +279,7 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
                 <span className="text-green-400">$</span> Waiting for events...
               </div>
             ) : (
-              logs.map((log) => (
-                <div
-                  key={log.id}
-                  className={`flex items-start gap-2 ${
-                    log.type === 'error'
-                      ? 'text-red-400'
-                      : log.type === 'warning'
-                        ? 'text-yellow-400'
-                        : log.type === 'success'
-                          ? 'text-green-400'
-                          : 'text-neutral-300'
-                  }`}
-                >
-                  <span className="text-neutral-500 text-xs w-16 flex-shrink-0">
-                    {log.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                    })}
-                  </span>
-                  <span className="text-sm">{log.emoji}</span>
-                  <span className="flex-1">{log.message}</span>
-                </div>
-              ))
+              logs.map((log) => <LogEntryComponent key={log.id} log={log} />)
             )}
           </div>
 
