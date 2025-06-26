@@ -20,13 +20,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onUpdatePreferences,
   stats
 }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'advanced'>('general');
-
-  const tabs = [
-    { id: 'general', label: 'General', icon: '⚙️' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
-    { id: 'advanced', label: 'Advanced', icon: '🔧' }
-  ];
 
   const handlePreferenceChange = (key: string, value: any) => {
     onUpdatePreferences({ [key]: value });
@@ -48,28 +41,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <p className="text-white/70">Customize your CCSeva experience</p>
       </div>
 
-      {/* Tabs */}
-      <div className="glass-card p-2">
-        <div className="flex space-x-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`
-                nav-item flex-1 flex items-center justify-center space-x-2 py-3 px-4
-                ${activeTab === tab.id ? 'active' : ''}
-              `}
-            >
-              <span className="text-lg">{tab.icon}</span>
-              <span className="text-white font-medium">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* General Settings */}
-      {activeTab === 'general' && (
-        <div className="glass-card p-6 hover-lift space-y-6">
+      <div className="glass-card p-6 hover-lift space-y-6">
           
           {/* Auto Refresh */}
           <div className="space-y-3">
@@ -152,6 +126,42 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="space-y-3">
+            <label className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">🔔</span>
+                <div>
+                  <div className="text-white font-medium">Notifications</div>
+                  <div className="text-white/60 text-sm">Get alerts for usage milestones</div>
+                </div>
+              </div>
+              
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={preferences.notifications}
+                  onChange={(e) => handlePreferenceChange('notifications', e.target.checked)}
+                  className="sr-only"
+                />
+                <div
+                  onClick={() => handlePreferenceChange('notifications', !preferences.notifications)}
+                  className={`
+                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
+                    ${preferences.notifications ? 'bg-blue-500' : 'bg-white/20'}
+                  `}
+                >
+                  <div
+                    className={`
+                      w-5 h-5 bg-white rounded-full transition-transform duration-300 mt-0.5
+                      ${preferences.notifications ? 'transform translate-x-6 ml-0.5' : 'ml-0.5'}
+                    `}
+                  />
+                </div>
+              </div>
+            </label>
           </div>
 
           {/* Animations */}
@@ -267,80 +277,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
           </div>
         </div>
-      )}
-
-      {/* Notification Settings */}
-      {activeTab === 'notifications' && (
-        <div className="glass-card p-6 hover-lift space-y-6">
-          
-          {/* Enable Notifications */}
-          <div className="space-y-3">
-            <label className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">🔔</span>
-                <div>
-                  <div className="text-white font-medium">Push Notifications</div>
-                  <div className="text-white/60 text-sm">Get alerts for usage milestones</div>
-                </div>
-              </div>
-              
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={preferences.notifications}
-                  onChange={(e) => handlePreferenceChange('notifications', e.target.checked)}
-                  className="sr-only"
-                />
-                <div
-                  onClick={() => handlePreferenceChange('notifications', !preferences.notifications)}
-                  className={`
-                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
-                    ${preferences.notifications ? 'bg-blue-500' : 'bg-white/20'}
-                  `}
-                >
-                  <div
-                    className={`
-                      w-5 h-5 bg-white rounded-full transition-transform duration-300 mt-0.5
-                      ${preferences.notifications ? 'transform translate-x-6 ml-0.5' : 'ml-0.5'}
-                    `}
-                  />
-                </div>
-              </div>
-            </label>
-          </div>
-
-        </div>
-      )}
-
-      {/* Advanced Settings */}
-      {activeTab === 'advanced' && (
-        <div className="glass-card p-6 hover-lift space-y-6">
-          
-        </div>
-      )}
-
-      {/* Quick Stats */}
-      <div className="glass-card p-6 hover-lift">
-        <h3 className="text-white font-semibold mb-4">Quick Stats</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="text-center">
-            <div className="text-white font-bold text-lg">{stats.tokensUsed.toLocaleString()}</div>
-            <div className="text-white/60">Tokens Used</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-bold text-lg">${stats.today.totalCost.toFixed(2)}</div>
-            <div className="text-white/60">Today's Cost</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-bold text-lg">{stats.burnRate}/hr</div>
-            <div className="text-white/60">Burn Rate</div>
-          </div>
-          <div className="text-center">
-            <div className="text-white font-bold text-lg">{Math.round(stats.percentageUsed)}%</div>
-            <div className="text-white/60">Usage</div>
-          </div>
-        </div>
       </div>
-    </div>
   );
 };
