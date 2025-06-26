@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { UsageStats } from './types/usage';
 import { Dashboard } from './components/Dashboard';
 import { Analytics } from './components/Analytics';
-import { LiveMonitoring } from './components/LiveMonitoring';
 import { TerminalView } from './components/TerminalView';
 import { NavigationTabs } from './components/NavigationTabs';
 import { SettingsPanel } from './components/SettingsPanel';
-import { NotificationSystem } from './components/NotificationSystem';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -380,12 +378,6 @@ const App: React.FC = () => {
                 />
               )}
 
-              {/* {state.currentView === 'live' && (
-                <LiveMonitoring
-                  stats={currentStats}
-                  onRefresh={refreshData}
-                />
-              )} */}
 
               {state.currentView === 'analytics' && (
                 <Analytics
@@ -413,12 +405,6 @@ const App: React.FC = () => {
           </div>
         </main>
 
-        {/* Notification System */}
-        {/* <NotificationSystem
-          notifications={state.notifications}
-          onRemove={removeNotification}
-          enabled={state.preferences.notifications}
-        /> */}
       </div>
     </ErrorBoundary>
   );
