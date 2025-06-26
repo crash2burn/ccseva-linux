@@ -18,7 +18,6 @@
       }
     ],
     "hardenedRuntime": true,
-    "gatekeeperAssess": false,
     "extendInfo": {
       "LSUIElement": true,
       "CFBundleDisplayName": "CCSeva",

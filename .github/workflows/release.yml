@@ -26,10 +26,7 @@ jobs:
        
     - name: Type check
       run: npx tsc --noEmit
-    
-    - name: Build application
-      run: npm run build
-    
+
     - name: Build distributables
       run: npm run dist:mac
       env:
@@ -37,8 +34,8 @@ jobs:
         # Code signing - uncomment and set secrets in repository
         CSC_LINK: ${{ secrets.CSC_LINK }}
         CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-        # APPLE_ID: ${{ secrets.APPLE_ID }}
-        # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     
     - name: Verify build artifacts
