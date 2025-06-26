@@ -11,18 +11,13 @@
   "mac": {
     "category": "public.app-category.developer-tools",
     "icon": "assets/icon.icns",
+    "identity": null,
     "target": [
       {
         "target": "dmg",
         "arch": ["x64", "arm64"]
-      },
-      {
-        "target": "mas",
-        "arch": ["x64", "arm64"]
       }
     ],
-    "entitlements": "entitlements.mas.plist",
-    "entitlementsInherit": "entitlements.mas.inherit.plist",
     "hardenedRuntime": true,
     "gatekeeperAssess": false,
     "extendInfo": {
@@ -33,30 +28,6 @@
       "NSHumanReadableCopyright": "Copyright © 2024 CCSeva. All rights reserved.",
       "CFBundleDocumentTypes": [],
       "LSMinimumSystemVersion": "10.15.0"
-    }
-  },
-  "mas": {
-    "category": "public.app-category.developer-tools",
-    "icon": "assets/icon.icns",
-    "entitlements": "entitlements.mas.plist",
-    "entitlementsInherit": "entitlements.mas.inherit.plist",
-    "hardenedRuntime": false,
-    "gatekeeperAssess": false,
-    "binaries": [],
-    "extendInfo": {
-      "LSUIElement": true,
-      "CFBundleDisplayName": "CCSeva",
-      "CFBundleName": "CCSeva",
-      "CFBundleExecutable": "CCSeva",
-      "NSHumanReadableCopyright": "Copyright © 2024 CCSeva. All rights reserved.",
-      "CFBundleDocumentTypes": [],
-      "LSMinimumSystemVersion": "10.15.0",
-      "NSPrivacyAccessedAPITypes": [
-        {
-          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-          "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
-        }
-      ]
     }
   },
   "dmg": {
