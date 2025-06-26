@@ -1,7 +1,52 @@
 import type React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
+
+// Helper functions
+const getUsageStatus = (percentage: number): 'safe' | 'warning' | 'critical' => {
+  if (percentage >= 90) return 'critical';
+  if (percentage >= 70) return 'warning';
+  return 'safe';
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'critical':
+      return 'from-red-500 to-red-600';
+    case 'warning':
+      return 'from-yellow-500 to-orange-500';
+    default:
+      return 'from-green-500 to-emerald-500';
+  }
+};
+
+const getStatusEmoji = (status: string) => {
+  switch (status) {
+    case 'critical':
+      return '🔴';
+    case 'warning':
+      return '🟡';
+    default:
+      return '🟢';
+  }
+};
+
+const formatTimeRemaining = (milliseconds: number): string => {
+  const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes}m`;
+};
+
+const formatNumber = (num: number) => {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toLocaleString();
+};
 
 interface LiveMonitoringProps {
   stats: UsageStats;
@@ -23,12 +68,27 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
   const logContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
+  const addLogEntry = useCallback((type: LogEntry['type'], message: string, emoji: string) => {
+    const newEntry: LogEntry = {
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
+      timestamp: new Date(),
+      type,
+      message,
+      emoji,
+    };
+
+    setLogs((prev) => {
+      const updated = [newEntry, ...prev];
+      return updated.slice(0, 50); // Keep only last 50 entries
+    });
+  }, []);
+
   // Auto-scroll to bottom when new logs are added
   useEffect(() => {
     if (logContainerRef.current && isLiveMode) {
       logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
     }
-  }, [logs, isLiveMode]);
+  }, [isLiveMode]);
 
   // Real-time updates every 3 seconds (like Python script)
   useEffect(() => {
@@ -45,11 +105,10 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
         clearInterval(intervalRef.current);
       }
     };
-  }, [isLiveMode, onRefresh]);
+  }, [isLiveMode, onRefresh, addLogEntry]);
 
   // Add status-based log entries
   useEffect(() => {
-    const status = getUsageStatus(stats.percentageUsed);
     const timeUntilReset = stats.resetInfo?.timeUntilReset;
 
     if (stats.percentageUsed >= 95) {
@@ -62,66 +121,8 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
       // Less than 1 hour
       addLogEntry('info', `Reset in ${formatTimeRemaining(timeUntilReset)}`, '⏰');
     }
-  }, [stats.percentageUsed, stats.resetInfo?.timeUntilReset]);
+  }, [stats.percentageUsed, stats.resetInfo?.timeUntilReset, addLogEntry]);
 
-  const addLogEntry = (type: LogEntry['type'], message: string, emoji: string) => {
-    const newEntry: LogEntry = {
-      id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
-      timestamp: new Date(),
-      type,
-      message,
-      emoji,
-    };
-
-    setLogs((prev) => {
-      const updated = [newEntry, ...prev];
-      return updated.slice(0, 50); // Keep only last 50 entries
-    });
-  };
-
-  const getUsageStatus = (percentage: number): 'safe' | 'warning' | 'critical' => {
-    if (percentage >= 90) return 'critical';
-    if (percentage >= 70) return 'warning';
-    return 'safe';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'critical':
-        return 'from-red-500 to-red-600';
-      case 'warning':
-        return 'from-yellow-500 to-orange-500';
-      default:
-        return 'from-green-500 to-emerald-500';
-    }
-  };
-
-  const getStatusEmoji = (status: string) => {
-    switch (status) {
-      case 'critical':
-        return '🔴';
-      case 'warning':
-        return '🟡';
-      default:
-        return '🟢';
-    }
-  };
-
-  const formatTimeRemaining = (milliseconds: number): string => {
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-  };
-
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toLocaleString();
-  };
 
   const currentStatus = getUsageStatus(stats.percentageUsed);
   const tokensPercentage = Math.min(stats.percentageUsed, 100);

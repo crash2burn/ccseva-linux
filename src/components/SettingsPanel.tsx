@@ -208,8 +208,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onClick={() =>
                   handlePreferenceChange('animationsEnabled', !preferences.animationsEnabled)
                 }
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePreferenceChange('animationsEnabled', !preferences.animationsEnabled);
+                  }
+                }}
+                tabIndex={0}
+                role="switch"
+                aria-checked={preferences.animationsEnabled}
                 className={`
-                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300
+                    w-12 h-6 rounded-full cursor-pointer transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400
                     ${preferences.animationsEnabled ? 'bg-blue-500' : 'bg-white/20'}
                   `}
               >
@@ -289,7 +298,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
                 >
                   {Array.from({ length: 24 }, (_, i) => (
-                    <option key={i} value={i} className="bg-gray-800">
+                    <option key={`hour-${i}`} value={i} className="bg-gray-800">
                       {i.toString().padStart(2, '0')}:00
                     </option>
                   ))}

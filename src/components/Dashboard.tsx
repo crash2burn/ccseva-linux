@@ -3,6 +3,45 @@ import { useState } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
 
+// Helper component for model usage item
+const ModelUsageItem = ({ modelName, modelData, totalTokens, index }: {
+  modelName: string;
+  modelData: { tokens: number; cost: number };
+  totalTokens: number;
+  index: number;
+}) => {
+  const percentage = totalTokens > 0 ? (modelData.tokens / totalTokens) * 100 : 0;
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toLocaleString();
+  };
+  
+  const getModelColor = (index: number) => {
+    return index === 0 ? 'bg-purple-500' : index === 1 ? 'bg-blue-500' : 'bg-green-500';
+  };
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className={`w-3 h-3 rounded-full ${getModelColor(index)}`} />
+      <div className="flex-1">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm font-medium text-white">{modelName}</span>
+          <span className="text-sm text-neutral-400">
+            {formatNumber(modelData.tokens)} ({percentage.toFixed(1)}%)
+          </span>
+        </div>
+        <div className="w-full bg-neutral-800 rounded-full h-1.5">
+          <div
+            className={`h-1.5 rounded-full transition-all duration-1000 ${getModelColor(index)}`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface DashboardProps {
   stats: UsageStats;
   status: 'safe' | 'warning' | 'critical';
@@ -476,44 +515,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <div className="space-y-3">
           {stats.today.models && Object.keys(stats.today.models).length > 0 ? (
-            Object.entries(stats.today.models).map(([modelName, modelData], index) => {
-              const percentage =
-                stats.today.totalTokens > 0
-                  ? (modelData.tokens / stats.today.totalTokens) * 100
-                  : 0;
-
-              return (
-                <div key={modelName} className="flex items-center gap-3">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      index === 0 ? 'bg-purple-500' : index === 1 ? 'bg-blue-500' : 'bg-green-500'
-                    }`}
-                  />
-
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-white">{modelName}</span>
-                      <span className="text-sm text-neutral-400">
-                        {formatNumber(modelData.tokens)} ({percentage.toFixed(1)}%)
-                      </span>
-                    </div>
-
-                    <div className="w-full bg-neutral-800 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full transition-all duration-1000 ${
-                          index === 0
-                            ? 'bg-purple-500'
-                            : index === 1
-                              ? 'bg-blue-500'
-                              : 'bg-green-500'
-                        }`}
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+            Object.entries(stats.today.models).map(([modelName, modelData], index) => (
+              <ModelUsageItem
+                key={modelName}
+                modelName={modelName}
+                modelData={modelData}
+                totalTokens={stats.today.totalTokens}
+                index={index}
+              />
+            ))
           ) : (
             <div className="text-center py-8 text-neutral-400">
               <svg

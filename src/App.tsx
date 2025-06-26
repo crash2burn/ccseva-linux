@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { UsageStats } from './types/usage';
 import { Dashboard } from './components/Dashboard';
 import { Analytics } from './components/Analytics';
@@ -56,7 +56,7 @@ const App: React.FC = () => {
   });
 
   // Load usage stats with enhanced error handling
-  const loadUsageStats = async (showLoading = true) => {
+  const loadUsageStats = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) {
         setState((prev) => ({ ...prev, loading: true, error: null }));
@@ -98,10 +98,10 @@ const App: React.FC = () => {
         message: errorMessage,
       });
     }
-  };
+  }, []);
 
   // Force refresh data
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     try {
       setState((prev) => ({ ...prev, error: null }));
 
@@ -128,7 +128,7 @@ const App: React.FC = () => {
         message: errorMessage,
       });
     }
-  };
+  }, []);
 
   // Add notification with auto-dismiss
   const addNotification = (
@@ -168,9 +168,9 @@ const App: React.FC = () => {
   };
 
   // Handle navigation
-  const navigateTo = (view: ViewType) => {
+  const navigateTo = useCallback((view: ViewType) => {
     setState((prev) => ({ ...prev, currentView: view }));
-  };
+  }, []);
 
   // Setup auto-refresh and event listeners
   useEffect(() => {
@@ -212,7 +212,7 @@ const App: React.FC = () => {
         window.electronAPI.removeUsageUpdatedListener(handleUsageUpdate);
       }
     };
-  }, [state.preferences.autoRefresh]);
+  }, [state.preferences.autoRefresh, loadUsageStats]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -253,7 +253,7 @@ const App: React.FC = () => {
 
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, []);
+  }, [navigateTo, refreshData]);
 
   // Helper functions
   const getUsageStatus = (percentage: number): 'safe' | 'warning' | 'critical' => {
@@ -314,7 +314,15 @@ const App: React.FC = () => {
     );
   }
 
-  const currentStats = state.stats!;
+  const currentStats = state.stats;
+  if (!currentStats) {
+    return (
+      <div className="app-background">
+        <LoadingScreen />
+      </div>
+    );
+  }
+  
   const usageStatus = getUsageStatus(currentStats.percentageUsed);
   const timeRemaining = formatTimeRemaining(currentStats.burnRate, currentStats.tokensRemaining);
 

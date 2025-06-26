@@ -104,24 +104,6 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
         </div>
       </div>
 
-      {/* Time Progress Section */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <span className="text-blue-400">TIME PROGRESS:</span>
-          <span className="text-white font-bold">{getTimeProgress().toFixed(1)}%</span>
-          <span className="text-2xl">⏰</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-blue-500">[</span>
-          <span className="text-cyan-400 transition-all duration-1000">
-            {generateTimeProgressBar(animatedTimeProgress)}
-          </span>
-          <span className="text-blue-500">]</span>
-          <span className="text-gray-400 text-xs">{formatTimeUntilReset()} until reset</span>
-        </div>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4 pt-2 border-t border-green-500/20">
         <div className="space-y-1">

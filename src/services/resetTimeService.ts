@@ -164,13 +164,12 @@ export class ResetTimeService {
 
     if (days > 0) {
       return `${days}d ${hours}h`;
-    } else if (hours > 0) {
+    }if (hours > 0) {
       return `${hours}h ${minutes}m`;
-    } else if (minutes > 0) {
+    }if (minutes > 0) {
       return `${minutes}m`;
-    } else {
-      return 'Soon';
     }
+      return 'Soon';
   }
 
   /**

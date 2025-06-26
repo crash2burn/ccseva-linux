@@ -82,14 +82,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
   const avgDailyCost = totalWeekCost / 7;
 
   const formatNumber = (num: number) => {
-    if (!num || isNaN(num)) return '0';
+    if (!num || Number.isNaN(num)) return '0';
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toLocaleString();
   };
 
   const formatCurrency = (amount: number) => {
-    if (!amount || isNaN(amount)) return '$0.000';
+    if (!amount || Number.isNaN(amount)) return '$0.000';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -103,7 +103,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
 
     try {
       const depletionDate = new Date(stats.predictedDepleted);
-      if (isNaN(depletionDate.getTime())) return 'No depletion';
+      if (Number.isNaN(depletionDate.getTime())) return 'No depletion';
 
       const now = new Date();
       const diffTime = depletionDate.getTime() - now.getTime();
@@ -180,7 +180,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
           <div className="flex items-center gap-2">
             <div className="glass px-3 py-1 rounded-lg">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-xs text-neutral-300">Live Data</span>
               </div>
             </div>
@@ -415,8 +415,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                   )}
 
                   {chartType === 'bar' && (
-                    <>
-                      {chartData.map((d, i) => {
+                    chartData.map((d, i) => {
                         const barWidth = (plotWidth / chartData.length) * 0.7;
                         const x =
                           padding +
@@ -438,8 +437,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ stats }) => {
                             rx="4"
                           />
                         );
-                      })}
-                    </>
+                      })
                   )}
 
                   {/* Data Points */}
