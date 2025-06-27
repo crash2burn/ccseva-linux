@@ -85,18 +85,18 @@ const StatusCard: React.FC<{
 }> = ({ title, emoji, value, progress, colorClass, subtitle }) => (
   <Card className="bg-neutral-800/50 border-neutral-700">
     <CardContent className="p-4">
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-sm text-neutral-400">{title}</span>
-      <span className="text-lg">{emoji}</span>
-    </div>
-    <div className="text-2xl font-bold text-white mb-2">{value}</div>
-    <div className="w-full bg-neutral-800 rounded-full h-3 mb-2">
-      <div
-        className={`h-3 rounded-full bg-gradient-to-r ${colorClass} transition-all duration-1000`}
-        style={{ width: `${progress}%` }}
-      />
-    </div>
-    <div className="text-xs text-neutral-400">{subtitle}</div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm text-neutral-400">{title}</span>
+        <span className="text-lg">{emoji}</span>
+      </div>
+      <div className="text-2xl font-bold text-white mb-2">{value}</div>
+      <div className="w-full bg-neutral-800 rounded-full h-3 mb-2">
+        <div
+          className={`h-3 rounded-full bg-gradient-to-r ${colorClass} transition-all duration-1000`}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="text-xs text-neutral-400">{subtitle}</div>
     </CardContent>
   </Card>
 );
@@ -175,20 +175,19 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
     }
   }, [stats.percentageUsed, stats.resetInfo?.timeUntilReset, addLogEntry]);
 
-
   const currentStatus = getUsageStatus(stats.percentageUsed);
   const tokensPercentage = Math.min(stats.percentageUsed, 100);
 
   // Calculate time progress (assuming reset info exists)
   const getTimeProgress = (): number => {
     if (!stats.resetInfo) return 0;
-    
+
     const totalCycleDuration = 24 * 60 * 60 * 1000;
     const timeElapsed = totalCycleDuration - stats.resetInfo.timeUntilReset;
-    
+
     return Math.max(0, Math.min(100, (timeElapsed / totalCycleDuration) * 100));
   };
-  
+
   const timeProgress = getTimeProgress();
 
   return (
@@ -196,107 +195,107 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
       {/* Header with Controls */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-bold text-gradient mb-1">Live Monitoring</h2>
-            <p className="text-sm text-neutral-400">Real-time terminal-style usage tracking</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="glass px-3 py-1 rounded-lg">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${isLiveMode ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}
-                />
-                <span className="text-xs text-neutral-300">{isLiveMode ? 'LIVE' : 'PAUSED'}</span>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-gradient mb-1">Live Monitoring</h2>
+              <p className="text-sm text-neutral-400">Real-time terminal-style usage tracking</p>
             </div>
 
-            <Button
-              onClick={() => setIsLiveMode(!isLiveMode)}
-              variant={isLiveMode ? 'secondary' : 'default'}
-              size="sm"
-              className={`text-sm px-3 py-1 transition-all duration-200 ${
-                isLiveMode
-                  ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20'
-              }`}
-            >
-              {isLiveMode ? 'Pause' : 'Resume'}
-            </Button>
-          </div>
-        </div>
+            <div className="flex items-center gap-3">
+              <div className="glass px-3 py-1 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${isLiveMode ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}
+                  />
+                  <span className="text-xs text-neutral-300">{isLiveMode ? 'LIVE' : 'PAUSED'}</span>
+                </div>
+              </div>
 
-        {/* Status Overview */}
-        <div className="grid grid-cols-2 gap-4">
-          <StatusCard
-            title="Token Usage"
-            emoji={getStatusEmoji(currentStatus)}
-            value={`${tokensPercentage.toFixed(1)}%`}
-            progress={tokensPercentage}
-            colorClass={getStatusColor(currentStatus)}
-            subtitle={`${formatNumber(stats.tokensUsed)} / ${formatNumber(stats.tokenLimit)}`}
-          />
-          
-          <StatusCard
-            title="Time Progress"
-            emoji="⏰"
-            value={`${timeProgress.toFixed(1)}%`}
-            progress={timeProgress}
-            colorClass="from-blue-500 to-purple-500"
-            subtitle={`${stats.resetInfo ? formatTimeRemaining(stats.resetInfo.timeUntilReset) : 'No reset info'} until reset`}
-          />
-        </div>
+              <Button
+                onClick={() => setIsLiveMode(!isLiveMode)}
+                variant={isLiveMode ? 'secondary' : 'default'}
+                size="sm"
+                className={`text-sm px-3 py-1 transition-all duration-200 ${
+                  isLiveMode
+                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                    : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20'
+                }`}
+              >
+                {isLiveMode ? 'Pause' : 'Resume'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Status Overview */}
+          <div className="grid grid-cols-2 gap-4">
+            <StatusCard
+              title="Token Usage"
+              emoji={getStatusEmoji(currentStatus)}
+              value={`${tokensPercentage.toFixed(1)}%`}
+              progress={tokensPercentage}
+              colorClass={getStatusColor(currentStatus)}
+              subtitle={`${formatNumber(stats.tokensUsed)} / ${formatNumber(stats.tokenLimit)}`}
+            />
+
+            <StatusCard
+              title="Time Progress"
+              emoji="⏰"
+              value={`${timeProgress.toFixed(1)}%`}
+              progress={timeProgress}
+              colorClass="from-blue-500 to-purple-500"
+              subtitle={`${stats.resetInfo ? formatTimeRemaining(stats.resetInfo.timeUntilReset) : 'No reset info'} until reset`}
+            />
+          </div>
         </CardContent>
       </Card>
 
       {/* Terminal-style Output */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-bold text-white">Live Feed</h3>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 bg-red-500 rounded-full" />
-              <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-              <div className="w-3 h-3 bg-green-500 rounded-full" />
-            </div>
-          </div>
-
-          <div className="text-xs text-neutral-400">
-            Last update: {lastUpdate.toLocaleTimeString()}
-          </div>
-        </div>
-
-        {/* Terminal Window */}
-        <div className="bg-black/50 rounded-lg border border-white/10 p-4 font-mono text-sm">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
-            <span className="text-green-400">●</span>
-            <span className="text-white">ccmonitor@live</span>
-            <span className="text-neutral-400">~</span>
-          </div>
-
-          <div
-            ref={logContainerRef}
-            className="h-60 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
-          >
-            {logs.length === 0 ? (
-              <div className="text-neutral-400">
-                <span className="text-green-400">$</span> Waiting for events...
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-white">Live Feed</h3>
+              <div className="flex gap-1">
+                <div className="w-3 h-3 bg-red-500 rounded-full" />
+                <div className="w-3 h-3 bg-yellow-500 rounded-full" />
+                <div className="w-3 h-3 bg-green-500 rounded-full" />
               </div>
-            ) : (
-              logs.map((log) => <LogEntryComponent key={log.id} log={log} />)
-            )}
-          </div>
+            </div>
 
-          {/* Command Line */}
-          <div className="mt-3 pt-2 border-t border-white/10">
-            <div className="flex items-center gap-2 text-neutral-400">
-              <span className="text-green-400">$</span>
-              <span className="animate-pulse">█</span>
+            <div className="text-xs text-neutral-400">
+              Last update: {lastUpdate.toLocaleTimeString()}
             </div>
           </div>
-        </div>
+
+          {/* Terminal Window */}
+          <div className="bg-black/50 rounded-lg border border-white/10 p-4 font-mono text-sm">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
+              <span className="text-green-400">●</span>
+              <span className="text-white">ccmonitor@live</span>
+              <span className="text-neutral-400">~</span>
+            </div>
+
+            <div
+              ref={logContainerRef}
+              className="h-60 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+            >
+              {logs.length === 0 ? (
+                <div className="text-neutral-400">
+                  <span className="text-green-400">$</span> Waiting for events...
+                </div>
+              ) : (
+                logs.map((log) => <LogEntryComponent key={log.id} log={log} />)
+              )}
+            </div>
+
+            {/* Command Line */}
+            <div className="mt-3 pt-2 border-t border-white/10">
+              <div className="flex items-center gap-2 text-neutral-400">
+                <span className="text-green-400">$</span>
+                <span className="animate-pulse">█</span>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -306,76 +305,79 @@ export const LiveMonitoring: React.FC<LiveMonitoringProps> = ({ stats, onRefresh
           <CardTitle className="text-white">Current Session</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white mb-1">
+                {formatNumber(stats.burnRate)}
+              </div>
+              <div className="text-sm text-neutral-400">Tokens/Hour</div>
+              <div className="text-xs text-neutral-500 mt-1">
+                🔥 {stats.burnRate > 1000 ? 'High' : stats.burnRate > 500 ? 'Moderate' : 'Normal'}
+              </div>
+            </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-1">{formatNumber(stats.burnRate)}</div>
-            <div className="text-sm text-neutral-400">Tokens/Hour</div>
-            <div className="text-xs text-neutral-500 mt-1">
-              🔥 {stats.burnRate > 1000 ? 'High' : stats.burnRate > 500 ? 'Moderate' : 'Normal'}
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white mb-1">{stats.currentPlan}</div>
+              <div className="text-sm text-neutral-400">Current Plan</div>
+              <div className="text-xs text-neutral-500 mt-1">📊 Auto-detected</div>
+            </div>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white mb-1">
+                {stats.velocity?.trend === 'increasing'
+                  ? '📈'
+                  : stats.velocity?.trend === 'decreasing'
+                    ? '📉'
+                    : '➡️'}
+              </div>
+              <div className="text-sm text-neutral-400">Trend</div>
+              <div className="text-xs text-neutral-500 mt-1">
+                {stats.velocity?.trend || 'stable'}
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white mb-1">
+                {stats.prediction?.confidence || 0}%
+              </div>
+              <div className="text-sm text-neutral-400">Confidence</div>
+              <div className="text-xs text-neutral-500 mt-1">🎯 Prediction</div>
             </div>
           </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-1">{stats.currentPlan}</div>
-            <div className="text-sm text-neutral-400">Current Plan</div>
-            <div className="text-xs text-neutral-500 mt-1">📊 Auto-detected</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-1">
-              {stats.velocity?.trend === 'increasing'
-                ? '📈'
-                : stats.velocity?.trend === 'decreasing'
-                  ? '📉'
-                  : '➡️'}
-            </div>
-            <div className="text-sm text-neutral-400">Trend</div>
-            <div className="text-xs text-neutral-500 mt-1">{stats.velocity?.trend || 'stable'}</div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white mb-1">
-              {stats.prediction?.confidence || 0}%
-            </div>
-            <div className="text-sm text-neutral-400">Confidence</div>
-            <div className="text-xs text-neutral-500 mt-1">🎯 Prediction</div>
-          </div>
-        </div>
         </CardContent>
       </Card>
 
       {/* Quick Actions */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardContent className="p-4">
-        <div className="grid grid-cols-3 gap-3">
-          <Button
-            onClick={onRefresh}
-            variant="ghost"
-            className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
-          >
-            <span>🔄</span>
-            Force Refresh
-          </Button>
+          <div className="grid grid-cols-3 gap-3">
+            <Button
+              onClick={onRefresh}
+              variant="ghost"
+              className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
+            >
+              <span>🔄</span>
+              Force Refresh
+            </Button>
 
-          <Button
-            onClick={() => addLogEntry('info', 'Manual checkpoint created', '📍')}
-            variant="ghost"
-            className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
-          >
-            <span>📍</span>
-            Checkpoint
-          </Button>
+            <Button
+              onClick={() => addLogEntry('info', 'Manual checkpoint created', '📍')}
+              variant="ghost"
+              className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
+            >
+              <span>📍</span>
+              Checkpoint
+            </Button>
 
-          <Button
-            onClick={() => setLogs([])}
-            variant="ghost"
-            className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
-          >
-            <span>🗑️</span>
-            Clear Logs
-          </Button>
-        </div>
+            <Button
+              onClick={() => setLogs([])}
+              variant="ghost"
+              className="flex items-center justify-center gap-2 py-3 h-auto hover:bg-white/10 transition-all duration-200"
+            >
+              <span>🗑️</span>
+              Clear Logs
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

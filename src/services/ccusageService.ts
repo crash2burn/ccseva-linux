@@ -199,14 +199,17 @@ export class CCUsageService {
         totalCost: day.totalCost,
         models: day.modelBreakdowns
           .filter((mb: ModelBreakdown) => mb.modelName !== '<synthetic>')
-          .reduce((acc: { [key: string]: { tokens: number; cost: number } }, mb: ModelBreakdown) => {
-            acc[mb.modelName] = {
-              tokens:
-                mb.inputTokens + mb.outputTokens + mb.cacheCreationTokens + mb.cacheReadTokens,
-              cost: mb.cost,
-            };
-            return acc;
-          }, {}),
+          .reduce(
+            (acc: { [key: string]: { tokens: number; cost: number } }, mb: ModelBreakdown) => {
+              acc[mb.modelName] = {
+                tokens:
+                  mb.inputTokens + mb.outputTokens + mb.cacheCreationTokens + mb.cacheReadTokens,
+                cost: mb.cost,
+              };
+              return acc;
+            },
+            {}
+          ),
       }));
     } else {
       processedDailyData = this.convertBlocksToDailyUsage(blocks);

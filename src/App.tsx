@@ -323,7 +323,7 @@ const App: React.FC = () => {
       </div>
     );
   }
-  
+
   const usageStatus = getUsageStatus(currentStats.percentageUsed);
   const timeRemaining = formatTimeRemaining(currentStats.burnRate, currentStats.tokensRemaining);
 

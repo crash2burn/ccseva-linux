@@ -42,7 +42,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
 
     for (const notification of notifications) {
       const toastFn = getToastFunction(notification.type);
-      
+
       toastFn(notification.title, {
         description: notification.message,
         duration: 5000,
@@ -61,10 +61,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
   // Show notification counter if there are active notifications
   return notifications.length > 0 ? (
     <div className="fixed top-4 right-4 z-50 pointer-events-none">
-      <Badge 
-        variant="destructive" 
-        className="animate-pulse pointer-events-auto"
-      >
+      <Badge variant="destructive" className="animate-pulse pointer-events-auto">
         {notifications.length} active
       </Badge>
     </div>

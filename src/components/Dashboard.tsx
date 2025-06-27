@@ -105,7 +105,6 @@ const getStatusHelpers = (status: 'safe' | 'warning' | 'critical') => {
   return { getStatusColor, getStatusIcon };
 };
 
-
 // Component for hero header section
 const DashboardHeader: React.FC<{
   isRefreshing: boolean;
@@ -281,332 +280,371 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <TooltipProvider>
-    <div className="space-y-4">
-      {/* Hero Section */}
-      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
-        <CardContent className="p-6">
-          <DashboardHeader isRefreshing={isRefreshing} onRefresh={handleRefresh} />
-
-          {/* Dual Progress Display - Token and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <CircularProgressChart
-                    percentage={stats.percentageUsed}
-                    status={status}
-                    label="Tokens"
-                    subtitle={status}
-                    emoji={getStatusIcon()}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="text-center">
-                  <p className="font-semibold">{status === 'critical' ? '🔴 Critical Usage' : status === 'warning' ? '🟡 Warning Level' : '🟢 Safe Usage'}</p>
-                  <p className="text-sm mt-1">
-                    {status === 'critical' ? 'Over 90% of daily limit used' : 
-                     status === 'warning' ? '70-90% of daily limit used' : 
-                     'Less than 70% of daily limit used'}
-                  </p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <KeyMetricsRow stats={stats} timeRemaining={timeRemaining} />
-        </CardContent>
-      </Card>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Current Plan */}
+      <div className="space-y-4">
+        {/* Hero Section */}
         <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div
-                className={`w-10 h-10 rounded-xl bg-gradient-to-r ${getStatusColor()} flex items-center justify-center shadow-lg`}
-              >
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <h3 className="text-lg font-bold text-neutral-100 font-primary cursor-help">
-                      {stats.currentPlan}
-                    </h3>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Your detected Claude plan based on daily token limit: {formatNumber(stats.tokenLimit)} tokens/day</p>
-                  </TooltipContent>
-                </Tooltip>
-                <p className="text-sm text-neutral-400 font-primary">Current Plan</p>
-              </div>
+          <CardContent className="p-6">
+            <DashboardHeader isRefreshing={isRefreshing} onRefresh={handleRefresh} />
+
+            {/* Dual Progress Display - Token and Time */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <CircularProgressChart
+                      percentage={stats.percentageUsed}
+                      status={status}
+                      label="Tokens"
+                      subtitle={status}
+                      emoji={getStatusIcon()}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="text-center">
+                    <p className="font-semibold">
+                      {status === 'critical'
+                        ? '🔴 Critical Usage'
+                        : status === 'warning'
+                          ? '🟡 Warning Level'
+                          : '🟢 Safe Usage'}
+                    </p>
+                    <p className="text-sm mt-1">
+                      {status === 'critical'
+                        ? 'Over 90% of daily limit used'
+                        : status === 'warning'
+                          ? '70-90% of daily limit used'
+                          : 'Less than 70% of daily limit used'}
+                    </p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-neutral-400 font-primary">Daily Limit</span>
-                <span className="text-neutral-100 font-medium font-primary">
-                  {formatNumber(stats.tokenLimit)}
-                </span>
-              </div>
-              <Progress value={Math.min(stats.percentageUsed, 100)} className="w-full h-2" />
-            </div>
+            <KeyMetricsRow stats={stats} timeRemaining={timeRemaining} />
           </CardContent>
         </Card>
 
-        {/* Burn Rate */}
-        <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Current Plan */}
+          <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className={`w-10 h-10 rounded-xl bg-gradient-to-r ${getStatusColor()} flex items-center justify-center shadow-lg`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <h3 className="text-lg font-bold text-neutral-100 font-primary cursor-help">
-                      {formatNumber(stats.burnRate)}
-                    </h3>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Rate of token consumption per hour based on your last 24 hours of usage</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="text-sm text-neutral-400 font-primary cursor-help">Tokens/Hour</p>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Current burn rate - how fast you're consuming your daily token allowance</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-neutral-400 font-primary cursor-help">Depletion Time</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Estimated time until your daily token limit is reached at current usage rate</p>
-                  </TooltipContent>
-                </Tooltip>
-                <span className="text-neutral-100 font-medium font-primary">{timeRemaining}</span>
-              </div>
-              <Badge
-                variant={
-                  stats.burnRate > 1000
-                    ? 'destructive'
-                    : stats.burnRate > 500
-                      ? 'secondary'
-                      : 'default'
-                }
-                className="w-full justify-center"
-              >
-                {stats.burnRate > 1000
-                  ? 'High Usage'
-                  : stats.burnRate > 500
-                    ? 'Moderate Usage'
-                    : 'Normal Usage'}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Today's Usage */}
-        <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Today</h3>
-                <p className="text-sm text-neutral-400">Usage Summary</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Tokens</span>
-                <span className="text-white font-medium">
-                  {stats.today.totalTokens.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Cost</span>
-                <span className="text-white font-medium">
-                  {formatCurrency(stats.today.totalCost)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Models</span>
-                <span className="text-white font-medium">
-                  {Object.keys(stats.today.models).length}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* This Week */}
-        <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">This Week</h3>
-                <p className="text-sm text-neutral-400">7-Day Summary</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Total Cost</span>
-                <span className="text-white font-medium">
-                  {formatCurrency(stats.thisWeek.reduce((sum, day) => sum + day.totalCost, 0))}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Total Tokens</span>
-                <span className="text-white font-medium">
-                  {stats.thisWeek.reduce((sum, day) => sum + day.totalTokens, 0).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-400">Avg Daily</span>
-                <span className="text-white font-medium">
-                  {formatCurrency(stats.thisWeek.reduce((sum, day) => sum + day.totalCost, 0) / 7)}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Model Breakdown */}
-      <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-white">Model Usage</CardTitle>
-              <CardDescription>Today's distribution by model</CardDescription>
-            </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-400 hover:text-white">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-neutral-800 border-neutral-700 text-white">
-                <div className="space-y-3">
-                  <div className="font-semibold">Model Usage Breakdown</div>
-                  <div className="text-sm text-neutral-300 space-y-2">
-                    <p>• <strong>Tokens:</strong> Number of tokens consumed by each model today</p>
-                    <p>• <strong>Cost:</strong> Estimated cost based on model pricing</p>
-                    <p>• <strong>Percentage:</strong> Share of your total daily usage</p>
-                    <p>• <strong>Colors:</strong> Purple (primary), Blue (secondary), Green (tertiary)</p>
-                  </div>
-                  <div className="text-xs text-neutral-400 border-t border-neutral-700 pt-2">
-                    Click on any model name for detailed tooltip information
-                  </div>
                 </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {stats.today.models && Object.keys(stats.today.models).length > 0 ? (
-              Object.entries(stats.today.models).map(([modelName, modelData], index) => (
-                <ModelUsageItem
-                  key={modelName}
-                  modelName={modelName}
-                  modelData={modelData}
-                  totalTokens={stats.today.totalTokens}
-                  index={index}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8 text-neutral-400">
-                <svg
-                  className="w-12 h-12 mx-auto mb-3 opacity-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <p className="text-sm">No model usage data available</p>
+                <div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <h3 className="text-lg font-bold text-neutral-100 font-primary cursor-help">
+                        {stats.currentPlan}
+                      </h3>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Your detected Claude plan based on daily token limit:{' '}
+                        {formatNumber(stats.tokenLimit)} tokens/day
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <p className="text-sm text-neutral-400 font-primary">Current Plan</p>
+                </div>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Quick Actions */}
-      {/* <div className="glass-card p-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-neutral-400 font-primary">Daily Limit</span>
+                  <span className="text-neutral-100 font-medium font-primary">
+                    {formatNumber(stats.tokenLimit)}
+                  </span>
+                </div>
+                <Progress value={Math.min(stats.percentageUsed, 100)} className="w-full h-2" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Burn Rate */}
+          <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <h3 className="text-lg font-bold text-neutral-100 font-primary cursor-help">
+                        {formatNumber(stats.burnRate)}
+                      </h3>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Rate of token consumption per hour based on your last 24 hours of usage</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-sm text-neutral-400 font-primary cursor-help">
+                        Tokens/Hour
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Current burn rate - how fast you're consuming your daily token allowance
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-neutral-400 font-primary cursor-help">
+                        Depletion Time
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Estimated time until your daily token limit is reached at current usage rate
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <span className="text-neutral-100 font-medium font-primary">{timeRemaining}</span>
+                </div>
+                <Badge
+                  variant={
+                    stats.burnRate > 1000
+                      ? 'destructive'
+                      : stats.burnRate > 500
+                        ? 'secondary'
+                        : 'default'
+                  }
+                  className="w-full justify-center"
+                >
+                  {stats.burnRate > 1000
+                    ? 'High Usage'
+                    : stats.burnRate > 500
+                      ? 'Moderate Usage'
+                      : 'Normal Usage'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Today's Usage */}
+          <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-lg">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Today</h3>
+                  <p className="text-sm text-neutral-400">Usage Summary</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">Tokens</span>
+                  <span className="text-white font-medium">
+                    {stats.today.totalTokens.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">Cost</span>
+                  <span className="text-white font-medium">
+                    {formatCurrency(stats.today.totalCost)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">Models</span>
+                  <span className="text-white font-medium">
+                    {Object.keys(stats.today.models).length}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* This Week */}
+          <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center shadow-lg">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">This Week</h3>
+                  <p className="text-sm text-neutral-400">7-Day Summary</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">Total Cost</span>
+                  <span className="text-white font-medium">
+                    {formatCurrency(stats.thisWeek.reduce((sum, day) => sum + day.totalCost, 0))}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">Total Tokens</span>
+                  <span className="text-white font-medium">
+                    {stats.thisWeek.reduce((sum, day) => sum + day.totalTokens, 0).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">Avg Daily</span>
+                  <span className="text-white font-medium">
+                    {formatCurrency(
+                      stats.thisWeek.reduce((sum, day) => sum + day.totalCost, 0) / 7
+                    )}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Model Breakdown */}
+        <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-white">Model Usage</CardTitle>
+                <CardDescription>Today's distribution by model</CardDescription>
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-neutral-400 hover:text-white"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-neutral-800 border-neutral-700 text-white">
+                  <div className="space-y-3">
+                    <div className="font-semibold">Model Usage Breakdown</div>
+                    <div className="text-sm text-neutral-300 space-y-2">
+                      <p>
+                        • <strong>Tokens:</strong> Number of tokens consumed by each model today
+                      </p>
+                      <p>
+                        • <strong>Cost:</strong> Estimated cost based on model pricing
+                      </p>
+                      <p>
+                        • <strong>Percentage:</strong> Share of your total daily usage
+                      </p>
+                      <p>
+                        • <strong>Colors:</strong> Purple (primary), Blue (secondary), Green
+                        (tertiary)
+                      </p>
+                    </div>
+                    <div className="text-xs text-neutral-400 border-t border-neutral-700 pt-2">
+                      Click on any model name for detailed tooltip information
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {stats.today.models && Object.keys(stats.today.models).length > 0 ? (
+                Object.entries(stats.today.models).map(([modelName, modelData], index) => (
+                  <ModelUsageItem
+                    key={modelName}
+                    modelName={modelName}
+                    modelData={modelData}
+                    totalTokens={stats.today.totalTokens}
+                    index={index}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-8 text-neutral-400">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-3 opacity-50"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <p className="text-sm">No model usage data available</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        {/* <div className="glass-card p-4">
         <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
         
         <div className="grid grid-cols-2 gap-3">
@@ -625,7 +663,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
       </div> */}
-    </div>
+      </div>
     </TooltipProvider>
   );
 };
