@@ -19,9 +19,7 @@
     ],
     "hardenedRuntime": true,
     "gatekeeperAssess": false,
-    "notarize": {
-      "teamId": "${APPLE_TEAM_ID}"
-    },
+    "notarize": true,
     "extendInfo": {
       "LSUIElement": true,
       "CFBundleDisplayName": "CCSeva",
