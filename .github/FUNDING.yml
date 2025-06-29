@@ -1,0 +1,55 @@
+# GitHub Sponsors funding configuration for CCSeva
+# This file configures the "Sponsor" button and funding options visible on the repository
+
+# GitHub Sponsors (recommended primary funding method)
+# Enables GitHub's sponsor matching program and integrated funding
+github: Iamshankhadeep
+
+# Alternative funding platforms
+# Uncomment and add usernames for platforms you want to support
+
+# Patreon for recurring monthly support
+# patreon: your_patreon_username
+
+# Ko-fi for one-time or monthly donations
+# ko_fi: your_kofi_username
+
+# Buy Me a Coffee for simple one-time donations
+# buy_me_a_coffee: your_buymeacoffee_username
+
+# Open Collective for transparent community funding
+# open_collective: your_opencollective_username
+
+# Tidelift for enterprise and security-focused funding
+# tidelift: npm/ccseva
+
+# Community Bridge for Linux Foundation projects
+# community_bridge: your_project_name
+
+# Liberapay for recurring donations
+# liberapay: your_liberapay_username
+
+# IssueHunt for issue-based bounties
+# issuehunt: Iamshankhadeep
+
+# Otechie for technical support and consulting
+# otechie: your_otechie_username
+
+# LFX Crowdfunding (formerly Community Bridge)
+# lfx_crowdfunding: your_project_name
+
+# Custom funding URLs
+# You can add up to 4 custom funding URLs
+custom:
+  - "https://github.com/sponsors/Iamshankhadeep"
+  # - "https://paypal.me/yourusername"
+  # - "https://your-custom-funding-url.com"
+  # - "https://another-funding-platform.com/yourusername"
+
+# Instructions for users who want to contribute:
+# 1. Click the "Sponsor" button above to see funding options
+# 2. Choose your preferred funding platform
+# 3. Consider starring ⭐ the repository to show support
+# 4. Share CCSeva with others who might find it useful
+#
+# Thank you for supporting open source development! 💙
