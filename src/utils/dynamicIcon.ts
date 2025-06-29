@@ -1,5 +1,6 @@
 import { nativeImage } from 'electron';
 import * as zlib from 'node:zlib';
+import { digitPatterns } from './digitPatterns.js';
 
 export class DynamicTrayIcon {
   private static instance: DynamicTrayIcon;
@@ -34,141 +35,11 @@ export class DynamicTrayIcon {
   }
 
   private getDigitPixels(digit: string): boolean[][] {
-    // 5x7 pixel patterns for digits and symbols
-    const patterns: { [key: string]: boolean[][] } = {
-      '0': [
-        [false, true, true, true, false],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, false]
-      ],
-      '1': [
-        [false, false, true, false, false],
-        [false, true, true, false, false],
-        [false, false, true, false, false],
-        [false, false, true, false, false],
-        [false, false, true, false, false],
-        [false, false, true, false, false],
-        [false, true, true, true, false]
-      ],
-      '2': [
-        [false, true, true, true, false],
-        [true, false, false, false, true],
-        [false, false, false, false, true],
-        [false, false, true, true, false],
-        [false, true, false, false, false],
-        [true, false, false, false, false],
-        [true, true, true, true, true]
-      ],
-      '3': [
-        [false, true, true, true, false],
-        [true, false, false, false, true],
-        [false, false, false, false, true],
-        [false, false, true, true, false],
-        [false, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, false]
-      ],
-      '4': [
-        [false, false, false, true, false],
-        [false, false, true, true, false],
-        [false, true, false, true, false],
-        [true, false, false, true, false],
-        [true, true, true, true, true],
-        [false, false, false, true, false],
-        [false, false, false, true, false]
-      ],
-      '5': [
-        [true, true, true, true, true],
-        [true, false, false, false, false],
-        [true, true, true, true, false],
-        [false, false, false, false, true],
-        [false, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, false]
-      ],
-      '6': [
-        [false, true, true, true, false],
-        [true, false, false, false, false],
-        [true, true, true, true, false],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, false]
-      ],
-      '7': [
-        [true, true, true, true, true],
-        [false, false, false, false, true],
-        [false, false, false, true, false],
-        [false, false, true, false, false],
-        [false, true, false, false, false],
-        [false, true, false, false, false],
-        [false, true, false, false, false]
-      ],
-      '8': [
-        [false, true, true, true, false],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, false],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, false]
-      ],
-      '9': [
-        [false, true, true, true, false],
-        [true, false, false, false, true],
-        [true, false, false, false, true],
-        [false, true, true, true, true],
-        [false, false, false, false, true],
-        [false, false, false, false, true],
-        [false, true, true, true, false]
-      ],
-      '%': [
-        [true, true, false, false, true],
-        [true, true, false, true, false],
-        [false, false, true, false, false],
-        [false, true, false, false, false],
-        [true, false, false, false, false],
-        [false, true, false, true, true],
-        [true, false, false, true, true]
-      ],
-      '$': [
-        [false, false, true, false, false],
-        [false, true, true, true, true],
-        [true, false, true, false, false],
-        [false, true, true, true, false],
-        [false, false, true, false, true],
-        [true, true, true, true, false],
-        [false, false, true, false, false]
-      ],
-      '.': [
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, true, true, false, false],
-        [false, true, true, false, false]
-      ],
-      ' ': [
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false]
-      ]
-    };
-    
-    return patterns[digit] || patterns[' '];
+    return digitPatterns[digit] || digitPatterns[' '];
   }
 
   private createPngIcon(text: string, symbol: string): Electron.NativeImage {
-    const width = 80;
+    const width = 24 + (text.length * 10); // Dynamic width: 24px for circle + 10px per character
     const height = 24;
     
     // Create RGBA pixel data
@@ -203,11 +74,12 @@ export class DynamicTrayIcon {
       }
     }
     
-    // Draw symbol in circle center
+    // Draw symbol in circle center (full size)
     const symbolPixels = this.getDigitPixels(symbol);
-    const symbolStartX = centerX - 2;
-    const symbolStartY = centerY - 3;
+    const symbolStartX = centerX - 4; // Center the 8-wide symbol
+    const symbolStartY = centerY - 8; // Center the 16-tall symbol
     
+    // Draw full-size symbol in circle
     for (let py = 0; py < symbolPixels.length; py++) {
       for (let px = 0; px < symbolPixels[py].length; px++) {
         if (symbolPixels[py][px]) {
@@ -224,8 +96,8 @@ export class DynamicTrayIcon {
       }
     }
     
-    // Draw text
-    let textX = 28;
+    // Draw text using full height (16 pixels tall, starting at y=4 to center in 24px height)
+    let textX = 26; // Start text closer to the circle
     for (const char of text) {
       const charPixels = this.getDigitPixels(char);
       
@@ -233,7 +105,7 @@ export class DynamicTrayIcon {
         for (let px = 0; px < charPixels[py].length; px++) {
           if (charPixels[py][px]) {
             const x = textX + px;
-            const y = 8 + py;
+            const y = 4 + py; // Start at y=4 to center 16px text in 24px height
             if (x >= 0 && x < width && y >= 0 && y < height) {
               const pixelIndex = (y * width + x) * 4;
               pixels[pixelIndex] = 255;     // R - white
@@ -244,7 +116,7 @@ export class DynamicTrayIcon {
           }
         }
       }
-      textX += 6; // character spacing
+      textX += 10; // Increased character spacing for 8-wide characters
     }
     
     // Convert to PNG format
@@ -302,7 +174,8 @@ export class DynamicTrayIcon {
   }
 
   createCostIcon(cost: number): Electron.NativeImage {
-    const text = `$${cost.toFixed(2)}`;
+    // cost should be in whole dollars
+    const text = `$${Math.round(cost)}`;
     return this.createPngIcon(text, '$');
   }
 
