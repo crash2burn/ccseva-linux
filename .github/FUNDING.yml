@@ -41,7 +41,7 @@ github: Iamshankhadeep
 # Custom funding URLs
 # You can add up to 4 custom funding URLs
 custom:
-  - "https://github.com/sponsors/Iamshankhadeep"
+  # - "https://github.com/sponsors/Iamshankhadeep"
   # - "https://paypal.me/yourusername"
   # - "https://your-custom-funding-url.com"
   # - "https://another-funding-platform.com/yourusername"
