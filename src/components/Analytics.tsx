@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { UsageStats } from '../types/usage';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';

@@ -1,20 +1,20 @@
 import {
   addDays,
   addMonths,
-  startOfDay,
-  endOfDay,
-  differenceInMilliseconds,
   differenceInDays,
+  differenceInMilliseconds,
+  endOfDay,
   format,
-  setHours,
-  setMinutes,
-  setSeconds,
-  setMilliseconds,
+  getDaysInMonth,
   isAfter,
   isBefore,
-  getDaysInMonth,
+  setHours,
+  setMilliseconds,
+  setMinutes,
+  setSeconds,
+  startOfDay,
 } from 'date-fns';
-import { toZonedTime, fromZonedTime, format as formatTz } from 'date-fns-tz';
+import { format as formatTz, fromZonedTime, toZonedTime } from 'date-fns-tz';
 import type { ResetTimeInfo, UserConfiguration } from '../types/usage.js';
 
 export class ResetTimeService {

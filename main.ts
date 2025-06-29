@@ -1,6 +1,8 @@
-import { app, BrowserWindow, Tray, nativeImage, screen, ipcMain } from 'electron';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { BrowserWindow, Tray, app, ipcMain, nativeImage, screen } from 'electron';
 import { CCUsageService } from './src/services/ccusageService.js';
 import { NotificationService } from './src/services/notificationService.js';
 
@@ -14,7 +16,7 @@ class CCSevaApp {
   private notificationService: NotificationService;
   private updateInterval: NodeJS.Timeout | null = null;
   private displayInterval: NodeJS.Timeout | null = null;
-  private showPercentage: boolean = true;
+  private showPercentage = true;
   private cachedMenuBarData: any = null;
 
   constructor() {
@@ -114,7 +116,7 @@ class CCSevaApp {
         preload: path.join(__dirname, 'preload.js'),
       },
     });
-    // this.window.webContents.openDevTools();
+    this.window.webContents.openDevTools();
 
     // Load the React app
     if (process.env.NODE_ENV === 'development') {
@@ -164,6 +166,10 @@ class CCSevaApp {
       }
       app.quit();
     });
+
+    ipcMain.handle('take-screenshot', async () => {
+      return this.takeScreenshot();
+    });
   }
 
   private startUsagePolling() {
@@ -202,6 +208,60 @@ class CCSevaApp {
         this.showWindow();
       }
     }
+  }
+
+  private async takeScreenshot() {
+    try {
+      if (!this.window) {
+        throw new Error('Window not available');
+      }
+
+      const image = await this.window.webContents.capturePage();
+      const filepath = this.createScreenshotPath();
+
+      fs.writeFileSync(filepath, image.toPNG());
+
+      return {
+        success: true,
+        filename: path.basename(filepath),
+        filepath,
+        message: `Screenshot saved to ${filepath}`,
+      };
+    } catch (error) {
+      console.error('Screenshot error:', error);
+      return {
+        success: false,
+        error: this.getScreenshotErrorMessage(error),
+      };
+    }
+  }
+
+  private createScreenshotPath(): string {
+    const screenshotsDir = path.join(os.homedir(), 'Pictures', 'CCSeva-Screenshots');
+    if (!fs.existsSync(screenshotsDir)) {
+      fs.mkdirSync(screenshotsDir, { recursive: true });
+    }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const filename = `CCSeva-Screenshot-${timestamp}.png`;
+    return path.join(screenshotsDir, filename);
+  }
+
+  private getScreenshotErrorMessage(error: unknown): string {
+    if (!(error instanceof Error)) {
+      return 'Unknown screenshot error';
+    }
+
+    if (error.message.includes('capturePage')) {
+      return 'Failed to capture window content. Please make sure the window is visible.';
+    }
+    if (error.message.includes('ENOENT') || error.message.includes('directory')) {
+      return 'Failed to create screenshots directory. Please check permissions.';
+    }
+    if (error.message.includes('EACCES')) {
+      return 'Permission denied. Please check file system permissions.';
+    }
+    return error.message;
   }
 }
 

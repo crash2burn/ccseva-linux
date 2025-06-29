@@ -1,12 +1,11 @@
 import type React from 'react';
-import { useState } from 'react';
 import type { UsageStats } from '../types/usage';
+import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Progress } from './ui/progress';
-import { Badge } from './ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Progress } from './ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 // Helper component for model usage item
 const ModelUsageItem = ({
@@ -104,44 +103,6 @@ const getStatusHelpers = (status: 'safe' | 'warning' | 'critical') => {
 
   return { getStatusColor, getStatusIcon };
 };
-
-// Component for hero header section
-const DashboardHeader: React.FC<{
-  isRefreshing: boolean;
-  onRefresh: () => void;
-}> = ({ isRefreshing, onRefresh }) => (
-  <div className="flex items-center justify-between mb-6">
-    <div>
-      <h2 className="text-xl font-bold text-gradient mb-2 font-primary">Usage Dashboard</h2>
-      <p className="text-neutral-400 text-sm font-primary">
-        Real-time monitoring of your Claude API usage
-      </p>
-    </div>
-
-    <Button
-      onClick={onRefresh}
-      disabled={isRefreshing}
-      className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 ${
-        isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
-    >
-      <svg
-        className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-        />
-      </svg>
-      {isRefreshing ? 'Refreshing...' : 'Refresh'}
-    </Button>
-  </div>
-);
 
 // Component for key metrics row
 const KeyMetricsRow: React.FC<{
@@ -260,23 +221,10 @@ interface DashboardProps {
   stats: UsageStats;
   status: 'safe' | 'warning' | 'critical';
   timeRemaining: string;
-  onRefresh: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({
-  stats,
-  status,
-  timeRemaining,
-  onRefresh,
-}) => {
-  const [isRefreshing, setIsRefreshing] = useState(false);
+export const Dashboard: React.FC<DashboardProps> = ({ stats, status, timeRemaining }) => {
   const { getStatusColor, getStatusIcon } = getStatusHelpers(status);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    onRefresh();
-    setTimeout(() => setIsRefreshing(false), 500);
-  };
 
   return (
     <TooltipProvider>
@@ -284,7 +232,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Hero Section */}
         <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
           <CardContent className="p-6">
-            <DashboardHeader isRefreshing={isRefreshing} onRefresh={handleRefresh} />
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-gradient mb-2 font-primary">Usage Dashboard</h2>
+              <p className="text-neutral-400 text-sm font-primary">
+                Real-time monitoring of your Claude API usage
+              </p>
+            </div>
 
             {/* Dual Progress Display - Token and Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

@@ -1,8 +1,8 @@
 import {
-  type SessionInfo,
-  SessionWindow,
-  type SessionTracking,
   type CCUsageBlock,
+  type SessionInfo,
+  type SessionTracking,
+  SessionWindow,
 } from '../types/usage';
 
 export class SessionTracker {

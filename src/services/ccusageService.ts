@@ -1,15 +1,15 @@
+import { loadDailyUsageData, loadSessionBlockData } from 'ccusage/data-loader';
 import type {
-  UsageStats,
   DailyUsage,
   MenuBarData,
-  VelocityInfo,
   PredictionInfo,
   ResetTimeInfo,
+  UsageStats,
   UserConfiguration,
+  VelocityInfo,
 } from '../types/usage.js';
 import { ResetTimeService } from './resetTimeService.js';
 import { SessionTracker } from './sessionTracker.js';
-import { loadSessionBlockData, loadDailyUsageData } from 'ccusage/data-loader';
 
 interface ModelBreakdown {
   modelName: string;

@@ -1,6 +1,6 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Button } from './ui/button';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 
 interface ErrorBoundaryState {

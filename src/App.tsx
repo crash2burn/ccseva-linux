@@ -1,15 +1,17 @@
+import { Camera } from 'lucide-react';
 import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import type { UsageStats } from './types/usage';
-import { Dashboard } from './components/Dashboard';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Analytics } from './components/Analytics';
-import { TerminalView } from './components/TerminalView';
+import { Dashboard } from './components/Dashboard';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { LoadingScreen } from './components/LoadingScreen';
 import { NavigationTabs } from './components/NavigationTabs';
 import { SettingsPanel } from './components/SettingsPanel';
-import { LoadingScreen } from './components/LoadingScreen';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { TerminalView } from './components/TerminalView';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
+import type { UsageStats } from './types/usage';
 
 type ViewType = 'dashboard' | 'live' | 'analytics' | 'terminal' | 'settings';
 
@@ -131,6 +133,35 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Take screenshot
+  const takeScreenshot = useCallback(async () => {
+    try {
+      if (!window.electronAPI) {
+        throw new Error('Electron API not available');
+      }
+
+      const result = await window.electronAPI.takeScreenshot();
+
+      if (result.success) {
+        toast.success('Screenshot captured!', {
+          description: result.message,
+          duration: 4000,
+        });
+      } else {
+        toast.error('Screenshot failed', {
+          description: result.error || 'Unknown error occurred',
+          duration: 4000,
+        });
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to take screenshot';
+      toast.error('Screenshot failed', {
+        description: errorMessage,
+        duration: 4000,
+      });
+    }
+  }, []);
+
   // Add notification with auto-dismiss
   const addNotification = (
     notification: Omit<AppState['notifications'][0], 'id' | 'timestamp'>
@@ -248,13 +279,19 @@ const App: React.FC = () => {
             event.preventDefault();
             navigateTo('settings');
             break;
+          case 'S':
+            if (event.shiftKey) {
+              event.preventDefault();
+              takeScreenshot();
+            }
+            break;
         }
       }
     };
 
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [navigateTo, refreshData]);
+  }, [navigateTo, refreshData, takeScreenshot]);
 
   // Helper functions
   const getUsageStatus = (percentage: number): 'safe' | 'warning' | 'critical' => {
@@ -386,6 +423,16 @@ const App: React.FC = () => {
                   </Button>
 
                   <Button
+                    onClick={takeScreenshot}
+                    variant="ghost"
+                    size="icon"
+                    className="p-1 hover:bg-white/10 hover:scale-105 transition-all duration-200"
+                    title="Take Screenshot (⌘⇧S)"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </Button>
+
+                  <Button
                     onClick={() => window.electronAPI?.quitApp()}
                     variant="ghost"
                     size="icon"
@@ -419,7 +466,6 @@ const App: React.FC = () => {
                   stats={currentStats}
                   status={usageStatus}
                   timeRemaining={timeRemaining}
-                  onRefresh={refreshData}
                 />
               )}
 
