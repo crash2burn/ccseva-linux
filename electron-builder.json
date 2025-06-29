@@ -6,7 +6,8 @@
   },
   "files": [
     "dist/**/*",
-    "node_modules/**/*"
+    "node_modules/**/*",
+    "assets/**/*"
   ],
   "mac": {
     "category": "public.app-category.developer-tools",
@@ -37,6 +38,20 @@
     "target": "nsis"
   },
   "linux": {
-    "target": "AppImage"
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64"]
+      },
+      {
+        "target": "tar.gz",
+        "arch": ["x64"]
+      }
+    ],
+    "category": "Development",
+    "icon": "assets/icon.svg",
+    "desktop": {
+      "StartupWMClass": "CCSeva"
+    }
   }
 }

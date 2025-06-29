@@ -2,9 +2,10 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BrowserWindow, Tray, app, ipcMain, nativeImage, screen } from 'electron';
+import { BrowserWindow, Menu, Tray, app, ipcMain, nativeImage, screen } from 'electron';
 import { CCUsageService } from './src/services/ccusageService.js';
 import { NotificationService } from './src/services/notificationService.js';
+import { DynamicTrayIcon } from './src/utils/dynamicIcon.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,6 +15,7 @@ class CCSevaApp {
   private window: BrowserWindow | null = null;
   private usageService: CCUsageService;
   private notificationService: NotificationService;
+  private iconService: DynamicTrayIcon;
   private updateInterval: NodeJS.Timeout | null = null;
   private displayInterval: NodeJS.Timeout | null = null;
   private showPercentage = true;
@@ -22,6 +24,7 @@ class CCSevaApp {
   constructor() {
     this.usageService = CCUsageService.getInstance();
     this.notificationService = NotificationService.getInstance();
+    this.iconService = DynamicTrayIcon.getInstance();
   }
 
   async initialize() {
@@ -45,14 +48,12 @@ class CCSevaApp {
   }
 
   private createTray() {
-    // Create a text-only menu bar (no icon)
-    // Use an empty 1x1 transparent image as placeholder
-    const emptyIcon = nativeImage.createEmpty();
+    // Create initial dynamic icon with 0%
+    const initialIcon = this.iconService.createPercentageIcon(0);
+    this.tray = new Tray(initialIcon);
+    this.tray.setToolTip('CCSeva - Claude Code Usage Monitor');
 
-    this.tray = new Tray(emptyIcon);
-    this.tray.setToolTip('CCSeva');
-
-    // Update tray title with usage percentage
+    // Update tray with usage percentage
     this.updateTrayTitle();
 
     this.tray.on('click', () => {
@@ -68,6 +69,9 @@ class CCSevaApp {
       // Update tray title based on current display mode
       this.updateTrayDisplay();
 
+      // Add context menu for Linux compatibility
+      this.updateTrayContextMenu();
+
       // Check for notifications (auto source)
       this.notificationService.checkAndNotify(menuBarData, 'auto');
     } catch (error) {
@@ -82,11 +86,18 @@ class CCSevaApp {
 
     if (this.showPercentage) {
       const percentage = Math.round(this.cachedMenuBarData.percentageUsed);
-      this.tray?.setTitle(`${percentage}%`);
+      // Create dynamic icon with percentage
+      const dynamicIcon = this.iconService.createPercentageIcon(percentage);
+      this.tray?.setImage(dynamicIcon);
     } else {
       const cost = this.cachedMenuBarData.cost;
-      this.tray?.setTitle(`$${cost.toFixed(2)}`);
+      // Create dynamic icon with cost
+      const dynamicIcon = this.iconService.createCostIcon(cost);
+      this.tray?.setImage(dynamicIcon);
     }
+    
+    // Clear title since we're showing everything in the icon
+    this.tray?.setTitle('');
   }
 
   private startDisplayToggle() {
@@ -95,6 +106,35 @@ class CCSevaApp {
       this.showPercentage = !this.showPercentage;
       this.updateTrayDisplay();
     }, 3000);
+  }
+
+  private updateTrayContextMenu() {
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show/Hide',
+        click: () => this.toggleWindow()
+      },
+      {
+        label: 'Refresh Data',
+        click: async () => {
+          await this.updateTrayTitle();
+          if (this.window && !this.window.isDestroyed()) {
+            this.window.webContents.send('usage-updated');
+          }
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Quit',
+        click: () => {
+          if (this.updateInterval) clearInterval(this.updateInterval);
+          if (this.displayInterval) clearInterval(this.displayInterval);
+          app.quit();
+        }
+      }
+    ]);
+    
+    this.tray?.setContextMenu(contextMenu);
   }
 
   private createWindow() {
@@ -126,9 +166,7 @@ class CCSevaApp {
       this.window.loadFile(path.join(__dirname, 'index.html'));
     }
 
-    this.window.on('blur', () => {
-      this.hideWindow();
-    });
+    // Removed auto-hide on blur for better usability
 
     this.window.on('closed', () => {
       this.window = null;
@@ -237,7 +275,14 @@ class CCSevaApp {
   }
 
   private createScreenshotPath(): string {
-    const screenshotsDir = path.join(os.homedir(), 'Pictures', 'CCSeva-Screenshots');
+    // Cross-platform screenshots directory
+    const picturesDir = process.platform === 'win32' 
+      ? path.join(os.homedir(), 'Pictures')
+      : process.platform === 'darwin'
+      ? path.join(os.homedir(), 'Pictures')
+      : path.join(os.homedir(), 'Pictures'); // Linux typically has Pictures too
+    
+    const screenshotsDir = path.join(picturesDir, 'CCSeva-Screenshots');
     if (!fs.existsSync(screenshotsDir)) {
       fs.mkdirSync(screenshotsDir, { recursive: true });
     }

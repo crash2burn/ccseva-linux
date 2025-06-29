@@ -1,7 +1,7 @@
 {
-  "name": "ccseva",
+  "name": "ccseva-linux",
   "version": "1.1.0",
-  "description": "CCSeva - A beautiful macOS menu bar app for real-time Claude Code usage tracking",
+  "description": "CCSeva Linux - A cross-platform desktop app for real-time Claude Code usage tracking",
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
@@ -11,6 +11,7 @@
     "pack": "electron-builder",
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux",
     "lint": "biome lint ./src",
     "lint:fix": "biome lint --write ./src",
     "format": "biome format --write ./src",
@@ -24,20 +25,23 @@
     "ccseva",
     "claude-code",
     "usage-monitor",
-    "macos",
-    "menu-bar",
+    "cross-platform",
+    "system-tray",
     "ai",
     "tokens"
   ],
-  "author": "Claude Code",
+  "author": "crash2burn <crash2burn@github.com> (https://github.com/crash2burn)",
+  "contributors": [
+    "Iamshankhadeep <shankhadeep@github.com> (https://github.com/Iamshankhadeep)"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Iamshankhadeep/ccseva.git"
+    "url": "https://github.com/crash2burn/ccseva-linux.git"
   },
-  "homepage": "https://github.com/Iamshankhadeep/ccseva#readme",
+  "homepage": "https://github.com/crash2burn/ccseva-linux#readme",
   "bugs": {
-    "url": "https://github.com/Iamshankhadeep/ccseva/issues"
+    "url": "https://github.com/crash2burn/ccseva-linux/issues"
   },
   "type": "module",
   "devDependencies": {
