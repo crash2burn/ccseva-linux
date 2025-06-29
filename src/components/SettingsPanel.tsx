@@ -52,7 +52,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardContent className="p-6 space-y-6">
           {/* Auto Refresh */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <span className="text-2xl">🔄</span>
@@ -92,10 +92,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Theme Selection */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <span className="text-2xl">🎨</span>
               <div>
@@ -124,10 +124,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </Button>
               ))}
             </div>
-          </div>
-
+          </div> */}
           {/* Notifications */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <span className="text-2xl">🔔</span>
@@ -142,10 +141,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Animations */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <span className="text-2xl">✨</span>
@@ -160,7 +159,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onCheckedChange={(checked) => handlePreferenceChange('animationsEnabled', checked)}
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Timezone Configuration */}
           <div className="space-y-3">
