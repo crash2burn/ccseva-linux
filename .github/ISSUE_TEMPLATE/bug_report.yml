@@ -87,8 +87,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Claude Monitor Version
-      description: What version of Claude Monitor are you using?
+      label: CCSeva Version
+      description: What version of CCSeva are you using?
       placeholder: e.g. 1.0.0
     validations:
       required: true
