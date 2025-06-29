@@ -116,7 +116,7 @@ class CCSevaApp {
         preload: path.join(__dirname, 'preload.js'),
       },
     });
-    this.window.webContents.openDevTools();
+    // this.window.webContents.openDevTools();
 
     // Load the React app
     if (process.env.NODE_ENV === 'development') {
