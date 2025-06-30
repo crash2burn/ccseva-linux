@@ -36,6 +36,7 @@ interface AppState {
     animationsEnabled: boolean;
     timezone?: string;
     resetHour?: number;
+    menuBarDisplay: 'off' | 'percentage' | 'value' | 'all';
   };
 }
 
@@ -55,6 +56,7 @@ const App: React.FC = () => {
       animationsEnabled: true,
       timezone: 'America/Los_Angeles',
       resetHour: 0,
+      menuBarDisplay: 'all',
     },
   });
 
@@ -197,6 +199,11 @@ const App: React.FC = () => {
       ...prev,
       preferences: { ...prev.preferences, ...newPreferences },
     }));
+
+    // Send menu bar display preference to main process
+    if ('menuBarDisplay' in newPreferences && newPreferences.menuBarDisplay) {
+      window.electronAPI.updateMenuBarDisplay(newPreferences.menuBarDisplay);
+    }
   };
 
   // Handle navigation

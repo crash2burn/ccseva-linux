@@ -11,6 +11,7 @@ export interface ElectronAPI {
   refreshData: () => Promise<any>;
   quitApp: () => Promise<void>;
   takeScreenshot: () => Promise<ScreenshotResult>;
+  updateMenuBarDisplay: (mode: 'off' | 'percentage' | 'value' | 'all') => Promise<void>;
   onUsageUpdated: (callback: () => void) => void;
   removeUsageUpdatedListener: (callback: () => void) => void;
 }

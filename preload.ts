@@ -5,6 +5,7 @@ const electronAPI = {
   refreshData: () => ipcRenderer.invoke('refresh-data'),
   quitApp: () => ipcRenderer.invoke('quit-app'),
   takeScreenshot: () => ipcRenderer.invoke('take-screenshot'),
+  updateMenuBarDisplay: (mode: string) => ipcRenderer.invoke('update-menu-bar-display', mode),
   onUsageUpdated: (callback: () => void) => ipcRenderer.on('usage-updated', callback),
   removeUsageUpdatedListener: (callback: () => void) =>
     ipcRenderer.removeListener('usage-updated', callback),

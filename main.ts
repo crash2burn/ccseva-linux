@@ -20,6 +20,7 @@ class CCSevaApp {
   private displayInterval: NodeJS.Timeout | null = null;
   private showPercentage = true;
   private cachedMenuBarData: any = null;
+  private menuBarDisplayMode: 'off' | 'percentage' | 'value' | 'all' = 'all';
 
   constructor() {
     this.usageService = CCUsageService.getInstance();
@@ -49,7 +50,7 @@ class CCSevaApp {
 
   private createTray() {
     // Create initial dynamic icon with 0%
-    const initialIcon = this.iconService.createPercentageIcon(0);
+    const initialIcon = this.iconService.createStaticIcon();
     this.tray = new Tray(initialIcon);
     this.tray.setToolTip('CCSeva - Claude Code Usage Monitor');
 
@@ -84,16 +85,38 @@ class CCSevaApp {
   private updateTrayDisplay() {
     if (!this.cachedMenuBarData) return;
 
-    if (this.showPercentage) {
-      const percentage = Math.round(this.cachedMenuBarData.percentageUsed);
-      // Create dynamic icon with percentage
-      const dynamicIcon = this.iconService.createPercentageIcon(percentage);
-      this.tray?.setImage(dynamicIcon);
-    } else {
-      const cost = this.cachedMenuBarData.cost;
-      // Create dynamic icon with cost
-      const dynamicIcon = this.iconService.createCostIcon(cost);
-      this.tray?.setImage(dynamicIcon);
+    // Handle different display modes
+    switch (this.menuBarDisplayMode) {
+      case 'off':
+        // Show static Claude icon only
+        const staticIcon = this.iconService.createStaticIcon();
+        this.tray?.setImage(staticIcon);
+        break;
+      
+      case 'percentage':
+        const percentage = Math.round(this.cachedMenuBarData.percentageUsed);
+        const percentageIcon = this.iconService.createPercentageIcon(percentage);
+        this.tray?.setImage(percentageIcon);
+        break;
+      
+      case 'value':
+        const cost = this.cachedMenuBarData.cost;
+        const costIcon = this.iconService.createCostIcon(cost);
+        this.tray?.setImage(costIcon);
+        break;
+      
+      case 'all':
+        // Toggle between percentage and cost based on showPercentage flag
+        if (this.showPercentage) {
+          const percentage = Math.round(this.cachedMenuBarData.percentageUsed);
+          const dynamicIcon = this.iconService.createPercentageIcon(percentage);
+          this.tray?.setImage(dynamicIcon);
+        } else {
+          const cost = this.cachedMenuBarData.cost;
+          const dynamicIcon = this.iconService.createCostIcon(cost);
+          this.tray?.setImage(dynamicIcon);
+        }
+        break;
     }
     
     // Clear title since we're showing everything in the icon
@@ -101,11 +124,14 @@ class CCSevaApp {
   }
 
   private startDisplayToggle() {
-    // Switch between percentage and cost every 3 seconds
-    this.displayInterval = setInterval(() => {
-      this.showPercentage = !this.showPercentage;
-      this.updateTrayDisplay();
-    }, 3000);
+    // Only toggle if in 'all' mode
+    if (this.menuBarDisplayMode === 'all') {
+      // Switch between percentage and cost every 3 seconds
+      this.displayInterval = setInterval(() => {
+        this.showPercentage = !this.showPercentage;
+        this.updateTrayDisplay();
+      }, 3000);
+    }
   }
 
   private updateTrayContextMenu() {
@@ -207,6 +233,23 @@ class CCSevaApp {
 
     ipcMain.handle('take-screenshot', async () => {
       return this.takeScreenshot();
+    });
+
+    ipcMain.handle('update-menu-bar-display', async (event, mode: 'off' | 'percentage' | 'value' | 'all') => {
+      this.menuBarDisplayMode = mode;
+      
+      // Clear the display toggle interval if switching away from 'all' mode
+      if (mode !== 'all' && this.displayInterval) {
+        clearInterval(this.displayInterval);
+        this.displayInterval = null;
+      }
+      
+      // Restart the display toggle if switching to 'all' mode
+      if (mode === 'all' && !this.displayInterval) {
+        this.startDisplayToggle();
+      }
+      
+      this.updateTrayDisplay();
     });
   }
 

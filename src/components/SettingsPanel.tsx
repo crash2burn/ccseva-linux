@@ -15,6 +15,7 @@ interface SettingsPanelProps {
     animationsEnabled: boolean;
     timezone?: string;
     resetHour?: number;
+    menuBarDisplay: 'off' | 'percentage' | 'value' | 'all';
   };
   onUpdatePreferences: (preferences: Partial<SettingsPanelProps['preferences']>) => void;
   stats: UsageStats;
@@ -51,6 +52,43 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* General Settings */}
       <Card className="bg-neutral-900/80 backdrop-blur-sm border-neutral-800">
         <CardContent className="p-6 space-y-6">
+          {/* Menu Bar Display */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl">📊</span>
+              <div>
+                <div className="text-white font-medium">Menu Bar Display</div>
+                <div className="text-white/60 text-sm">
+                  Choose what information to show in the menu bar
+                </div>
+              </div>
+            </div>
+
+            <div className="ml-11">
+              <Select
+                value={preferences.menuBarDisplay}
+                onValueChange={(value) => handlePreferenceChange('menuBarDisplay', value)}
+              >
+                <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-900/80 border-white/20">
+                  <SelectItem value="off">Icon Only</SelectItem>
+                  <SelectItem value="percentage">Percentage</SelectItem>
+                  <SelectItem value="value">Dollar Value</SelectItem>
+                  <SelectItem value="all">All (Alternating)</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="mt-2 text-xs text-white/50">
+                {preferences.menuBarDisplay === 'off' && 'Shows only a static icon in the menu bar'}
+                {preferences.menuBarDisplay === 'percentage' && 'Shows usage percentage in the menu bar'}
+                {preferences.menuBarDisplay === 'value' && 'Shows dollar cost in the menu bar'}
+                {preferences.menuBarDisplay === 'all' && 'Alternates between percentage and cost every 3 seconds'}
+              </div>
+            </div>
+          </div>
+
           {/* Auto Refresh */}
           {/* <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -181,7 +219,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-neutral-900/80 border-white/20">
                   <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
                   <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
                   <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
@@ -207,7 +245,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     <SelectTrigger className="w-full bg-white/10 border-white/20 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-neutral-900/80 border-white/20">
                       {Array.from({ length: 24 }, (_, i) => (
                         <SelectItem
                           key={`reset-hour-${i.toString().padStart(2, '0')}`}
