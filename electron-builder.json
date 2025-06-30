@@ -51,7 +51,9 @@
     "category": "Development",
     "icon": "assets/icon.svg",
     "desktop": {
-      "StartupWMClass": "CCSeva"
+      "entry": {
+        "StartupWMClass": "CCSeva"
+      }
     }
   }
 }
