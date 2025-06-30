@@ -21,6 +21,7 @@ interface AppState {
   loading: boolean;
   error: string | null;
   sidebarExpanded: boolean;
+  focusMode: boolean;
   notifications: Array<{
     id: string;
     type: 'success' | 'warning' | 'error' | 'info';
@@ -47,6 +48,7 @@ const App: React.FC = () => {
     loading: true,
     error: null,
     sidebarExpanded: false,
+    focusMode: false,
     notifications: [],
     preferences: {
       autoRefresh: true,
@@ -210,6 +212,25 @@ const App: React.FC = () => {
   const navigateTo = useCallback((view: ViewType) => {
     setState((prev) => ({ ...prev, currentView: view }));
   }, []);
+
+  // Toggle focus mode
+  const toggleFocusMode = useCallback(() => {
+    setState((prev) => ({ ...prev, focusMode: !prev.focusMode }));
+  }, []);
+
+  // Setup keyboard shortcut for focus mode
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only trigger on spacebar when not typing in an input
+      if (event.code === 'Space' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement)?.tagName)) {
+        event.preventDefault();
+        toggleFocusMode();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleFocusMode]);
 
   // Setup auto-refresh and event listeners
   useEffect(() => {
@@ -378,96 +399,98 @@ const App: React.FC = () => {
       <div className="relative flex h-screen overflow-hidden">
         {/* Main Content - Full Width for Compact Mode */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-3 max-w-full min-h-full">
-            {/* Compact Header */}
-            <header className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 flex-shrink-0">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-full h-full"
+          <div className={state.focusMode ? "p-0 max-w-full min-h-full" : "p-3 max-w-full min-h-full"}>
+            {/* Compact Header - Hidden in focus mode */}
+            {!state.focusMode && (
+              <header className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 flex-shrink-0">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-full h-full"
+                      >
+                        <circle cx="12" cy="12" r="11" fill="#CC785C" />
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C13.8214 20 15.4983 19.4024 16.8358 18.3914C15.8231 17.0375 15.1667 15.352 15.1667 13.5C15.1667 9.35786 11.8088 6 7.66667 6C7.25363 6 6.84888 6.04259 6.45976 6.12411C7.59756 4.81331 9.65863 4 12 4Z"
+                          fill="white"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h1 className="text-lg font-bold text-gradient mb-1">CCSeva</h1>
+                      <p className="text-xs text-neutral-400">Track API usage</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="glass px-2 py-1 rounded-lg">
+                      <span className="text-xs text-neutral-300">
+                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+
+                    <Button
+                      onClick={refreshData}
+                      variant="ghost"
+                      size="icon"
+                      className="p-1 hover:bg-white/10 hover:scale-105 transition-all duration-200"
+                      title="Refresh Data (⌘R)"
                     >
-                      <circle cx="12" cy="12" r="11" fill="#CC785C" />
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C13.8214 20 15.4983 19.4024 16.8358 18.3914C15.8231 17.0375 15.1667 15.352 15.1667 13.5C15.1667 9.35786 11.8088 6 7.66667 6C7.25363 6 6.84888 6.04259 6.45976 6.12411C7.59756 4.81331 9.65863 4 12 4Z"
-                        fill="white"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h1 className="text-lg font-bold text-gradient mb-1">CCSeva</h1>
-                    <p className="text-xs text-neutral-400">Track API usage</p>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg>
+                    </Button>
+
+                    <Button
+                      onClick={takeScreenshot}
+                      variant="ghost"
+                      size="icon"
+                      className="p-1 hover:bg-white/10 hover:scale-105 transition-all duration-200"
+                      title="Take Screenshot (⌘⇧S)"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </Button>
+
+                    <Button
+                      onClick={() => window.electronAPI?.quitApp()}
+                      variant="ghost"
+                      size="icon"
+                      className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:scale-105 transition-all duration-200"
+                      title="Quit Application (⌘Q)"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </Button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="glass px-2 py-1 rounded-lg">
-                    <span className="text-xs text-neutral-300">
-                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-
-                  <Button
-                    onClick={refreshData}
-                    variant="ghost"
-                    size="icon"
-                    className="p-1 hover:bg-white/10 hover:scale-105 transition-all duration-200"
-                    title="Refresh Data (⌘R)"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      />
-                    </svg>
-                  </Button>
-
-                  <Button
-                    onClick={takeScreenshot}
-                    variant="ghost"
-                    size="icon"
-                    className="p-1 hover:bg-white/10 hover:scale-105 transition-all duration-200"
-                    title="Take Screenshot (⌘⇧S)"
-                  >
-                    <Camera className="w-4 h-4" />
-                  </Button>
-
-                  <Button
-                    onClick={() => window.electronAPI?.quitApp()}
-                    variant="ghost"
-                    size="icon"
-                    className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 hover:scale-105 transition-all duration-200"
-                    title="Quit Application (⌘Q)"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Navigation Tabs */}
-              <NavigationTabs
-                currentView={state.currentView}
-                onNavigate={navigateTo}
-                className="mb-3"
-              />
-            </header>
+                {/* Navigation Tabs - Hidden in focus mode */}
+                <NavigationTabs
+                  currentView={state.currentView}
+                  onNavigate={navigateTo}
+                  className="mb-3"
+                />
+              </header>
+            )}
 
             {/* Content */}
-            <div className="space-y-3 pb-3">
+            <div className={state.focusMode ? "h-screen" : "space-y-3 pb-3"}>
               {state.currentView === 'dashboard' && (
                 <Dashboard
                   stats={currentStats}
@@ -481,7 +504,7 @@ const App: React.FC = () => {
               )}
 
               {state.currentView === 'terminal' && (
-                <TerminalView stats={currentStats} onRefresh={refreshData} />
+                <TerminalView stats={currentStats} onRefresh={refreshData} focusMode={state.focusMode} />
               )}
 
               {state.currentView === 'settings' && (

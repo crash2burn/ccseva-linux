@@ -6,9 +6,10 @@ import { Button } from './ui/button';
 interface TerminalViewProps {
   stats: UsageStats;
   onRefresh: () => void;
+  focusMode?: boolean;
 }
 
-export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) => {
+export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh, focusMode = false }) => {
   const [animatedPercentage, setAnimatedPercentage] = useState(0);
   const [animatedTimeProgress, setAnimatedTimeProgress] = useState(0);
 
@@ -71,7 +72,11 @@ export const TerminalView: React.FC<TerminalViewProps> = ({ stats, onRefresh }) 
   };
 
   return (
-    <div className="font-mono text-sm bg-black/90 rounded-lg border border-green-500/30 p-6 space-y-4">
+    <div className={`font-mono text-sm bg-black/90 border border-green-500/30 space-y-4 ${
+      focusMode 
+        ? 'h-screen rounded-none p-8' 
+        : 'rounded-lg p-6'
+    }`}>
       {/* Header */}
       <div className="border-b border-green-500/30 pb-4">
         <div className="flex items-center justify-between">
